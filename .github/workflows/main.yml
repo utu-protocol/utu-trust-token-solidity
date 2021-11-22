@@ -1,0 +1,25 @@
+name: CI
+on: push
+jobs:
+  test:
+    name: Test contracts
+    runs-on: ubuntu-latest
+    env:
+      REPORT_GAS: true
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Compile contracts
+        run: npx hardhat compile
+
+      - name: Run tests
+        run: npx hardhat test
+
+      - name: Coverage report
+        run: npx hardhat coverage
