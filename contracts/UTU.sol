@@ -85,25 +85,36 @@ contract UTU is Context, AccessControl, ERC20Burnable, ERC20Pausable, Ownable {
 
         // TODO: migrated from Sophia code
         // how exactly the users will acquire endorsement tokens?
+        
+        // In the sophia contract there was a piece of code which
+        // allowed tokens to be minted to the transaction sender
+        // at the time of invoking the endorse function.
 
         // get previous endorser
-        uint256 sequence = endorsementId[msg.sender];
+        uint256 sequence = endorsementId[recipient];
+        address previousEndorser = endorsements[recipient][sequence];
 
-        // TODO: what do we do with the case when there is no previous endorser?
+        // TODO: what to do in the case when there is no previous endorser?
         // shall the token amount sent be still transferred and to whom?
+        // Or maybe endorse it in full to the recipient (which seems logical)
+        // 
         // if (sequence >= 1) {
 
             uint256 nextSequence = sequence + 1;
-            address previousEndorser = endorsements[msg.sender][sequence];
 
             // update state
-            endorsementId[msg.sender] = nextSequence;
-            endorsements[msg.sender][nextSequence] = recipient;
+            endorsementId[recipient] = nextSequence;
+            endorsements[recipient][nextSequence] = recipient;
 
-            // internal transfer
+            // Send tokens (endorse) the recipient
+
+            // TODO: How to split the endorsement between the recipient and 
+            // the previous endorser?
             super._transfer(msg.sender, recipient, amount);
+            // super._transfer(msg.sender, previousEndorser, 0);
 
-            // emit event
+            // TODO: shall we add the recipient address and the address of
+            // the previous endorser to the emitted event as well?
             emit Endorse(msg.sender, recipient, nextSequence, amount);
 
         // }
