@@ -24,6 +24,11 @@ contract UTU is Context, AccessControl, ERC20Burnable, ERC20Pausable, Ownable {
     mapping (address => mapping (uint256 => address)) endorsements;
     mapping (address => uint256) endorsementId;
 
+    // address : social_media_platform_id
+    mapping (address => uint256) socialConnections;
+
+    mapping (address => uint256) connectionRewards;
+
     event Endorse(address indexed _from, address indexed _to, uint indexed _id, uint _value);
 
     /**
@@ -119,6 +124,37 @@ contract UTU is Context, AccessControl, ERC20Burnable, ERC20Pausable, Ownable {
 
         // }
     }
+
+    /**
+     * @dev The admin (backend) can set verified social media
+     * connections.
+     */
+    function addConnection(
+        address user,
+        uint256 socialId
+    ) public {
+        require(
+            hasRole(ADMIN_ROLE, _msgSender()),
+            "Contract: must have admin role to add a social connection"
+        );
+
+        socialConnections[user] = socialId;
+    }
+
+    /**
+     * @dev The admin (backend) can remove social media connections.
+     */
+    function removeConnection(
+        address user
+    ) public {
+        require(
+            hasRole(ADMIN_ROLE, _msgSender()),
+            "Contract: must have admin role to remove a social connection"
+        );
+        
+        socialConnections[user] = 0;
+    }
+
 
     function _beforeTokenTransfer(
         address from,
