@@ -2,18 +2,11 @@
 pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
 
-contract UTU is Context, AccessControl, ERC20Burnable, ERC20Pausable, Ownable {
-    using Strings for uint256;
-
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
-
+contract UTU is ERC20Burnable, ERC20Pausable, Ownable {
     /**
      * The endorsement structure: every endorsement is composed of:
      * - Endorsement address is the key of the mapping
@@ -46,15 +39,8 @@ contract UTU is Context, AccessControl, ERC20Burnable, ERC20Pausable, Ownable {
      *
      * See {ERC20Pausable} and {Pausable-_pause}.
      *
-     * Requirements:
-     *
-     * - the caller must have the `PAUSER_ROLE`.
      */
-    function pause() public virtual {
-        require(
-            hasRole(PAUSER_ROLE, _msgSender()),
-            "Contract: must have pauser role to pause"
-        );
+    function pause() public onlyOwner virtual {
         _pause();
     }
 
@@ -63,15 +49,8 @@ contract UTU is Context, AccessControl, ERC20Burnable, ERC20Pausable, Ownable {
      *
      * See {ERC20Pausable} and {Pausable-_unpause}.
      *
-     * Requirements:
-     *
-     * - the caller must have the `PAUSER_ROLE`.
      */
-    function unpause() public virtual {
-        require(
-            hasRole(PAUSER_ROLE, _msgSender()),
-            "Contract: must have pauser role to unpause"
-        );
+    function unpause() public onlyOwner virtual {
         _unpause();
     }
 
@@ -132,12 +111,7 @@ contract UTU is Context, AccessControl, ERC20Burnable, ERC20Pausable, Ownable {
     function addConnection(
         address user,
         uint256 socialId
-    ) public {
-        require(
-            hasRole(ADMIN_ROLE, _msgSender()),
-            "Contract: must have admin role to add a social connection"
-        );
-
+    ) public onlyOwner {
         socialConnections[user] = socialId;
     }
 
@@ -146,12 +120,7 @@ contract UTU is Context, AccessControl, ERC20Burnable, ERC20Pausable, Ownable {
      */
     function removeConnection(
         address user
-    ) public {
-        require(
-            hasRole(ADMIN_ROLE, _msgSender()),
-            "Contract: must have admin role to remove a social connection"
-        );
-        
+    ) public onlyOwner {
         socialConnections[user] = 0;
     }
 
