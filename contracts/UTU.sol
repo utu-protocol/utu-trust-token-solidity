@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
 
-contract UTU is Context, AccessControl, ERC20Burnable, ERC20Pausable, Ownable {
+contract UTT is Context, AccessControl, ERC20Burnable, ERC20Pausable, Ownable {
     using Strings for uint256;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -35,7 +35,7 @@ contract UTU is Context, AccessControl, ERC20Burnable, ERC20Pausable, Ownable {
     constructor() public ERC20("UTU Endorse (ERC20)", "ENDR") {
         _mint(msg.sender, 100000000000000000000);
     }
-    
+
     /**
      * @dev Pauses all token transfers.
      *
@@ -85,7 +85,7 @@ contract UTU is Context, AccessControl, ERC20Burnable, ERC20Pausable, Ownable {
 
         // TODO: migrated from Sophia code
         // how exactly the users will acquire endorsement tokens?
-        
+
         // In the sophia contract there was a piece of code which
         // allowed tokens to be minted to the transaction sender
         // at the time of invoking the endorse function.
@@ -97,7 +97,7 @@ contract UTU is Context, AccessControl, ERC20Burnable, ERC20Pausable, Ownable {
         // TODO: what to do in the case when there is no previous endorser?
         // shall the token amount sent be still transferred and to whom?
         // Or maybe endorse it in full to the recipient (which seems logical)
-        // 
+        //
         // if (sequence >= 1) {
 
             uint256 nextSequence = sequence + 1;
@@ -108,7 +108,7 @@ contract UTU is Context, AccessControl, ERC20Burnable, ERC20Pausable, Ownable {
 
             // Send tokens (endorse) the recipient
 
-            // TODO: How to split the endorsement between the recipient and 
+            // TODO: How to split the endorsement between the recipient and
             // the previous endorser?
             super._transfer(msg.sender, recipient, amount);
             // super._transfer(msg.sender, previousEndorser, 0);
