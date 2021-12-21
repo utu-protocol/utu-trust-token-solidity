@@ -14,12 +14,12 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const UTU = await ethers.getContractFactory("UTU");
-  const utu = await UTU.deploy();
+  const UTT = await ethers.getContractFactory("UTT");
+  const utt = await UTT.deploy();
 
-  await utu.deployed();
+  await utt.deployed();
 
-  console.log("UTU deployed to:", utu.address);
+  console.log("UTT deployed to:", utt.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

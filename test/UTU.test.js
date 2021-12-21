@@ -1,7 +1,7 @@
-const { ethers } = require("hardhat");
-const { expect } = require("chai");
+const {ethers} = require("hardhat");
+const {expect} = require("chai");
 
-const { AddressZero } = ethers.constants;
+const {AddressZero} = ethers.constants;
 
 async function deploy() {
   const Contract = await ethers.getContractFactory("UTU");
@@ -20,12 +20,11 @@ describe("UTU", function () {
       this.utu = await deploy();
     });
 
-     it("should be possible to endorse anyone", async function () {
-       await expect(
-         this.utu.connect(this.admin).endorse(this.regularAcc.address, ethers.utils.parseEther("1")
-      ))
+    it("should be possible to endorse anyone", async function () {
+      await expect(
+        this.utu.connect(this.admin).endorse(this.regularAcc.address, ethers.utils.parseEther("1")))
         .to.emit(this.utu, "Endorse")
-         .withArgs(this.admin.address, this.regularAcc.address, 1, ethers.utils.parseEther("1"));
+        .withArgs(this.admin.address, this.regularAcc.address, 1, ethers.utils.parseEther("1"));
     });
   });
 });
