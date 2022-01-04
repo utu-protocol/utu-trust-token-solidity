@@ -2,18 +2,11 @@
 pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
 
-contract UTT is Context, AccessControl, ERC20Burnable, ERC20Pausable, Ownable {
-    using Strings for uint256;
-
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
-
+contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
     /**
      * The endorsement structure: every endorsement is composed of:
      * - Endorsement address is the key of the mapping
@@ -23,6 +16,11 @@ contract UTT is Context, AccessControl, ERC20Burnable, ERC20Pausable, Ownable {
 
     mapping (address => mapping (uint256 => address)) endorsements;
     mapping (address => uint256) endorsementId;
+
+    // address : social_media_platform_id
+    mapping (address => uint256) socialConnections;
+
+    mapping (address => uint256) connectionRewards;
 
     event Endorse(address indexed _from, address indexed _to, uint indexed _id, uint _value);
 
@@ -41,15 +39,8 @@ contract UTT is Context, AccessControl, ERC20Burnable, ERC20Pausable, Ownable {
      *
      * See {ERC20Pausable} and {Pausable-_pause}.
      *
-     * Requirements:
-     *
-     * - the caller must have the `PAUSER_ROLE`.
      */
-    function pause() public virtual {
-        require(
-            hasRole(PAUSER_ROLE, _msgSender()),
-            "Contract: must have pauser role to pause"
-        );
+    function pause() public onlyOwner virtual {
         _pause();
     }
 
@@ -58,15 +49,8 @@ contract UTT is Context, AccessControl, ERC20Burnable, ERC20Pausable, Ownable {
      *
      * See {ERC20Pausable} and {Pausable-_unpause}.
      *
-     * Requirements:
-     *
-     * - the caller must have the `PAUSER_ROLE`.
      */
-    function unpause() public virtual {
-        require(
-            hasRole(PAUSER_ROLE, _msgSender()),
-            "Contract: must have pauser role to unpause"
-        );
+    function unpause() public onlyOwner virtual {
         _unpause();
     }
 
@@ -119,6 +103,27 @@ contract UTT is Context, AccessControl, ERC20Burnable, ERC20Pausable, Ownable {
 
         // }
     }
+
+    /**
+     * @dev The admin (backend) can set verified social media
+     * connections.
+     */
+    function addConnection(
+        address user,
+        uint256 socialId
+    ) public onlyOwner {
+        socialConnections[user] = socialId;
+    }
+
+    /**
+     * @dev The admin (backend) can remove social media connections.
+     */
+    function removeConnection(
+        address user
+    ) public onlyOwner {
+        socialConnections[user] = 0;
+    }
+
 
     function _beforeTokenTransfer(
         address from,
