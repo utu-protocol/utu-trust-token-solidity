@@ -15,11 +15,11 @@ async function setupTestEndorsements() {
   const utt = await UTT.deploy();
 
   const lastValue = "0.03";
-    utt.on(utt.filters.Endorse(), (source: string, target: string, index: BigNumber, value: BigNumber, tx: Transaction) => {
-      const formattedValue = ethers.utils.formatEther(value);
-      console.log("Endorsed", target, "with", formattedValue)
-      if(lastValue === formattedValue) process.exit(0);
-    });
+  utt.on(utt.filters.Endorse(), (source: string, target: string, index: BigNumber, value: BigNumber, tx: Transaction) => {
+    const formattedValue = ethers.utils.formatEther(value);
+    console.log("Endorsed", target, "with", formattedValue)
+    if(lastValue === formattedValue) process.exit(0);
+  });
 
   // Create some endorsements on the (constant) hardhat testnet accounts:
   const endorsementResults = [];
