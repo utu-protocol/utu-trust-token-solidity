@@ -23,6 +23,8 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
     mapping (address => uint256) connectionRewards;
 
     event Endorse(address indexed _from, address indexed _to, uint indexed _id, uint _value);
+ 
+    event AddConnection(address indexed _user, uint indexed _socialId);
 
     /**
      * @dev Grants `DEFAULT_ADMIN_ROLE` and `PAUSER_ROLE` to the
@@ -113,6 +115,8 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
         uint256 socialId
     ) public onlyOwner {
         socialConnections[user] = socialId;
+
+        emit AddConnection(user, socialId);
     }
 
     /**
