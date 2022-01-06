@@ -29,5 +29,5 @@ async function setupTestEndorsements() {
   return endorsementResults;
 }
 
-setupTestEndorsements().then(console.log);
+//setupTestEndorsements().then(console.log);
 
