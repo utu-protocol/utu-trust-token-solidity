@@ -28,12 +28,14 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
     uint256 public totalEndorsedCoins=0;
     
     event Endorse(address indexed _from, address indexed _to, uint indexed _id, uint _value);
+
     event EndorseRewardFormula(address sender, uint256 reward);
     event ParentEndorsersReward(address sender, uint256 reward);
     event SubmitRewardsEndorser(address sneder, uint256 reward);
     event SubmitReward(address sender, uint256 reward);
     event Log(uint256 logger);
-
+    event AddConnection(address indexed _user, uint indexed _socialId);
+    
     /**
      * @dev Grants `DEFAULT_ADMIN_ROLE` and `PAUSER_ROLE` to the
      * account that deploys the contract. Grants `MINTER_ROLE` to the bridge.
@@ -133,6 +135,8 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
         uint256 socialId
     ) public onlyOwner {
         socialConnections[user] = socialId;
+
+        emit AddConnection(user, socialId);
     }
 
     /**
