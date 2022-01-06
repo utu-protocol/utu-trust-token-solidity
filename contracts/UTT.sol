@@ -22,10 +22,10 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
 
     mapping (address => uint256) connectionRewards;
     mapping (address => address[]) parentEndorsers;
-    uint256 public constant RMAX = 2;
-    uint256 public constant DN = 1;
-    uint256 public constant DP = 1;
-    uint256 public totalEndorsedCoins=0;
+    uint256 public constant maximumBoundRate = 2; //RMAX
+    uint256 public constant discountingRateEndor = 1; //DN
+    uint256 public constant discountingRateGrandendor = 1; //DP
+    uint256 public totalEndorsedCoins;
     
     event Endorse(address indexed _from, address indexed _to, uint indexed _id, uint _value);
 
@@ -97,10 +97,11 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
         uint256 currentEndorsedToken = balanceOf(recipient);
 
         //rewards are given as in the formula in the whitepaper
-        uint256 reward = (RMAX * division((DN*amount+DP*currentEndorsedToken),totalEndorsedCoins, 5));
+        uint256 reward = (maximumBoundRate * division(
+            (discountingRateEndor*amount+discountingRateGrandendor*currentEndorsedToken),totalEndorsedCoins, 5));
     
         //reward recomended endorsers
-        for(uint256 i=0; i<endorsers.length; i++){
+        for(uint8 i=0; i<endorsers.length; i++){
             address current = endorsers[i];
             uint256 endorserReward = getReward(reward, parentEndorsers[current]);    
 
@@ -109,7 +110,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
             emit SubmitRewardsEndorser(msg.sender, endorserReward);
         
             //reward parents of recomended endorsers
-            for(uint256 j=0; j<parentEndorsers[current].length; j++){
+            for(uint8 j=0; j<parentEndorsers[current].length; j++){
                 uint256 parentEndorLength = parentEndorsers[current].length;
                 uint prevRewardForEndors = division(multiplyByPercent(reward,10,5),parentEndorLength,5);
                 address parentEndorser = parentEndorsers[current][j];
