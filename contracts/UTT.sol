@@ -36,7 +36,6 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
     event SubmitRewardsEndorser(address sneder, uint256 reward);
     event SubmitReward(address sender, uint256 reward);
     event Log(uint256 logger);
-    event AddConnection(address indexed _user, uint indexed _socialId);
     
     /**
      * @dev Grants `DEFAULT_ADMIN_ROLE` and `PAUSER_ROLE` to the
