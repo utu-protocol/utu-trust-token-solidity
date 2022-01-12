@@ -18,9 +18,10 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
     mapping (address => uint256) endorsementId;
 
     // address : social_media_platform_id
-    mapping (address => uint256) socialConnections;
-
+    mapping (address => mapping (uint256 => bytes32) ) socialConnections;
     mapping (address => uint256) connectionRewards;
+    uint256 public socialConnectionReward = 1; // social connection reward amount
+
     mapping (address => address[]) parentEndorsers;
     uint256 public constant maximumBoundRate = 2; //RMAX
     uint256 public constant discountingRateEndor = 1; //DN
@@ -29,7 +30,8 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
     
     event Endorse(address indexed _from, address indexed _to, uint indexed _id, uint _value);
  
-    event AddConnection(address indexed _user, uint indexed _socialId);
+    event AddConnection(address indexed _user, uint indexed _connectedTypeId, bytes32 indexed _connectedUserIdHash);
+    event RemoveConnection(address indexed _user, uint indexed _connectedTypeId, bytes32 indexed _connectedUserIdHash);
 
     event EndorseRewardFormula(address sender, uint256 reward);
     event ParentEndorsersReward(address sender, uint256 reward);
@@ -134,20 +136,42 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
      */
     function addConnection(
         address user,
-        uint256 socialId
+        uint256 connectedTypeId,
+        bytes32 connectedUserIdHash
     ) public onlyOwner {
-        socialConnections[user] = socialId;
+        // only add connection if not previously added
+        if (socialConnections[user][connectedTypeId] == 0) {
+            socialConnections[user][connectedTypeId] = connectedUserIdHash;
 
-        emit AddConnection(user, socialId);
+            // mint reward
+            super._mint(user, socialConnectionReward);
+
+            emit AddConnection(user, connectedTypeId, connectedUserIdHash);
+        }
     }
 
     /**
      * @dev The admin (backend) can remove social media connections.
      */
     function removeConnection(
-        address user
+        address user,
+        uint256 connectedTypeId
     ) public onlyOwner {
-        socialConnections[user] = 0;
+        // only remove connection if currently connected
+        if (socialConnections[user][connectedTypeId] != 0) {
+            socialConnections[user][connectedTypeId] = 0;
+
+            emit RemoveConnection(user, connectedTypeId, 0);
+        }
+    }
+
+    /**
+     * @dev The admin (backend) can set the social connection reward amount.
+     */
+    function setSocialConnectionReward(
+        uint256 amount
+    ) public onlyOwner {
+        socialConnectionReward = amount;
     }
 
     function _beforeTokenTransfer(
