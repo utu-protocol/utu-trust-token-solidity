@@ -17,10 +17,19 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
     mapping (address => mapping (uint256 => address)) endorsements;
     mapping (address => uint256) endorsementId;
 
-    // address : social_media_platform_id
+    /**
+     * The `socialConnections` mapping is storing the connected socialIds
+     * as so: address => socialTypeId => socialUserIdHash
+     */ 
     mapping (address => mapping (uint256 => bytes32) ) socialConnections;
     mapping (address => uint256) connectionRewards;
-    uint256 public socialConnectionReward = 1; // social connection reward amount
+
+    /**
+     * The `socialConnectionReward` variable is the amount of tokens to be minted
+     * as a reward for connecting/verifying with a social platform user id.
+     * Configurable by admin.
+     */
+    uint256 public socialConnectionReward = 1;
 
     mapping (address => address[]) parentEndorsers;
     uint256 public constant maximumBoundRate = 2; //RMAX
@@ -99,26 +108,26 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
         totalEndorsedCoins += amount;
         uint256 currentEndorsedToken = balanceOf(recipient);
 
-        //rewards are given as in the formula in the whitepaper
+        // rewards are distributed as in the formula in the whitepaper
         uint256 reward = (maximumBoundRate * division(
             (discountingRateEndor*amount+discountingRateGrandendor*currentEndorsedToken),totalEndorsedCoins, 5));
     
-        //reward recomended endorsers
+        // reward recommended endorsers
         for(uint8 i=0; i<endorsers.length; i++){
             address current = endorsers[i];
             uint256 endorserReward = getReward(reward, parentEndorsers[current]);    
 
-            //give tokens to endorser
+            // distribute tokens to endorser
             super._mint(address(endorsers[i]), endorserReward);
             emit SubmitRewardsEndorser(msg.sender, endorserReward);
         
-            //reward parents of recomended endorsers
+            // reward parents of recommended endorsers
             for(uint8 j=0; j<parentEndorsers[current].length; j++){
                 uint256 parentEndorLength = parentEndorsers[current].length;
                 uint prevRewardForEndors = division(multiplyByPercent(reward,10,5),parentEndorLength,5);
                 address parentEndorser = parentEndorsers[current][j];
 
-                //submit tokens to endorsers
+                // submit tokens to endorsers
                 super._mint(parentEndorser, prevRewardForEndors);
                 emit ParentEndorsersReward(msg.sender, prevRewardForEndors);
             }
