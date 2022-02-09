@@ -31,7 +31,6 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
      */
     uint256 public socialConnectionReward = 1;
 
-    mapping (address => address[]) parentEndorsers;
     uint256 public constant maximumBoundRate = 2; //RMAX
     uint256 public constant discountingRateDN = 1; // DN
     uint256 public constant discountingRateDP = 1; // DP
@@ -154,28 +153,25 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
     
         //reward recommended endorsers
         for(uint8 i=0; i < endorsers.length; i++){
-            address current = endorsers[i];
-            uint256 endorserReward = getReward(reward, parentEndorsers[current]);    
+            uint256 endorserReward = getReward(reward, previousEndorsers);    
 
             // distribute tokens to endorser
             super._mint(address(endorsers[i]), endorserReward);
             emit SubmitRewardsEndorser(msg.sender, endorserReward);
         
             //reward parents of recommended endorsers
-            for(uint8 j=0; j < parentEndorsers[current].length; j++){
-                uint256 parentEndorsersLength = parentEndorsers[current].length;
-                uint prevRewardForEndorser = division(multiplyByPercent(reward, 10, 5), parentEndorsersLength, 5);
-                address parentEndorser = parentEndorsers[current][j];
-
-                //submit tokens to endorsers
-                super._mint(parentEndorser, prevRewardForEndorser);
-                emit ParentEndorsersReward(msg.sender, prevRewardForEndorser);
-            }
         }
-        
-        parentEndorsers[msg.sender] = endorsers;
+
+        for(uint8 i=0; i < previousEndorsers.length; i++){
+            uint256 prevEndorsersLength = previousEndorsers.length;
+            uint prevRewardForEndorser = division(multiplyByPercent(reward, 10, 0), prevEndorsersLength, 0);
+            address prevEndorser = previousEndorsers[i];
+
+            //submit tokens to endorsers
+            super._mint(prevEndorser, prevRewardForEndorser);
+            emit ParentEndorsersReward(msg.sender, prevRewardForEndorser);
+        }
         transfer(target, amount);
-    
         emit EndorseRewardFormula(msg.sender, reward);
     }
 
