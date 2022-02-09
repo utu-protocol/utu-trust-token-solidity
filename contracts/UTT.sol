@@ -54,15 +54,36 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
      *
      * See {ERC20-constructor}.
      */
-    constructor() public ERC20("UTU Endorse (ERC20)", "ENDR") {
-        _mint(msg.sender, 100000000000000000000000);
+    constructor(
+        uint256 _mintAmount
+    )
+        ERC20("UTU Endorse (ERC20)", "ENDR")
+    {
+        _mint(msg.sender, _mintAmount);
     }
 
-    function division(uint a, uint b, uint precision) public pure returns ( uint) {
-     return a*(10**precision)/b;
+    function division(
+        uint a,
+        uint b,
+        uint precision
+    )
+        public
+        pure
+        returns (uint)
+    {
+        return a * (10 ** precision) / b;
     }
-    function multiplyByPercent(uint a, uint b, uint precision) public pure returns(uint){
-        return a*(10**precision)*b/100;
+    
+    function multiplyByPercent(
+        uint a,
+        uint b,
+        uint precision
+    )
+        public
+        pure
+        returns (uint)
+    {
+        return a * (10 ** precision) * b / 100;
     }
 
     /**
@@ -71,7 +92,11 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
      * See {ERC20Pausable} and {Pausable-_pause}.
      *
      */
-    function pause() public onlyOwner virtual {
+    function pause()
+        public
+        virtual
+        onlyOwner
+    {
         _pause();
     }
 
@@ -81,18 +106,30 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
      * See {ERC20Pausable} and {Pausable-_unpause}.
      *
      */
-    function unpause() public onlyOwner virtual {
+    function unpause()
+        public
+        virtual
+        onlyOwner
+    {
         _unpause();
     }
 
-    function getReward(uint256 reward, address[] memory endorsers) private pure returns (uint256){
-        if(endorsers.length==0){
+    function getReward(
+        uint256 reward,
+        address[] memory endorsers
+    )
+        private
+        pure
+        returns (uint256)
+    {
+        if (endorsers.length == 0) {
             return reward;
         }
-        else{
+        else {
             return multiplyByPercent(reward, 90, 5);
         }
     }
+
     /**
      * @dev Sends a tip of tokens to the previous address
      * that endorsed the current one.
@@ -102,8 +139,11 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
     function endorse(
         address target,
         uint256 amount,
-        address[] memory endorsers
-    ) public {
+        address[] memory endorsers,
+        address[] memory previousEndorsers
+    )
+        public
+    {
         require(msg.sender == tx.origin, "should be an user");
         totalEndorsedCoins += amount;
         uint256 currentEndorsedToken = balanceOf(target);
@@ -147,7 +187,10 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
         address user,
         uint256 connectedTypeId,
         bytes32 connectedUserIdHash
-    ) public onlyOwner {
+    )
+        public
+        onlyOwner
+    {
         // only add connection if not previously added
         if (socialConnections[user][connectedTypeId] == 0) {
             socialConnections[user][connectedTypeId] = connectedUserIdHash;
@@ -165,7 +208,10 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
     function removeConnection(
         address user,
         uint256 connectedTypeId
-    ) public onlyOwner {
+    )
+        public
+        onlyOwner
+    {
         // only remove connection if currently connected
         if (socialConnections[user][connectedTypeId] != 0) {
             socialConnections[user][connectedTypeId] = 0;
@@ -179,7 +225,10 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
      */
     function setSocialConnectionReward(
         uint256 amount
-    ) public onlyOwner {
+    )
+        public
+        onlyOwner
+    {
         socialConnectionReward = amount;
     }
 
@@ -187,7 +236,10 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
         address from,
         address to,
         uint256 amount
-    ) internal override(ERC20, ERC20Pausable) {
+    )
+        internal
+        override(ERC20, ERC20Pausable)
+    {
         super._beforeTokenTransfer(from, to, amount);
     }
 }
