@@ -171,7 +171,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
             super._mint(prevEndorser, prevRewardForEndorser);
             emit ParentEndorsersReward(msg.sender, prevRewardForEndorser);
         }
-        transfer(target, amount);
+
         emit EndorseRewardFormula(msg.sender, reward);
     }
 
