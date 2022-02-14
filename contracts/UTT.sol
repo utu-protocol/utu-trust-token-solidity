@@ -31,10 +31,9 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
      */
     uint256 public socialConnectionReward = 1;
 
-    mapping (address => address[]) parentEndorsers;
     uint256 public constant maximumBoundRate = 2; //RMAX
-    uint256 public constant discountingRateEndor = 1; //DN
-    uint256 public constant discountingRateGrandendor = 1; //DP
+    uint256 public constant discountingRateDN = 1; // DN
+    uint256 public constant discountingRateDP = 1; // DP
     uint256 public totalEndorsedCoins;
     
     event Endorse(address indexed _from, address indexed _to, uint indexed _id, uint _value);
@@ -44,7 +43,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
 
     event EndorseRewardFormula(address sender, uint256 reward);
     event ParentEndorsersReward(address sender, uint256 reward);
-    event SubmitRewardsEndorser(address sneder, uint256 reward);
+    event SubmitRewardsEndorser(address sender, uint256 reward);
     event SubmitReward(address sender, uint256 reward);
     event Log(uint256 logger);
     
@@ -54,15 +53,36 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
      *
      * See {ERC20-constructor}.
      */
-    constructor() public ERC20("UTU Endorse (ERC20)", "ENDR") {
-        _mint(msg.sender, 100000000000000000000000);
+    constructor(
+        uint256 _mintAmount
+    )
+        ERC20("UTU Endorse (ERC20)", "ENDR")
+    {
+        _mint(msg.sender, _mintAmount);
     }
 
-    function division(uint a, uint b, uint precision) public pure returns ( uint) {
-     return a*(10**precision)/b;
+    function division(
+        uint a,
+        uint b,
+        uint precision
+    )
+        public
+        pure
+        returns (uint)
+    {
+        return a * (10 ** precision) / b;
     }
-    function multiplyByPercent(uint a, uint b, uint precision) public pure returns(uint){
-        return a*(10**precision)*b/100;
+    
+    function multiplyByPercent(
+        uint a,
+        uint b,
+        uint precision
+    )
+        public
+        pure
+        returns (uint)
+    {
+        return a * (10 ** precision) * b / 100;
     }
 
     /**
@@ -71,7 +91,11 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
      * See {ERC20Pausable} and {Pausable-_pause}.
      *
      */
-    function pause() public onlyOwner virtual {
+    function pause()
+        public
+        virtual
+        onlyOwner
+    {
         _pause();
     }
 
@@ -81,18 +105,30 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
      * See {ERC20Pausable} and {Pausable-_unpause}.
      *
      */
-    function unpause() public onlyOwner virtual {
+    function unpause()
+        public
+        virtual
+        onlyOwner
+    {
         _unpause();
     }
 
-    function getReward(uint256 reward, address[] memory endorsers) private pure returns (uint256){
-        if(endorsers.length==0){
+    function getReward(
+        uint256 reward,
+        address[] memory endorsers
+    )
+        private
+        pure
+        returns (uint256)
+    {
+        if (endorsers.length == 0) {
             return reward;
         }
-        else{
+        else {
             return multiplyByPercent(reward, 90, 5);
         }
     }
+
     /**
      * @dev Sends a tip of tokens to the previous address
      * that endorsed the current one.
@@ -100,42 +136,42 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
      * Invokes `super._transfer()`.
      */
     function endorse(
-        address recipient,
+        address target,
         uint256 amount,
-        address[] memory endorsers
-    ) public {
+        address[] memory endorsers,
+        address[] memory previousEndorsers
+    )
+        public
+    {
         require(msg.sender == tx.origin, "should be an user");
         totalEndorsedCoins += amount;
-        uint256 currentEndorsedToken = balanceOf(recipient);
+        uint256 currentEndorsedToken = balanceOf(target);
 
-        // rewards are distributed as in the formula in the whitepaper
-        uint256 reward = (maximumBoundRate * division(
-            (discountingRateEndor*amount+discountingRateGrandendor*currentEndorsedToken),totalEndorsedCoins, 5));
+        //rewards are given as in the formula in the whitepaper
+        uint256 reward = (maximumBoundRate * division (
+            (discountingRateDN * amount + discountingRateDP * currentEndorsedToken), totalEndorsedCoins, 5));
     
-        // reward recommended endorsers
-        for(uint8 i=0; i<endorsers.length; i++){
-            address current = endorsers[i];
-            uint256 endorserReward = getReward(reward, parentEndorsers[current]);    
+        //reward recommended endorsers
+        for(uint8 i=0; i < endorsers.length; i++){
+            uint256 endorserReward = getReward(reward, previousEndorsers);    
 
             // distribute tokens to endorser
             super._mint(address(endorsers[i]), endorserReward);
             emit SubmitRewardsEndorser(msg.sender, endorserReward);
         
-            // reward parents of recommended endorsers
-            for(uint8 j=0; j<parentEndorsers[current].length; j++){
-                uint256 parentEndorLength = parentEndorsers[current].length;
-                uint prevRewardForEndors = division(multiplyByPercent(reward,10,5),parentEndorLength,5);
-                address parentEndorser = parentEndorsers[current][j];
-
-                // submit tokens to endorsers
-                super._mint(parentEndorser, prevRewardForEndors);
-                emit ParentEndorsersReward(msg.sender, prevRewardForEndors);
-            }
+            //reward parents of recommended endorsers
         }
-        
-        parentEndorsers[msg.sender] = endorsers;
-        transfer(recipient, amount);
-    
+
+        for(uint8 i=0; i < previousEndorsers.length; i++){
+            uint256 prevEndorsersLength = previousEndorsers.length;
+            uint prevRewardForEndorser = division(multiplyByPercent(reward, 10, 0), prevEndorsersLength, 0);
+            address prevEndorser = previousEndorsers[i];
+
+            //submit tokens to endorsers
+            super._mint(prevEndorser, prevRewardForEndorser);
+            emit ParentEndorsersReward(msg.sender, prevRewardForEndorser);
+        }
+
         emit EndorseRewardFormula(msg.sender, reward);
     }
 
@@ -147,7 +183,10 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
         address user,
         uint256 connectedTypeId,
         bytes32 connectedUserIdHash
-    ) public onlyOwner {
+    )
+        public
+        onlyOwner
+    {
         // only add connection if not previously added
         if (socialConnections[user][connectedTypeId] == 0) {
             socialConnections[user][connectedTypeId] = connectedUserIdHash;
@@ -165,7 +204,10 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
     function removeConnection(
         address user,
         uint256 connectedTypeId
-    ) public onlyOwner {
+    )
+        public
+        onlyOwner
+    {
         // only remove connection if currently connected
         if (socialConnections[user][connectedTypeId] != 0) {
             socialConnections[user][connectedTypeId] = 0;
@@ -179,7 +221,10 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
      */
     function setSocialConnectionReward(
         uint256 amount
-    ) public onlyOwner {
+    )
+        public
+        onlyOwner
+    {
         socialConnectionReward = amount;
     }
 
@@ -187,7 +232,10 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
         address from,
         address to,
         uint256 amount
-    ) internal override(ERC20, ERC20Pausable) {
+    )
+        internal
+        override(ERC20, ERC20Pausable)
+    {
         super._beforeTokenTransfer(from, to, amount);
     }
 }
