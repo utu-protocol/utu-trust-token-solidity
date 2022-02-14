@@ -5,8 +5,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
+import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 
-contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
+contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
+    using Chainlink for Chainlink.Request;
     /**
      * The endorsement structure: every endorsement is composed of:
      * - Endorsement address is the key of the mapping
@@ -35,9 +37,19 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
     uint256 public constant discountingRateDN = 1; // DN
     uint256 public constant discountingRateDP = 1; // DP
     uint256 public totalEndorsedCoins;
-    
+
+    // Oracle related
+    struct OracleRequest {
+        address target;
+        uint256 amount;
+    }
+    mapping (uint256 => OracleRequest) private oracleRequests;
+    address private oracle;
+    bytes32 private jobId;
+    uint256 private fee;
+
     event Endorse(address indexed _from, address indexed _to, uint indexed _id, uint _value);
- 
+
     event AddConnection(address indexed _user, uint indexed _connectedTypeId, bytes32 indexed _connectedUserIdHash);
     event RemoveConnection(address indexed _user, uint indexed _connectedTypeId, bytes32 indexed _connectedUserIdHash);
 
@@ -54,11 +66,20 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
      * See {ERC20-constructor}.
      */
     constructor(
-        uint256 _mintAmount
+        uint256 _mintAmount,
+        address _oracle,
+        string memory _jobId,
+        uint256 _fee,
+        address _link
     )
         ERC20("UTU Endorse (ERC20)", "ENDR")
     {
         _mint(msg.sender, _mintAmount);
+
+        setChainlinkToken(_link);
+        oracle = _oracle;
+        jobId = stringToBytes32(_jobId);
+        fee = _fee;
     }
 
     function division(
@@ -135,15 +156,14 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
      *
      * Invokes `super._transfer()`.
      */
-    function endorse(
+    function _endorse(
         address target,
         uint256 amount,
         address[] memory endorsers,
         address[] memory previousEndorsers
     )
-        public
+        internal
     {
-        require(msg.sender == tx.origin, "should be an user");
         totalEndorsedCoins += amount;
         uint256 currentEndorsedToken = balanceOf(target);
 
@@ -173,6 +193,27 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
         }
 
         emit EndorseRewardFormula(msg.sender, reward);
+    }
+
+    function endorse(address target, uint256 amount) external {
+        require(msg.sender == tx.origin, "should be an user");
+        Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), this.fulfillEndorse.selector);
+        request.add("targetAddress", string(abi.encodePacked(target)));
+        sendOperatorRequestTo(oracle, request, fee);
+        oracleRequests[asciiToInteger(request.id)] = OracleRequest({ target: target, amount: amount });
+    }
+
+    function fulfillEndorse(
+        bytes32 _requestId,
+        address[] calldata endorsers,
+        address[] calldata previousEndorsers
+    )
+        external
+        recordChainlinkFulfillment(_requestId)
+    {
+        OracleRequest memory r = oracleRequests[asciiToInteger(_requestId)];
+        require(r.target != address(0), "unknown endorsment");
+        _endorse(r.target, r.amount, endorsers, previousEndorsers);
     }
 
     /**
@@ -237,5 +278,27 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
         override(ERC20, ERC20Pausable)
     {
         super._beforeTokenTransfer(from, to, amount);
+    }
+
+    function asciiToInteger(bytes32 x) public pure returns (uint256) {
+        uint256 y;
+        for (uint256 i = 0; i < 32; i++) {
+            uint256 c = (uint256(x) >> (i * 8)) & 0xff;
+            if (48 <= c && c <= 57)
+                y += (c - 48) * 10 ** i;
+            else
+                break;
+        }
+        return y;
+    }
+
+    function stringToBytes32(string memory source) public pure returns (bytes32 result) {
+        bytes memory tempEmptyStringTest = bytes(source);
+        if (tempEmptyStringTest.length == 0) {
+            return 0x0;
+        }
+        assembly {
+            result := mload(add(source, 32))
+        }
     }
 }

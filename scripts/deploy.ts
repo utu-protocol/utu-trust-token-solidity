@@ -15,7 +15,13 @@ async function main() {
 
   // We get the contract to deploy
   const UTT = await ethers.getContractFactory("UTT");
-  const utt = await UTT.deploy();
+  const utt = await UTT.deploy(
+    ethers.utils.parseEther("1000000"), // test value
+    "0x2be8C0Fe5BD0a6E40F3a62795fBe2A9B7da35038", // kovan oracle
+    "0eec7e1dd0d2476ca1a872dfb6633f48", // kovan job id
+    ethers.utils.parseEther("0.1"), // kovan fee
+    "0x01be23585060835e02b77ef475b0cc51aa1e0709" // kovan link token address
+  );
 
   await utt.deployed();
 
