@@ -8,6 +8,7 @@ import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "hardhat-abi-exporter";
 import "hardhat-tracer";
+import "@appliedblockchain/chainlink-plugins-fund-link";
 
 dotenv.config();
 
@@ -26,7 +27,29 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 
 const config: HardhatUserConfig = {
   solidity: {
-    version: "0.8.7",
+    // version: "0.8.7",
+    compilers: [
+      {
+        version: "0.8.7",
+      },
+      // Operator
+      {
+        version: "0.7.0",
+      },
+      // LinkToken
+      {
+        version: "0.4.24",
+      },
+      {
+        version: "0.4.23",
+      },
+      {
+        version: "0.4.11",
+      },
+      {
+        version: "0.4.8",
+      },
+    ],
     settings: {
       optimizer: {
         enabled: true,
