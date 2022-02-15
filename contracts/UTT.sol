@@ -40,6 +40,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
 
     // Oracle related
     struct OracleRequest {
+        address from;
         address target;
         uint256 amount;
     }
@@ -157,6 +158,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
      * Invokes `super._transfer()`.
      */
     function _endorse(
+        address from,
         address target,
         uint256 amount,
         address[] memory endorsers,
@@ -177,7 +179,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
 
             // distribute tokens to endorser
             super._mint(address(endorsers[i]), endorserReward);
-            emit SubmitRewardsEndorser(msg.sender, endorserReward);
+            emit SubmitRewardsEndorser(from, endorserReward);
         
             //reward parents of recommended endorsers
         }
@@ -189,10 +191,10 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
 
             //submit tokens to endorsers
             super._mint(prevEndorser, prevRewardForEndorser);
-            emit ParentEndorsersReward(msg.sender, prevRewardForEndorser);
+            emit ParentEndorsersReward(from, prevRewardForEndorser);
         }
 
-        emit EndorseRewardFormula(msg.sender, reward);
+        emit EndorseRewardFormula(from, reward);
     }
 
     function endorse(address target, uint256 amount) external {
@@ -200,7 +202,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), this.fulfillEndorse.selector);
         request.add("targetAddress", string(abi.encodePacked(target)));
         sendOperatorRequestTo(oracle, request, fee);
-        oracleRequests[asciiToInteger(request.id)] = OracleRequest({ target: target, amount: amount });
+        oracleRequests[asciiToInteger(request.id)] = OracleRequest({ from: msg.sender, target: target, amount: amount });
     }
 
     function fulfillEndorse(
@@ -213,7 +215,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     {
         OracleRequest memory r = oracleRequests[asciiToInteger(_requestId)];
         require(r.target != address(0), "unknown endorsment");
-        _endorse(r.target, r.amount, endorsers, previousEndorsers);
+        _endorse(r.from, r.target, r.amount, endorsers, previousEndorsers);
     }
 
     /**
