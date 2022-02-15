@@ -17,13 +17,37 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
     mapping (address => mapping (uint256 => address)) endorsements;
     mapping (address => uint256) endorsementId;
 
-    // address : social_media_platform_id
-    mapping (address => uint256) socialConnections;
-
+    /**
+     * The `socialConnections` mapping is storing the connected socialIds
+     * as so: address => socialTypeId => socialUserIdHash
+     */ 
+    mapping (address => mapping (uint256 => bytes32) ) socialConnections;
     mapping (address => uint256) connectionRewards;
 
-    event Endorse(address indexed _from, address indexed _to, uint indexed _id, uint _value);
+    /**
+     * The `socialConnectionReward` variable is the amount of tokens to be minted
+     * as a reward for connecting/verifying with a social platform user id.
+     * Configurable by admin.
+     */
+    uint256 public socialConnectionReward = 1;
 
+    mapping (address => address[]) parentEndorsers;
+    uint256 public constant maximumBoundRate = 2; //RMAX
+    uint256 public constant discountingRateEndor = 1; //DN
+    uint256 public constant discountingRateGrandendor = 1; //DP
+    uint256 public totalEndorsedCoins;
+    
+    event Endorse(address indexed _from, address indexed _to, uint indexed _id, uint _value);
+ 
+    event AddConnection(address indexed _user, uint indexed _connectedTypeId, bytes32 indexed _connectedUserIdHash);
+    event RemoveConnection(address indexed _user, uint indexed _connectedTypeId, bytes32 indexed _connectedUserIdHash);
+
+    event EndorseRewardFormula(address sender, uint256 reward);
+    event ParentEndorsersReward(address sender, uint256 reward);
+    event SubmitRewardsEndorser(address sneder, uint256 reward);
+    event SubmitReward(address sender, uint256 reward);
+    event Log(uint256 logger);
+    
     /**
      * @dev Grants `DEFAULT_ADMIN_ROLE` and `PAUSER_ROLE` to the
      * account that deploys the contract. Grants `MINTER_ROLE` to the bridge.
@@ -31,7 +55,14 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
      * See {ERC20-constructor}.
      */
     constructor() public ERC20("UTU Endorse (ERC20)", "ENDR") {
-        _mint(msg.sender, 100000000000000000000);
+        _mint(msg.sender, 100000000000000000000000);
+    }
+
+    function division(uint a, uint b, uint precision) public pure returns ( uint) {
+     return a*(10**precision)/b;
+    }
+    function multiplyByPercent(uint a, uint b, uint precision) public pure returns(uint){
+        return a*(10**precision)*b/100;
     }
 
     /**
@@ -54,6 +85,14 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
         _unpause();
     }
 
+    function getReward(uint256 reward, address[] memory endorsers) private pure returns (uint256){
+        if(endorsers.length==0){
+            return reward;
+        }
+        else{
+            return multiplyByPercent(reward, 90, 5);
+        }
+    }
     /**
      * @dev Sends a tip of tokens to the previous address
      * that endorsed the current one.
@@ -62,46 +101,42 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
      */
     function endorse(
         address recipient,
-        uint256 amount
+        uint256 amount,
+        address[] memory endorsers
     ) public {
-
         require(msg.sender == tx.origin, "should be an user");
+        totalEndorsedCoins += amount;
+        uint256 currentEndorsedToken = balanceOf(recipient);
 
-        // TODO: migrated from Sophia code
-        // how exactly the users will acquire endorsement tokens?
+        // rewards are distributed as in the formula in the whitepaper
+        uint256 reward = (maximumBoundRate * division(
+            (discountingRateEndor*amount+discountingRateGrandendor*currentEndorsedToken),totalEndorsedCoins, 5));
+    
+        // reward recommended endorsers
+        for(uint8 i=0; i<endorsers.length; i++){
+            address current = endorsers[i];
+            uint256 endorserReward = getReward(reward, parentEndorsers[current]);    
 
-        // In the sophia contract there was a piece of code which
-        // allowed tokens to be minted to the transaction sender
-        // at the time of invoking the endorse function.
+            // distribute tokens to endorser
+            super._mint(address(endorsers[i]), endorserReward);
+            emit SubmitRewardsEndorser(msg.sender, endorserReward);
+        
+            // reward parents of recommended endorsers
+            for(uint8 j=0; j<parentEndorsers[current].length; j++){
+                uint256 parentEndorLength = parentEndorsers[current].length;
+                uint prevRewardForEndors = division(multiplyByPercent(reward,10,5),parentEndorLength,5);
+                address parentEndorser = parentEndorsers[current][j];
 
-        // get previous endorser
-        uint256 sequence = endorsementId[recipient];
-        address previousEndorser = endorsements[recipient][sequence];
-
-        // TODO: what to do in the case when there is no previous endorser?
-        // shall the token amount sent be still transferred and to whom?
-        // Or maybe endorse it in full to the recipient (which seems logical)
-        //
-        // if (sequence >= 1) {
-
-            uint256 nextSequence = sequence + 1;
-
-            // update state
-            endorsementId[recipient] = nextSequence;
-            endorsements[recipient][nextSequence] = recipient;
-
-            // Send tokens (endorse) the recipient
-
-            // TODO: How to split the endorsement between the recipient and
-            // the previous endorser?
-            super._transfer(msg.sender, recipient, amount);
-            // super._transfer(msg.sender, previousEndorser, 0);
-
-            // TODO: shall we add the recipient address and the address of
-            // the previous endorser to the emitted event as well?
-            emit Endorse(msg.sender, recipient, nextSequence, amount);
-
-        // }
+                // submit tokens to endorsers
+                super._mint(parentEndorser, prevRewardForEndors);
+                emit ParentEndorsersReward(msg.sender, prevRewardForEndors);
+            }
+        }
+        
+        parentEndorsers[msg.sender] = endorsers;
+        transfer(recipient, amount);
+    
+        emit EndorseRewardFormula(msg.sender, reward);
     }
 
     /**
@@ -110,20 +145,43 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable {
      */
     function addConnection(
         address user,
-        uint256 socialId
+        uint256 connectedTypeId,
+        bytes32 connectedUserIdHash
     ) public onlyOwner {
-        socialConnections[user] = socialId;
+        // only add connection if not previously added
+        if (socialConnections[user][connectedTypeId] == 0) {
+            socialConnections[user][connectedTypeId] = connectedUserIdHash;
+
+            // mint reward
+            super._mint(user, socialConnectionReward);
+
+            emit AddConnection(user, connectedTypeId, connectedUserIdHash);
+        }
     }
 
     /**
      * @dev The admin (backend) can remove social media connections.
      */
     function removeConnection(
-        address user
+        address user,
+        uint256 connectedTypeId
     ) public onlyOwner {
-        socialConnections[user] = 0;
+        // only remove connection if currently connected
+        if (socialConnections[user][connectedTypeId] != 0) {
+            socialConnections[user][connectedTypeId] = 0;
+
+            emit RemoveConnection(user, connectedTypeId, 0);
+        }
     }
 
+    /**
+     * @dev The admin (backend) can set the social connection reward amount.
+     */
+    function setSocialConnectionReward(
+        uint256 amount
+    ) public onlyOwner {
+        socialConnectionReward = amount;
+    }
 
     function _beforeTokenTransfer(
         address from,
