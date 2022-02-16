@@ -44,7 +44,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         address target;
         uint256 amount;
     }
-    mapping (uint256 => OracleRequest) private oracleRequests;
+    mapping (bytes32 => OracleRequest) private oracleRequests;
     address private oracle;
     bytes32 private jobId;
     uint256 private fee;
@@ -76,7 +76,6 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         ERC20("UTU Endorse (ERC20)", "ENDR")
     {
         _mint(msg.sender, _mintAmount);
-
         setChainlinkToken(_link);
         oracle = _oracle;
         jobId = stringToBytes32(_jobId);
@@ -202,7 +201,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), this.fulfillEndorse.selector);
         request.add("targetAddress", toAsciiString(target));
         bytes32 requestId = sendOperatorRequestTo(oracle, request, fee);
-        oracleRequests[asciiToInteger(requestId)] = OracleRequest({ from: msg.sender, target: target, amount: amount });
+        oracleRequests[requestId] = OracleRequest({ from: msg.sender, target: target, amount: amount });
     }
 
     function fulfillEndorse(
@@ -213,7 +212,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         external
         recordChainlinkFulfillment(_requestId)
     {
-        OracleRequest memory r = oracleRequests[asciiToInteger(_requestId)];
+        OracleRequest memory r = oracleRequests[_requestId];
         require(r.target != address(0), "unknown endorsment");
         _endorse(r.from, r.target, r.amount, endorsers, previousEndorsers);
     }
@@ -280,18 +279,6 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         override(ERC20, ERC20Pausable)
     {
         super._beforeTokenTransfer(from, to, amount);
-    }
-
-    function asciiToInteger(bytes32 x) public pure returns (uint256) {
-        uint256 y;
-        for (uint256 i = 0; i < 32; i++) {
-            uint256 c = (uint256(x) >> (i * 8)) & 0xff;
-            if (48 <= c && c <= 57)
-                y += (c - 48) * 10 ** i;
-            else
-                break;
-        }
-        return y;
     }
 
     function toAsciiString(address x) internal pure returns (string memory) {
