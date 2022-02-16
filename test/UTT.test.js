@@ -1,95 +1,168 @@
-const { ethers } = require("hardhat");
+const { ethers, run } = require("hardhat");
 const { expect } = require("chai");
+const {
+  decodeRunRequest,
+  convertFufillParams,
+} = require("@chainlink/test-helpers/dist/src/contracts/oracle");
 
-const { AddressZero } = ethers.constants;
-
-async function deploy(...params) {
-  const Contract = await ethers.getContractFactory("UTT");
-  return await Contract.deploy(...params).then((f) => f.deployed());
+async function endorse(
+  utt,
+  mockOperator,
+  sender,
+  target,
+  amount,
+  endorsers,
+  previousEndorsers
+) {
+  const tx = await utt.connect(sender).endorse(target, amount);
+  const receipt = await tx.wait(1);
+  const requestId = receipt.events[0].topics[1];
+  const request = decodeRunRequest(receipt.logs[3]);
+  const abiCoder = new ethers.utils.AbiCoder();
+  const data = abiCoder.encode(
+    ["bytes32", "address[]", "address[]"],
+    [requestId, [...endorsers], [...previousEndorsers]]
+  );
+  const fulfillParams = convertFufillParams(request, data);
+  return mockOperator.fulfillOracleRequest2(...fulfillParams);
 }
 
-
 describe("UTT", function () {
-  let mintAmount = ethers.utils.parseEther('1000000');
+  const mintAmount = ethers.utils.parseEther("1000000");
+  const precision = Math.pow(10, 5);
+
   let utt;
+  let mockOperator;
+
   let admin;
   let user1;
   let user2;
   let user3;
   let service1;
   let service2;
-  let accounts;
-  let precision = Math.pow(10, 5);
 
   before(async function () {
-    [admin, user1, user2, user3, service1, service2, ...accounts] =
+    [admin, user1, user2, user3, service1, service2] =
       await ethers.getSigners();
   });
 
   beforeEach(async function () {
-    utt = await deploy(mintAmount);
+    const LinkToken = await ethers.getContractFactory("LinkToken");
+    const linkToken = await LinkToken.deploy().then((f) => f.deployed());
+    const MockOperator = await ethers.getContractFactory("Operator");
+    mockOperator = await MockOperator.deploy(
+      linkToken.address,
+      admin.address
+    ).then((f) => f.deployed());
+    await mockOperator.setAuthorizedSenders([admin.address]);
 
-    //send initial coins to first 3 addresses
-    await utt.connect(admin).transfer(user1.address, ethers.utils.parseEther('10'));
-    await utt.connect(admin).transfer(user2.address, ethers.utils.parseEther('10'));
-    await utt.connect(admin).transfer(user3.address, ethers.utils.parseEther('10'));
+    const UTT = await ethers.getContractFactory("UTT");
+    utt = await UTT.deploy(
+      mintAmount,
+      mockOperator.address,
+      "",
+      ethers.utils.parseEther("0.1"),
+      linkToken.address
+    ).then((f) => f.deployed());
+
+    await run("fund-link", {
+      contract: utt.address,
+      linkaddress: linkToken.address,
+    });
+
+    // send initial coins to first 3 addresses
+    await utt
+      .connect(admin)
+      .transfer(user1.address, ethers.utils.parseEther("10"));
+    await utt
+      .connect(admin)
+      .transfer(user2.address, ethers.utils.parseEther("10"));
+    await utt
+      .connect(admin)
+      .transfer(user3.address, ethers.utils.parseEther("10"));
 
     // await utt.connect(this.admin).endorse(service.address, 1, [], []);
     // await utt.connect(this.admin).endorse(service.address, 1, [], []);
-
   });
 
   describe("Endorsements", function () {
-
-    it('should halve a number correctly', async function () {
+    it("should halve a number correctly", async function () {
       const result = await utt.connect(admin).multiplyByPercent(10, 50, 5);
-      expect(result).to.deep.equal(ethers.BigNumber.from(5).mul(Math.pow(10, 5)));
-    })
-
-    it("should take your tokens when you endorsing", async function () {
-      expect(
-        await utt.connect(admin).balanceOf(admin.address)
-      ).to.equal(ethers.utils.parseEther('999970'));
+      expect(result).to.deep.equal(
+        ethers.BigNumber.from(5).mul(Math.pow(10, 5))
+      );
     });
 
-    it('should evaluate the formula in the whitepaper', async function () {
-      await expect(
-        utt.connect(admin)
-          .endorse(service1.address, 1, [user2.address, user3.address], [])
-      )
-        .to.emit(utt, 'EndorseRewardFormula')
-        .withArgs(admin.address, 2 * precision);
-    })
+    it("should take your tokens when you endorsing", async function () {
+      expect(await utt.connect(admin).balanceOf(admin.address)).to.equal(
+        ethers.utils.parseEther("999970")
+      );
+    });
 
-    it('should not give tokens when theres no parent endorsers', async function () {
+    it("should evaluate the formula in the whitepaper", async function () {
       await expect(
-        utt.connect(admin)
-          .endorse(service1.address, 1, [user2.address, user3.address], [])
+        endorse(
+          utt,
+          mockOperator,
+          admin,
+          service1.address,
+          1,
+          [user2.address, user3.address],
+          []
+        )
       )
-        .to.not.emit(utt, 'ParentEndorsersReward')
-    })
-
-    it('should give back rewards to endorser', async function () {
-      await expect(
-        utt.connect(admin)
-          .endorse(service1.address, 1, [user2.address], [])
-      )
-        .to.emit(utt, 'SubmitRewardsEndorser')
+        .to.emit(utt, "EndorseRewardFormula")
         .withArgs(admin.address, 2 * precision);
-    })
+    });
+
+    it("should not give tokens when theres no parent endorsers", async function () {
+      await expect(
+        endorse(
+          utt,
+          mockOperator,
+          admin,
+          service1.address,
+          1,
+          [user2.address, user3.address],
+          []
+        )
+      ).to.not.emit(utt, "ParentEndorsersReward");
+    });
+
+    it("should give back rewards to endorser", async function () {
+      await expect(
+        endorse(
+          utt,
+          mockOperator,
+          admin,
+          service1.address,
+          1,
+          [user2.address],
+          []
+        )
+      )
+        .to.emit(utt, "SubmitRewardsEndorser")
+        .withArgs(admin.address, 2 * precision);
+    });
 
     // TODO: adapt after the oracle call
-    it.skip('should give token to parent endorser of endorsed service', async function () {
-      await utt.connect(user1).endorse(service1.address, 1, [], []);
-      await utt.connect(user2).endorse(service2.address, 5, [], []);
+    it.skip("should give token to parent endorser of endorsed service", async function () {
+      await endorse(utt, mockOperator, user1, service1.address, 1, [], []);
+      await endorse(utt, mockOperator, user2, service2.address, 5, [], []);
 
       await expect(
-        utt.connect(user3)
-          .endorse(service1.address, 3, [admin.address, user1.address], [])
+        endorse(
+          utt,
+          mockOperator,
+          user3,
+          service1.address,
+          3,
+          [admin.address, user1.address],
+          []
+        )
       )
-        .to.emit(utt, 'EndorseRewardFormula')
+        .to.emit(utt, "EndorseRewardFormula")
         .withArgs(user3.address, 1 * precision);
-    })
-
+    });
   });
 });
