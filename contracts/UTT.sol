@@ -49,7 +49,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     bytes32 private jobId;
     uint256 private fee;
 
-    event Endorse(address indexed _from, address indexed _to, uint indexed _id, uint _value);
+    event Endorse(address indexed _from, address indexed _to, uint _value);
 
     event AddConnection(address indexed _user, uint indexed _connectedTypeId, bytes32 indexed _connectedUserIdHash);
     event RemoveConnection(address indexed _user, uint indexed _connectedTypeId, bytes32 indexed _connectedUserIdHash);
@@ -194,6 +194,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         }
 
         emit EndorseRewardFormula(from, reward);
+        emit Endorse(from, target, amount);
     }
 
     function endorse(address target, uint256 amount) external {
