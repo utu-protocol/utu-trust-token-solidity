@@ -1,78 +1,168 @@
-const {ethers} = require("hardhat");
-const {expect} = require("chai");
+const { ethers, run } = require("hardhat");
+const { expect } = require("chai");
+const {
+  decodeRunRequest,
+  convertFufillParams,
+} = require("@chainlink/test-helpers/dist/src/contracts/oracle");
 
-const {AddressZero} = ethers.constants;
-
-async function deploy() {
-  const Contract = await ethers.getContractFactory("UTT");
-  return await Contract.deploy().then((f) => f.deployed());
+async function endorse(
+  utt,
+  mockOperator,
+  sender,
+  target,
+  amount,
+  endorsers,
+  previousEndorsers
+) {
+  const tx = await utt.connect(sender).endorse(target, amount);
+  const receipt = await tx.wait(1);
+  const requestId = receipt.events[0].topics[1];
+  const request = decodeRunRequest(receipt.logs[3]);
+  const abiCoder = new ethers.utils.AbiCoder();
+  const data = abiCoder.encode(
+    ["bytes32", "address[]", "address[]"],
+    [requestId, [...endorsers], [...previousEndorsers]]
+  );
+  const fulfillParams = convertFufillParams(request, data);
+  return mockOperator.fulfillOracleRequest2(...fulfillParams);
 }
 
+describe("UTT", function () {
+  const mintAmount = ethers.utils.parseEther("1000000");
+  const precision = Math.pow(10, 5);
 
-describe("UTU", function () {
+  let utt;
+  let mockOperator;
+
+  let admin;
+  let user1;
+  let user2;
+  let user3;
+  let service1;
+  let service2;
+
   before(async function () {
-    this.accounts = await ethers.getSigners();
-    this.admin = this.accounts[0];
-    this.regularAcc = this.accounts[1];
-    this.regularAcc2 = this.accounts[2];
-    this.regularAcc3 = this.accounts[3];
-
-    this.service = this.accounts[4];
-    this.service2 = this.accounts[5];
+    [admin, user1, user2, user3, service1, service2] =
+      await ethers.getSigners();
   });
 
-  context("Endorsements", function () {
-    beforeEach(async function () {
-      this.utt = await deploy();
-      this.precision = Math.pow(10,5);
-      //send initial coins to first 3 addresses
-      await this.utt.connect(this.admin).transfer(this.regularAcc.address, ethers.utils.parseEther("10"));
-      await this.utt.connect(this.admin).transfer(this.regularAcc2.address, ethers.utils.parseEther("10"));
-      await this.utt.connect(this.admin).transfer(this.regularAcc3.address, ethers.utils.parseEther("10"));
+  beforeEach(async function () {
+    const LinkToken = await ethers.getContractFactory("LinkToken");
+    const linkToken = await LinkToken.deploy().then((f) => f.deployed());
+    const MockOperator = await ethers.getContractFactory("Operator");
+    mockOperator = await MockOperator.deploy(
+      linkToken.address,
+      admin.address
+    ).then((f) => f.deployed());
+    await mockOperator.setAuthorizedSenders([admin.address]);
 
-      await this.utt.connect(this.admin)
-      .endorse(this.service.address, 1,[]);
-      
+    const UTT = await ethers.getContractFactory("UTT");
+    utt = await UTT.deploy(
+      mintAmount,
+      mockOperator.address,
+      "",
+      ethers.utils.parseEther("0.1"),
+      linkToken.address
+    ).then((f) => f.deployed());
+
+    await run("fund-link", {
+      contract: utt.address,
+      linkaddress: linkToken.address,
     });
-    
-    it('should halve a number', async function(){
-      let precision = 5;
-      let result = await this.utt.connect(this.admin).multiplyByPercent(10, 50, precision);
-      expect(result.toString()/Math.pow(10,5)).to.equal(5);
 
-    })
+    // send initial coins to first 3 addresses
+    await utt
+      .connect(admin)
+      .transfer(user1.address, ethers.utils.parseEther("10"));
+    await utt
+      .connect(admin)
+      .transfer(user2.address, ethers.utils.parseEther("10"));
+    await utt
+      .connect(admin)
+      .transfer(user3.address, ethers.utils.parseEther("10"));
+
+    // await utt.connect(this.admin).endorse(service.address, 1, [], []);
+    // await utt.connect(this.admin).endorse(service.address, 1, [], []);
+  });
+
+  describe("Endorsements", function () {
+    it("should halve a number correctly", async function () {
+      const result = await utt.connect(admin).multiplyByPercent(10, 50, 5);
+      expect(result).to.deep.equal(
+        ethers.BigNumber.from(5).mul(Math.pow(10, 5))
+      );
+    });
+
     it("should take your tokens when you endorsing", async function () {
-      let newBalance = await this.utt.connect(this.admin).balanceOf(this.admin.address);
-      await expect(newBalance.toString() == '99000000000000000000');
+      expect(await utt.connect(admin).balanceOf(admin.address)).to.equal(
+        ethers.utils.parseEther("999970")
+      );
     });
-    it('should evaluate the formula in the whitepaper', async function(){
-      await expect(this.utt.connect(this.admin)
-      .endorse(this.service.address, 1,[this.regularAcc2.address, this.regularAcc3.address]))
-      .to.emit(this.utt, 'EndorseRewardFormula')
-      .withArgs(this.admin.address,2 * this.precision);
-    })
-    it('should not give tokens when theres no parent endorsers', async function(){
-      await expect(this.utt.connect(this.admin)
-      .endorse(this.service.address, 1,[this.regularAcc2.address, this.regularAcc3.address]))
-      .to.not.emit(this.utt, 'ParentEndorsersReward')
-    })
-    it('should give back rewards to endorser', async function(){
-      await expect(this.utt.connect(this.admin)
-      .endorse(this.service.address, 1,[this.regularAcc2.address]))
-      .to.emit(this.utt, 'SubmitRewardsEndorser')
-      .withArgs(this.admin.address, 2 * this.precision);
-    })
-    it('should give token to parent endorser of endorsed service', async function(){    
-      await this.utt.connect(this.regularAcc)
-      .endorse(this.service.address, 1, []);
 
-      await this.utt.connect(this.regularAcc2)
-      .endorse(this.service2.address, 5, []);
+    it("should evaluate the formula in the whitepaper", async function () {
+      await expect(
+        endorse(
+          utt,
+          mockOperator,
+          admin,
+          service1.address,
+          1,
+          [user2.address, user3.address],
+          []
+        )
+      )
+        .to.emit(utt, "EndorseRewardFormula")
+        .withArgs(admin.address, 2 * precision);
+    });
 
-      await expect(this.utt.connect(this.regularAcc3)
-      .endorse(this.service.address, 3, [this.admin.address, this.regularAcc.address]))
-      .to.emit(this.utt, 'EndorseRewardFormula')
-      .withArgs(this.regularAcc3.address, 1 * this.precision);
-    })
+    it("should not give tokens when theres no parent endorsers", async function () {
+      await expect(
+        endorse(
+          utt,
+          mockOperator,
+          admin,
+          service1.address,
+          1,
+          [user2.address, user3.address],
+          []
+        )
+      ).to.not.emit(utt, "ParentEndorsersReward");
+    });
+
+    it("should give back rewards to endorser", async function () {
+      await expect(
+        endorse(
+          utt,
+          mockOperator,
+          admin,
+          service1.address,
+          1,
+          [user2.address],
+          []
+        )
+      )
+        .to.emit(utt, "SubmitRewardsEndorser")
+        .withArgs(admin.address, 2 * precision);
+    });
+
+    // TODO: adapt after the oracle call
+    it.skip("should give token to parent endorser of endorsed service", async function () {
+      await endorse(utt, mockOperator, user1, service1.address, 1, [], []);
+      await endorse(utt, mockOperator, user2, service2.address, 5, [], []);
+
+      await expect(
+        endorse(
+          utt,
+          mockOperator,
+          user3,
+          service1.address,
+          3,
+          [admin.address, user1.address],
+          []
+        )
+      )
+        .to.emit(utt, "EndorseRewardFormula")
+        .withArgs(user3.address, 1 * precision);
+    });
   });
 });
