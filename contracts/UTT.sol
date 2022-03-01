@@ -36,7 +36,9 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     uint256 public constant maximumBoundRate = 2; //RMAX
     uint256 public constant discountingRateDN = 1; // DN
     uint256 public constant discountingRateDP = 1; // DP
-    uint256 public totalEndorsedCoins;
+
+    mapping (address => mapping(address => uint256)) public endorserStakes; //Sp
+    mapping (address => uint) public totalEndorsedCoins; //S total
 
     // Oracle related
     struct OracleRequest {
@@ -48,6 +50,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     address private oracle;
     bytes32 private jobId;
     uint256 private fee;
+    
 
     event Endorse(address indexed _from, address indexed _to, uint _value);
 
@@ -165,12 +168,18 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     )
         internal
     {
-        totalEndorsedCoins += amount;
-        uint256 currentEndorsedToken = balanceOf(target);
+        uint prevEndorserStake = 0;
+        totalEndorsedCoins[target] += amount;
 
+        for(uint i=0; i<endorsers.length; i++){
+            uint oldTokens = endorserStakes[target][endorsers[i]];
+            prevEndorserStake+=oldTokens;    
+        }
+        
         //rewards are given as in the formula in the whitepaper
         uint256 reward = (maximumBoundRate * division (
-            (discountingRateDN * amount + discountingRateDP * currentEndorsedToken), totalEndorsedCoins, 5));
+            (discountingRateDN * amount + discountingRateDP * prevEndorserStake), totalEndorsedCoins[target], 5));
+
     
         //reward recommended endorsers
         for(uint8 i=0; i < endorsersLevel1.length; i++){
