@@ -168,9 +168,10 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     )
         internal
     {
-        uint prevEndorserStake = 0;
         totalEndorsedCoins[target] += amount;
+        burnFrom(from, amount);
 
+        uint prevEndorserStake = 0;
         for(uint i=0; i<endorsers.length; i++){
             uint oldTokens = endorserStakes[target][endorsers[i]];
             prevEndorserStake+=oldTokens;    
@@ -188,8 +189,6 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
             // distribute tokens to endorser
             super._mint(address(endorsersLevel1[i]), endorserReward);
             emit SubmitRewardsEndorser(from, endorserReward);
-        
-            //reward parents of recommended endorsers
         }
 
         for(uint8 i=0; i < endorsersLevel2.length; i++){
