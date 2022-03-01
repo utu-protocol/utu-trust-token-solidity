@@ -160,8 +160,8 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         address from,
         address target,
         uint256 amount,
-        address[] memory endorsers,
-        address[] memory previousEndorsers
+        address[] memory endorsersLevel1,
+        address[] memory endorsersLevel2
     )
         internal
     {
@@ -173,20 +173,20 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
             (discountingRateDN * amount + discountingRateDP * currentEndorsedToken), totalEndorsedCoins, 5));
     
         //reward recommended endorsers
-        for(uint8 i=0; i < endorsers.length; i++){
-            uint256 endorserReward = getReward(reward, previousEndorsers);    
+        for(uint8 i=0; i < endorsersLevel1.length; i++){
+            uint256 endorserReward = getReward(reward, endorsersLevel2);    
 
             // distribute tokens to endorser
-            super._mint(address(endorsers[i]), endorserReward);
+            super._mint(address(endorsersLevel1[i]), endorserReward);
             emit SubmitRewardsEndorser(from, endorserReward);
         
             //reward parents of recommended endorsers
         }
 
-        for(uint8 i=0; i < previousEndorsers.length; i++){
-            uint256 prevEndorsersLength = previousEndorsers.length;
+        for(uint8 i=0; i < endorsersLevel2.length; i++){
+            uint256 prevEndorsersLength = endorsersLevel2.length;
             uint prevRewardForEndorser = division(multiplyByPercent(reward, 10, 0), prevEndorsersLength, 0);
-            address prevEndorser = previousEndorsers[i];
+            address prevEndorser = endorsersLevel2[i];
 
             //submit tokens to endorsers
             super._mint(prevEndorser, prevRewardForEndorser);
@@ -207,15 +207,15 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
 
     function fulfillEndorse(
         bytes32 _requestId,
-        address[] calldata endorsers,
-        address[] calldata previousEndorsers
+        address[] calldata endorsersLevel1,
+        address[] calldata endorsersLevel2
     )
         external
         recordChainlinkFulfillment(_requestId)
     {
         OracleRequest memory r = oracleRequests[_requestId];
         require(r.target != address(0), "unknown endorsment");
-        _endorse(r.from, r.target, r.amount, endorsers, previousEndorsers);
+        _endorse(r.from, r.target, r.amount, endorsersLevel1, endorsersLevel2);
     }
 
     /**
