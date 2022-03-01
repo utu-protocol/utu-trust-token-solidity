@@ -50,7 +50,6 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     address private oracle;
     bytes32 private jobId;
     uint256 private fee;
-    
     event Endorse(address indexed _from, address indexed _to, uint _value);
 
     event AddConnection(address indexed _user, uint indexed _connectedTypeId, bytes32 indexed _connectedUserIdHash);
@@ -178,7 +177,6 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         //rewards are given as in the formula in the whitepaper
         uint256 reward = (maximumBoundRate * division (
             (discountingRateDN * amount + discountingRateDP * prevEndorserStake), totalEndorsedCoins[target], 5));
-
         //reward recommended endorsers
         for(uint8 i=0; i < endorsersLevel1.length; i++){
             uint256 endorserReward = getReward(reward, endorsersLevel2);    
