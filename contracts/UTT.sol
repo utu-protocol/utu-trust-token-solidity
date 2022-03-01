@@ -169,14 +169,16 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         internal
     {
         totalEndorsedCoins[target] += amount;
+        
         burnFrom(from, amount);
 
         uint prevEndorserStake = 0;
-        for(uint i=0; i<endorsers.length; i++){
+        for(uint8 i=0; i<endorsers.length; i++){
             uint oldTokens = endorserStakes[target][endorsers[i]];
             prevEndorserStake+=oldTokens;    
         }
-        
+        endorserStakes[target][from] += amount;
+
         //rewards are given as in the formula in the whitepaper
         uint256 reward = (maximumBoundRate * division (
             (discountingRateDN * amount + discountingRateDP * prevEndorserStake), totalEndorsedCoins[target], 5));
