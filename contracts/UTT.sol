@@ -169,9 +169,6 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         internal
     {
         totalEndorsedCoins[target] += amount;
-        
-        burnFrom(from, amount);
-
         uint prevEndorserStake = 0;
         for(uint8 i=0; i<endorsers.length; i++){
             uint oldTokens = endorserStakes[target][endorsers[i]];
@@ -204,7 +201,6 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         }
 
         emit EndorseRewardFormula(from, reward);
-        emit Endorse(from, target, amount);
     }
 
     function endorse(address target, uint256 amount) external {
@@ -225,6 +221,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     {
         OracleRequest memory r = oracleRequests[_requestId];
         require(r.target != address(0), "unknown endorsment");
+        _burn(r.from, r.amount);
         _endorse(r.from, r.target, r.amount, endorsersLevel1, endorsersLevel2);
     }
 
