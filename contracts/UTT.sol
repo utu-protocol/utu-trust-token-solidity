@@ -170,8 +170,8 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     {
         totalEndorsedCoins[target] += amount;
         uint prevEndorserStake = 0;
-        for(uint8 i=0; i<endorsers.length; i++){
-            uint oldTokens = endorserStakes[target][endorsers[i]];
+        for(uint8 i=0; i<endorsersLevel1.length; i++){
+            uint oldTokens = endorserStakes[target][endorsersLevel1[i]];
             prevEndorserStake+=oldTokens;    
         }
         endorserStakes[target][from] += amount;
