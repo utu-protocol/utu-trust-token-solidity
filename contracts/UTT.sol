@@ -277,6 +277,20 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         super._beforeTokenTransfer(from, to, amount);
     }
 
+    /**
+     * @dev - forbid external calls on transfer
+     */
+    function transfer(address recipient, uint256 amount) public pure override returns (bool) {
+      revert('Not allowed.');
+    }
+
+    /**
+     * @dev - forbid external calls on approve
+     */
+    function approve(address spender, uint256 amount) public pure override returns (bool) {
+      revert('Not allowed.');
+    }
+
     function toAsciiString(address x) internal pure returns (string memory) {
         bytes memory s = new bytes(40);
         for (uint i = 0; i < 20; i++) {

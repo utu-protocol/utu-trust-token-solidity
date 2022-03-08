@@ -74,15 +74,15 @@ describe("UTT", function () {
     });
 
     // send initial coins to first 3 addresses
-    await utt
-      .connect(admin)
-      .transfer(user1.address, ethers.utils.parseEther("10"));
-    await utt
-      .connect(admin)
-      .transfer(user2.address, ethers.utils.parseEther("10"));
-    await utt
-      .connect(admin)
-      .transfer(user3.address, ethers.utils.parseEther("10"));
+    // await utt
+    //   .connect(admin)
+    //   .transfer(user1.address, ethers.utils.parseEther("10"));
+    // await utt
+    //   .connect(admin)
+    //   .transfer(user2.address, ethers.utils.parseEther("10"));
+    // await utt
+    //   .connect(admin)
+    //   .transfer(user3.address, ethers.utils.parseEther("10"));
 
     // await utt.connect(this.admin).endorse(service.address, 1, [], []);
     // await utt.connect(this.admin).endorse(service.address, 1, [], []);
@@ -97,9 +97,19 @@ describe("UTT", function () {
     });
 
     it("should take your tokens when you endorsing", async function () {
-      expect(await utt.connect(admin).balanceOf(admin.address)).to.equal(
-        ethers.utils.parseEther("999970")
-      );
+      const balanceBefore = await utt.connect(admin).balanceOf(admin.address);
+      await endorse(
+          utt,
+          mockOperator,
+          admin,
+          service1.address,
+          1,
+          mockTransactionId,
+          [user2.address, user3.address],
+          []
+        );
+      const balanceAfter = await utt.connect(admin).balanceOf(admin.address);
+      expect(balanceAfter).to.be.lt(balanceBefore);
     });
 
     it("should evaluate the formula in the whitepaper", async function () {
