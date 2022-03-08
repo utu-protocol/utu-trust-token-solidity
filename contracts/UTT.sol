@@ -36,7 +36,9 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     uint256 public constant maximumBoundRate = 2; //RMAX
     uint256 public constant discountingRateDN = 1; // DN
     uint256 public constant discountingRateDP = 1; // DP
-    uint256 public totalEndorsedCoins;
+
+    mapping (address => mapping(address => uint256)) public endorserStakes; //Sp
+    mapping (address => uint) public totalEndorsedCoins; //S total
 
     // Oracle related
     struct OracleRequest {
@@ -48,7 +50,6 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     address private oracle;
     bytes32 private jobId;
     uint256 private fee;
-
     event Endorse(address indexed _from, address indexed _to, uint _value);
 
     event AddConnection(address indexed _user, uint indexed _connectedTypeId, bytes32 indexed _connectedUserIdHash);
@@ -165,13 +166,17 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     )
         internal
     {
-        totalEndorsedCoins += amount;
-        uint256 currentEndorsedToken = balanceOf(target);
+        totalEndorsedCoins[target] += amount;
+        uint prevEndorserStake = 0;
+        for(uint8 i=0; i<endorsersLevel1.length; i++){
+            uint primaryTokens = endorserStakes[target][endorsersLevel1[i]];
+            prevEndorserStake += primaryTokens;    
+        }
+        endorserStakes[target][from] += amount;
 
         //rewards are given as in the formula in the whitepaper
         uint256 reward = (maximumBoundRate * division (
-            (discountingRateDN * amount + discountingRateDP * currentEndorsedToken), totalEndorsedCoins, 5));
-    
+            (discountingRateDN * amount + discountingRateDP * prevEndorserStake), totalEndorsedCoins[target], 5));
         //reward recommended endorsers
         for(uint8 i=0; i < endorsersLevel1.length; i++){
             uint256 endorserReward = getReward(reward, endorsersLevel2);    
@@ -179,8 +184,6 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
             // distribute tokens to endorser
             super._mint(address(endorsersLevel1[i]), endorserReward);
             emit SubmitRewardsEndorser(from, endorserReward);
-        
-            //reward parents of recommended endorsers
         }
 
         for(uint8 i=0; i < endorsersLevel2.length; i++){
@@ -194,7 +197,6 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         }
 
         emit EndorseRewardFormula(from, reward);
-        emit Endorse(from, target, amount);
     }
 
     function endorse(address target, uint256 amount) external {
@@ -215,6 +217,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     {
         OracleRequest memory r = oracleRequests[_requestId];
         require(r.target != address(0), "unknown endorsment");
+        _burn(r.from, r.amount);
         _endorse(r.from, r.target, r.amount, endorsersLevel1, endorsersLevel2);
     }
 
