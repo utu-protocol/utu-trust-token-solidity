@@ -11,10 +11,11 @@ async function endorse(
   sender,
   target,
   amount,
+  transactionId,
   endorsers,
   previousEndorsers
 ) {
-  const tx = await utt.connect(sender).endorse(target, amount);
+  const tx = await utt.connect(sender).endorse(target, amount, transactionId);
   const receipt = await tx.wait(1);
   const requestId = receipt.events[0].topics[1];
   const request = decodeRunRequest(receipt.logs[3]);
@@ -33,6 +34,8 @@ describe("UTT", function () {
 
   let utt;
   let mockOperator;
+
+  let mockTransactionId = '123456';
 
   let admin;
   let user1;
@@ -107,6 +110,7 @@ describe("UTT", function () {
           admin,
           service1.address,
           1,
+          mockTransactionId,
           [user2.address, user3.address],
           []
         )
@@ -123,6 +127,7 @@ describe("UTT", function () {
           admin,
           service1.address,
           1,
+          mockTransactionId,
           [user2.address, user3.address],
           []
         )
@@ -137,6 +142,7 @@ describe("UTT", function () {
           admin,
           service1.address,
           1,
+          mockTransactionId,
           [user2.address],
           []
         )
@@ -147,8 +153,8 @@ describe("UTT", function () {
 
     // TODO: adapt after the oracle call
     it.skip("should give token to parent endorser of endorsed service", async function () {
-      await endorse(utt, mockOperator, user1, service1.address, 1, [], []);
-      await endorse(utt, mockOperator, user2, service2.address, 5, [], []);
+      await endorse(utt, mockOperator, user1, service1.address, 1, mockTransactionId, [], []);
+      await endorse(utt, mockOperator, user2, service2.address, 5, mockTransactionId, [], []);
 
       await expect(
         endorse(
@@ -157,6 +163,7 @@ describe("UTT", function () {
           user3,
           service1.address,
           3,
+          mockTransactionId,
           [admin.address, user1.address],
           []
         )
