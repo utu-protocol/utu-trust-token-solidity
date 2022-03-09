@@ -9,22 +9,12 @@ import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 
 contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     using Chainlink for Chainlink.Request;
-    /**
-     * The endorsement structure: every endorsement is composed of:
-     * - Endorsement address is the key of the mapping
-     * - Id is the sequence of the endorsements for that account
-     * - Accepted Status - true if the user has accepted the endorsement
-     */
-
-    mapping (address => mapping (uint256 => address)) endorsements;
-    mapping (address => uint256) endorsementId;
-
+    
     /**
      * The `socialConnections` mapping is storing the connected socialIds
      * as so: address => socialTypeId => socialUserIdHash
      */ 
     mapping (address => mapping (uint256 => bytes32) ) socialConnections;
-    mapping (address => uint256) connectionRewards;
 
     /**
      * The `socialConnectionReward` variable is the amount of tokens to be minted
@@ -45,16 +35,16 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         address from;
         address target;
         uint256 amount;
+        string transactionId;
     }
     mapping (bytes32 => OracleRequest) private oracleRequests;
     address private oracle;
     bytes32 private jobId;
     uint256 private fee;
-    event Endorse(address indexed _from, address indexed _to, uint _value);
 
+    event Endorse(address indexed _from, address indexed _to, uint _value, string _transactionId);
     event AddConnection(address indexed _user, uint indexed _connectedTypeId, bytes32 indexed _connectedUserIdHash);
     event RemoveConnection(address indexed _user, uint indexed _connectedTypeId, bytes32 indexed _connectedUserIdHash);
-
     event EndorseRewardFormula(address sender, uint256 reward);
     event ParentEndorsersReward(address sender, uint256 reward);
     event SubmitRewardsEndorser(address sender, uint256 reward);
@@ -161,6 +151,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         address from,
         address target,
         uint256 amount,
+        string memory transactionId,
         address[] memory endorsersLevel1,
         address[] memory endorsersLevel2
     )
@@ -197,14 +188,15 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         }
 
         emit EndorseRewardFormula(from, reward);
+        emit Endorse(from, target, amount, transactionId);
     }
 
-    function endorse(address target, uint256 amount) external {
+    function endorse(address target, uint256 amount, string memory transactionId) external {
         require(msg.sender == tx.origin, "should be an user");
         Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), this.fulfillEndorse.selector);
         request.add("targetAddress", toAsciiString(target));
         bytes32 requestId = sendOperatorRequestTo(oracle, request, fee);
-        oracleRequests[requestId] = OracleRequest({ from: msg.sender, target: target, amount: amount });
+        oracleRequests[requestId] = OracleRequest({ from: msg.sender, target: target, amount: amount, transactionId: transactionId });
     }
 
     function fulfillEndorse(
@@ -218,7 +210,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         OracleRequest memory r = oracleRequests[_requestId];
         require(r.target != address(0), "unknown endorsment");
         _burn(r.from, r.amount);
-        _endorse(r.from, r.target, r.amount, endorsersLevel1, endorsersLevel2);
+        _endorse(r.from, r.target, r.amount, r.transactionId, endorsersLevel1, endorsersLevel2);
     }
 
     /**
@@ -283,6 +275,20 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         override(ERC20, ERC20Pausable)
     {
         super._beforeTokenTransfer(from, to, amount);
+    }
+
+    /**
+     * @dev - forbid external calls on transfer
+     */
+    function transfer(address recipient, uint256 amount) public pure override returns (bool) {
+      revert('Not allowed.');
+    }
+
+    /**
+     * @dev - forbid external calls on approve
+     */
+    function approve(address spender, uint256 amount) public pure override returns (bool) {
+      revert('Not allowed.');
     }
 
     function toAsciiString(address x) internal pure returns (string memory) {
