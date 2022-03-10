@@ -196,6 +196,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), this.fulfillEndorse.selector);
         request.add("targetAddress", addressToString(target));
         request.add("sourceAddress", addressToString(msg.sender));
+        request.add("transactionId", transactionId);
         bytes32 requestId = sendOperatorRequestTo(oracle, request, fee);
         oracleRequests[requestId] = OracleRequest({ from: msg.sender, target: target, amount: amount, transactionId: transactionId });
     }
