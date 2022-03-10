@@ -194,7 +194,8 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     function endorse(address target, uint256 amount, string memory transactionId) external {
         require(msg.sender == tx.origin, "should be an user");
         Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), this.fulfillEndorse.selector);
-        request.add("targetAddress", toAsciiString(target));
+        request.add("targetAddress", addressToString(target));
+        request.add("sourceAddress", addressToString(msg.sender));
         bytes32 requestId = sendOperatorRequestTo(oracle, request, fee);
         oracleRequests[requestId] = OracleRequest({ from: msg.sender, target: target, amount: amount, transactionId: transactionId });
     }
@@ -291,7 +292,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
       revert('Not allowed.');
     }
 
-    function toAsciiString(address x) internal pure returns (string memory) {
+    function addressToString(address x) internal pure returns (string memory) {
         bytes memory s = new bytes(40);
         for (uint i = 0; i < 20; i++) {
             bytes1 b = bytes1(uint8(uint(uint160(x)) / (2**(8*(19 - i)))));
@@ -300,7 +301,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
             s[2*i] = char(hi);
             s[2*i+1] = char(lo);
         }
-        return string(s);
+        return string(abi.encodePacked("0x", string(s)));
     }
 
     function char(bytes1 b) internal pure returns (bytes1 c) {
