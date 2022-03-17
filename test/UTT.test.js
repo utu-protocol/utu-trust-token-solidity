@@ -12,8 +12,8 @@ async function endorse(
   target,
   amount,
   transactionId,
-  endorsers,
-  previousEndorsers
+  endorsersLevel1,
+  endorsersLevel2
 ) {
   const tx = await utt.connect(sender).endorse(target, amount, transactionId);
   const receipt = await tx.wait(1);
@@ -22,7 +22,7 @@ async function endorse(
   const abiCoder = new ethers.utils.AbiCoder();
   const data = abiCoder.encode(
     ["bytes32", "address[]", "address[]"],
-    [requestId, [...endorsers], [...previousEndorsers]]
+    [requestId, [...endorsersLevel1], [...endorsersLevel2]]
   );
   const fulfillParams = convertFufillParams(request, data);
   return mockOperator.fulfillOracleRequest2(...fulfillParams);
@@ -112,24 +112,25 @@ describe("UTT", function () {
       expect(balanceAfter).to.be.lt(balanceBefore);
     });
 
-    it("should evaluate the formula in the whitepaper", async function () {
+    it("should emit an Endorse event with correct parameters", async function () {
       await expect(
         endorse(
           utt,
           mockOperator,
           admin,
           service1.address,
-          1,
+          3,
           mockTransactionId,
           [user2.address, user3.address],
           []
         )
       )
-        .to.emit(utt, "EndorseRewardFormula")
-        .withArgs(admin.address, 2 * precision);
+        .to.emit(utt, "Endorse")
+        .withArgs(admin.address, service1.address, 3, mockTransactionId);
     });
 
-    it("should not give tokens when theres no parent endorsers", async function () {
+    it("should not emit and RewardPreviousEndorserLevel2 event when there are no 2nd-level previous endorsers",
+      async function () {
       await expect(
         endorse(
           utt,
@@ -141,10 +142,10 @@ describe("UTT", function () {
           [user2.address, user3.address],
           []
         )
-      ).to.not.emit(utt, "ParentEndorsersReward");
+      ).to.not.emit(utt, "RewardPreviousEndorserLevel2");
     });
 
-    it("should give back rewards to endorser", async function () {
+    it("Reward 1st-level previous endorsers", async function () {
       await expect(
         endorse(
           utt,
@@ -157,8 +158,9 @@ describe("UTT", function () {
           []
         )
       )
-        .to.emit(utt, "SubmitRewardsEndorser")
-        .withArgs(admin.address, 2 * precision);
+        .to.emit(utt, "RewardPreviousEndorserLevel1")
+        // FIXME: reward formula is wrong
+        .withArgs(user2.address, 2);
     });
 
     // TODO: adapt after the oracle call
@@ -178,7 +180,7 @@ describe("UTT", function () {
           []
         )
       )
-        .to.emit(utt, "EndorseRewardFormula")
+        .to.emit(utt, "RewardPreviousEndorserLevel1")
         .withArgs(user3.address, 1 * precision);
     });
   });

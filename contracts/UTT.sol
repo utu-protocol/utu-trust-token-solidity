@@ -9,11 +9,11 @@ import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 
 contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     using Chainlink for Chainlink.Request;
-    
+
     /**
      * The `socialConnections` mapping is storing the connected socialIds
      * as so: address => socialTypeId => socialUserIdHash
-     */ 
+     */
     mapping (address => mapping (uint256 => bytes32) ) socialConnections;
 
     /**
@@ -42,15 +42,15 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     bytes32 private jobId;
     uint256 private fee;
 
-    event Endorse(address indexed _from, address indexed _to, uint _value, string _transactionId);
+    // Events for connecting social media accounts/other user ids.
     event AddConnection(address indexed _user, uint indexed _connectedTypeId, bytes32 indexed _connectedUserIdHash);
     event RemoveConnection(address indexed _user, uint indexed _connectedTypeId, bytes32 indexed _connectedUserIdHash);
-    event EndorseRewardFormula(address sender, uint256 reward);
-    event ParentEndorsersReward(address sender, uint256 reward);
-    event SubmitRewardsEndorser(address sender, uint256 reward);
-    event SubmitReward(address sender, uint256 reward);
-    event Log(uint256 logger);
-    
+
+    // Events for endorsements.
+    event Endorse(address indexed _from, address indexed _to, uint _value, string _transactionId);
+    event RewardPreviousEndorserLevel1(address endorser, uint256 reward);
+    event RewardPreviousEndorserLevel2(address endorser, uint256 reward);
+
     /**
      * @dev Grants `DEFAULT_ADMIN_ROLE` and `PAUSER_ROLE` to the
      * account that deploys the contract. Grants `MINTER_ROLE` to the bridge.
@@ -84,7 +84,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     {
         return a * (10 ** precision) / b;
     }
-    
+
     function multiplyByPercent(
         uint a,
         uint b,
@@ -161,20 +161,20 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         uint prevEndorserStake = 0;
         for(uint8 i=0; i<endorsersLevel1.length; i++){
             uint primaryTokens = endorserStakes[target][endorsersLevel1[i]];
-            prevEndorserStake += primaryTokens;    
+            prevEndorserStake += primaryTokens;
         }
         endorserStakes[target][from] += amount;
 
         //rewards are given as in the formula in the whitepaper
         uint256 reward = (maximumBoundRate * division (
-            (discountingRateDN * amount + discountingRateDP * prevEndorserStake), totalEndorsedCoins[target], 5));
+            (discountingRateDN * amount + discountingRateDP * prevEndorserStake), totalEndorsedCoins[target], 0));
         //reward recommended endorsers
         for(uint8 i=0; i < endorsersLevel1.length; i++){
-            uint256 endorserReward = getReward(reward, endorsersLevel2);    
+            uint256 endorserReward = getReward(reward, endorsersLevel2);
 
             // distribute tokens to endorser
             super._mint(address(endorsersLevel1[i]), endorserReward);
-            emit SubmitRewardsEndorser(from, endorserReward);
+            emit RewardPreviousEndorserLevel1(endorsersLevel1[i], endorserReward);
         }
 
         for(uint8 i=0; i < endorsersLevel2.length; i++){
@@ -184,10 +184,9 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
 
             //submit tokens to endorsers
             super._mint(prevEndorser, prevRewardForEndorser);
-            emit ParentEndorsersReward(from, prevRewardForEndorser);
+            emit RewardPreviousEndorserLevel2(endorsersLevel2[i], prevRewardForEndorser);
         }
 
-        emit EndorseRewardFormula(from, reward);
         emit Endorse(from, target, amount, transactionId);
     }
 
