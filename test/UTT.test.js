@@ -198,7 +198,7 @@ describe("UTT", function () {
           mockOperator,
           user1,
           service1.address,
-          1000,
+          200,
           mockTransactionId,
           [admin.address],
           []
