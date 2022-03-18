@@ -138,9 +138,9 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         uint256 s_o = totalStake[target] - s_p;
 
         return
-            s_p *  (s_n + O_n) * D_o
+            (s_p *  (s_n + O_n) * D_o)
             /
-            D_lvl_p * (s_n + D_n) * (D_o + s_o);
+            (D_lvl_p * (s_n + D_n) * (D_o + s_o));
     }
 
 
