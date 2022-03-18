@@ -28,6 +28,15 @@ async function endorse(
   return mockOperator.fulfillOracleRequest2(...fulfillParams);
 }
 
+/**
+ * Invokes the addConnection() method on the contract for the given user address, which, if successful, will mint some
+ * UTT to their account.
+ */
+async function addConnection(utt, admin, userAddress, connectedTypeId = 0) {
+  connectedUserIdHash = ethers.utils.formatBytes32String(userAddress.slice(0,31));
+  return await utt.connect(admin).addConnection(userAddress, connectedTypeId, connectedUserIdHash);
+}
+
 describe("UTT", function () {
   const mintAmount = ethers.utils.parseEther("1000000");
 
@@ -157,6 +166,9 @@ describe("UTT", function () {
     });
 
     it("Reward 1st-level previous endorsers for user1", async function () {
+      // First obtain some UTT for user1 which they can stake:
+      await addConnection(utt, admin, user1.address);
+
       await expect(
         endorse(
           utt,
@@ -175,7 +187,35 @@ describe("UTT", function () {
     });
 
     it("Reward the correct amount for the first-level endorser", async function () {
-      await endorse(utt, mockOperator, user1, service1.address, 200, mockTransactionId, [], []);
+      // Obtain some UTT for user1 which they can stake:
+      await addConnection(utt, admin, user1.address);
+
+      await endorse(utt, mockOperator, admin, service1.address, 200, mockTransactionId, [], []);
+
+      await expect(
+        endorse(
+          utt,
+          mockOperator,
+          user1,
+          service1.address,
+          1000,
+          mockTransactionId,
+          [admin.address],
+          []
+        )
+      )
+        .to.emit(utt, "RewardPreviousEndorserLevel1")
+        // We didn't previously call endorse for user2, so reward should be 0 despite it being in endorsersLevel1:
+        .withArgs(admin.address, 87);
+    });
+
+    it("Reward the correct amount for the second-level endorser", async function () {
+      // Obtain some UTT for user1 and user2 which they can stake:
+      await addConnection(utt, admin, user1.address);
+      await addConnection(utt, admin, user2.address);
+
+      await endorse(utt, mockOperator, admin, service1.address, 200, mockTransactionId, [], []);
+      await endorse(utt, mockOperator, user1, service1.address, 200, mockTransactionId, [admin.address], []);
 
       await expect(
         endorse(
@@ -183,35 +223,14 @@ describe("UTT", function () {
           mockOperator,
           user2,
           service1.address,
-          1000,
-          mockTransactionId,
-          [user1.address],
-          []
-        )
-      )
-        .to.emit(utt, "RewardPreviousEndorserLevel1")
-        // We didn't previously call endorse for user2, so reward should be 0 despite it being in endorsersLevel1:
-        .withArgs(user1.address, 87);
-    });
-
-    it("Reward the correct amount for the second-level endorser", async function () {
-      await endorse(utt, mockOperator, user1, service1.address, 200, mockTransactionId, [], []);
-      await endorse(utt, mockOperator, user2, service1.address, 200, mockTransactionId, [user1.address], []);
-
-      await expect(
-        endorse(
-          utt,
-          mockOperator,
-          user3,
-          service1.address,
           200,
           mockTransactionId,
-          [user1.address],
-          [user2.address]
+          [admin.address],
+          [user1.address]
         )
       )
         .to.emit(utt, "RewardPreviousEndorserLevel2")
-        .withArgs(user2.address, 8);
+        .withArgs(user1.address, 8);
     });
   });
 });
