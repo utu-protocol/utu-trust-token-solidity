@@ -1,5 +1,11 @@
 {
   "name": "utu-trust-token-solidity",
+  "scripts": {
+    "build": "npx hardhat compile",
+    "start": "npx hardhat node",
+    "deploy": "npx hardhat run scripts/deploy.ts",
+    "test": "npx hardhat test"
+  },
   "devDependencies": {
     "@appliedblockchain/chainlink-plugins-fund-link": "0.0.3",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
