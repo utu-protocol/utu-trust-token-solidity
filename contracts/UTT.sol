@@ -21,14 +21,32 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
      * as a reward for connecting/verifying with a social platform user id.
      * Configurable by admin.
      */
-    uint256 public socialConnectionReward = 1;
+    uint256 public socialConnectionReward = 10000;
 
-    uint256 public constant maximumBoundRate = 2; //RMAX
-    uint256 public constant discountingRateDN = 1; // DN
-    uint256 public constant discountingRateDP = 1; // DP
 
-    mapping (address => mapping(address => uint256)) public endorserStakes; //Sp
-    mapping (address => uint) public totalEndorsedCoins; //S total
+    // See the whitepaper for the meaning of the following parameters:
+
+    /** New stake offset */
+    uint256 public constant O_n = 1;
+
+    /** Discounting component for the new stake */
+    uint256 public constant D_n = 30;
+
+    /** Discounting component for the stake of first-level previous endorsers */
+    uint256 public constant D_lvl1 = 2;
+
+    /** Discounting component for the stake of second-level previous endorsers */
+    uint256 public constant D_lvl2 = 20; //
+
+    /** Discounting component for other previous endorsers' total stake */
+    uint256 public constant D_o = 5000;
+
+
+    /** A map targetAddress => endorserAddress => stake mapping all endorser's stakes by their endorsement target */
+    mapping (address => mapping(address => uint256)) public previousEndorserStakes;
+
+    /** A map targetAddress => stake with the total stake by target */
+    mapping (address => uint) public totalStake;
 
     // Oracle related
     struct OracleRequest {
@@ -73,30 +91,6 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         fee = _fee;
     }
 
-    function division(
-        uint a,
-        uint b,
-        uint precision
-    )
-        public
-        pure
-        returns (uint)
-    {
-        return a * (10 ** precision) / b;
-    }
-
-    function multiplyByPercent(
-        uint a,
-        uint b,
-        uint precision
-    )
-        public
-        pure
-        returns (uint)
-    {
-        return a * (10 ** precision) * b / 100;
-    }
-
     /**
      * @dev Pauses all token transfers.
      *
@@ -125,21 +119,30 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         _unpause();
     }
 
-    function getReward(
-        uint256 reward,
-        address[] memory endorsers
+    /**
+     * Computes the reward to be given to previousEndorser for a new endorsement of s_n on the given target and the
+     * previous endorser level-dependent discount D_lvl_p. It assumes that the new endorsement s_n has not yet been
+     * added to the totalStake map.
+     */
+    function computeReward(
+        address target,
+        address previousEndorser,
+        uint256 D_lvl_p,
+        uint256 s_n
     )
-        private
-        pure
-        returns (uint256)
+    private
+    view
+    returns (uint256)
     {
-        if (endorsers.length == 0) {
-            return reward;
-        }
-        else {
-            return multiplyByPercent(reward, 90, 5);
-        }
+        uint256 s_p = previousEndorserStakes[target][previousEndorser];
+        uint256 s_o = totalStake[target] - s_p;
+
+        return
+            s_p *  (s_n + O_n) * D_o
+            /
+            D_lvl_p * (s_n + D_n) * (D_o + s_o);
     }
+
 
     /**
      * @dev Sends a tip of tokens to the previous address
@@ -157,35 +160,26 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     )
         internal
     {
-        totalEndorsedCoins[target] += amount;
-        uint prevEndorserStake = 0;
-        for(uint8 i=0; i<endorsersLevel1.length; i++){
-            uint primaryTokens = endorserStakes[target][endorsersLevel1[i]];
-            prevEndorserStake += primaryTokens;
-        }
-        endorserStakes[target][from] += amount;
-
-        //rewards are given as in the formula in the whitepaper
-        uint256 reward = (maximumBoundRate * division (
-            (discountingRateDN * amount + discountingRateDP * prevEndorserStake), totalEndorsedCoins[target], 0));
-        //reward recommended endorsers
+        //reward first-level previous endorsers
         for(uint8 i=0; i < endorsersLevel1.length; i++){
-            uint256 endorserReward = getReward(reward, endorsersLevel2);
+            uint256 endorserReward = computeReward(target, endorsersLevel1[i], D_lvl1, amount);
 
-            // distribute tokens to endorser
+            // mint rewarded tokens to endorser
             super._mint(address(endorsersLevel1[i]), endorserReward);
             emit RewardPreviousEndorserLevel1(endorsersLevel1[i], endorserReward);
         }
 
+        //reward first-level previous endorsers
         for(uint8 i=0; i < endorsersLevel2.length; i++){
-            uint256 prevEndorsersLength = endorsersLevel2.length;
-            uint prevRewardForEndorser = division(multiplyByPercent(reward, 10, 0), prevEndorsersLength, 0);
-            address prevEndorser = endorsersLevel2[i];
+            uint256 endorserReward = computeReward(target, endorsersLevel2[i], D_lvl2, amount);
 
-            //submit tokens to endorsers
-            super._mint(prevEndorser, prevRewardForEndorser);
-            emit RewardPreviousEndorserLevel2(endorsersLevel2[i], prevRewardForEndorser);
+            // mint rewarded tokens to endorser
+            super._mint(endorsersLevel2[i], endorserReward);
+            emit RewardPreviousEndorserLevel2(endorsersLevel2[i], endorserReward);
         }
+
+        totalStake[target] += amount;
+        previousEndorserStakes[target][from] += amount;
 
         emit Endorse(from, target, amount, transactionId);
     }
