@@ -36,7 +36,7 @@ npm run deploy -- --network <network>
 
 Verify deployment at `<address>` on `<network>`:
 ```shell
-npm run verify --  ./scripts/deploy.args.<network>.js <address>
+npm run verify --  ./scripts/deploy.args.<network>.js --network <network> <address>
 ```                                     
 
 This is a `hardhat` project, so one can also use the usual hardhat commands to 
