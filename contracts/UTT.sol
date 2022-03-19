@@ -82,7 +82,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         uint256 _fee,
         address _link
     )
-        ERC20("UTU Endorse (ERC20)", "ENDR")
+        ERC20("UTU Trust Token", "UTT")
     {
         _mint(msg.sender, _mintAmount);
         setChainlinkToken(_link);
