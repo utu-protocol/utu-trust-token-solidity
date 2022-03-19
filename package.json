@@ -2,6 +2,7 @@
   "name": "utu-trust-token-solidity",
   "scripts": {
     "build": "npx hardhat compile",
+    "clean": "npx hardhat clean",
     "start": "npx hardhat node",
     "deploy": "npx hardhat run scripts/deploy.ts",
     "verify": "npx hardhat verify --constructor-args",
