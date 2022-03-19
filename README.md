@@ -3,11 +3,44 @@
 This project implements the UTU Trust Token (UTT) smart contract. 
 
 
-## Building, Testing and Deploying
+## Building, Testing 
 
-This is a `hardhat` project, so one can use the usual commands to 
+Compile the contract:
+```shell
+npm run build                     
+```
+
+Run tests:
+```shell
+npm run test
+```
+
+Start a local testnet:
+```shell
+npm start
+```                                     
+
+## Deploying and Verifying
+
+The following require the `PRIVATE_KEY` and `<NETWORK>_URL` 
+environment variables to be set appropriately.
+
+E.g. for Polygon Mumbai:
+
+```MUMBAI_URL=https://polygon-mumbai.g.alchemy.com/v2/<key>``` 
+
+Deploy on `<network>` (e.g. mumbai):
+```shell
+npm run deploy -- --network <network>
+```                                     
+
+Verify deployment at `<address>` on `<network>`:
+```shell
+npm run verify --  ./scripts/deploy.args.<network>.js <address>
+```                                     
+
+This is a `hardhat` project, so one can also use the usual hardhat commands to 
 build/test/deploy:
-
 
 ```shell
 npx hardhat compile
