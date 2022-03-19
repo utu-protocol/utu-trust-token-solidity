@@ -20,7 +20,7 @@ Start a local testnet:
 npm start
 ```                                     
 
-## Deploying and Verifying
+## Deploying 
 
 The following require the `PRIVATE_KEY` and `<NETWORK>_URL` 
 environment variables to be set appropriately.
@@ -34,12 +34,31 @@ Deploy on `<network>` (e.g. mumbai):
 npm run deploy -- --network <network>
 ```                                     
 
-Verify deployment at `<address>` on `<network>`:
+## Verifying
+
+### Using etherscan API 
+
+Verify deployment at `<address>` on `<network>`  
+(additionally requires an API key in the `ETHERSCAN_API_KEY` env variable):
 ```shell
 npm run verify --  ./scripts/deploy.args.<network>.js --network <network> <address>
 ```                                     
 
-This is a `hardhat` project, so one can also use the usual hardhat commands to 
+### Using flattened contract source 
+
+Note that the etherscan API isn't available on Polygon Mumbai. One can 
+verify manually using the UI and single-file verification. A 
+flattened source file for this purpose can be created like so:
+
+1. `npx hardhat flatten contracts/UTT.sol > UTT.flattened.sol`
+2. remove all but one `// SPDX-License-Identifier:` lines
+3. replace occurrences of `ENSResolver_Chainlink` with `ENSResolver` (because the 
+   flattener seems to ignore the "as" in `import ... as ...` statements).
+
+### Other hardhat commands
+
+Since this is a `hardhat` project, so one can also use the usual hardhat 
+commands to 
 build/test/deploy:
 
 ```shell
@@ -47,6 +66,7 @@ npx hardhat compile
 REPORT_GAS=true npx hardhat test
 npx hardhat coverage
 npx hardhat run scripts/deploy.ts
+npx hardhat flatten contracts/UTT.sol > UTT.flattened.sol
 ```
 etc.
 
