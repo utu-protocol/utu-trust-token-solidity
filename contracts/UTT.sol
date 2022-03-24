@@ -120,6 +120,15 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     }
 
     /**
+     * 
+     * Setting the decimals to 0 instead of 18 since we don't need decimals for this particular use case
+     *
+     */
+    function decimals() public view virtual override returns (uint8) {
+        return 0;
+    }
+
+    /**
      * Computes the reward to be given to previousEndorser for a new endorsement of s_n on the given target and the
      * previous endorser level-dependent discount D_lvl_p. It assumes that the new endorsement s_n has not yet been
      * added to the totalStake map.
