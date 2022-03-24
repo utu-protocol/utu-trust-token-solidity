@@ -1,7 +1,7 @@
 const { ethers } = require("hardhat");
 
 module.exports = [
-	ethers.utils.parseEther("1000000"), // test value
+	1000000, // test value
 	"0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f", // mumbai oracle
 	"0eec7e1dd0d2476ca1a872dfb6633f48", // mumbai job id
 	ethers.utils.parseEther("0.01"), // mumbai fee
