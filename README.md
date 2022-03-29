@@ -181,3 +181,8 @@ $ cd ~/.chainlink
 ```shell
 $ docker run -p 6688:6688 -v ~/.chainlink:/chainlink -it --env-file=.env smartcontract/chainlink:1.0.1 local n
 ```
+
+### Deploy Oracle Contract
+
+1. Deploy [Chainlink Operator](https://github.com/smartcontractkit/chainlink/blob/develop/contracts/src/v0.7/Operator.sol) contract via [Remix](https://remix.ethereum.org/) or by cloning the [Chainlink contracts repo](https://github.com/smartcontractkit/chainlink/tree/develop/contracts) and using Hardhat
+2. Whitelist the node address by calling `setAuthorizedSenders` from the `Operator` contract
