@@ -22,8 +22,30 @@ npm start
 
 ## Deploying 
 
+### Deploy Oracle Contract
+
+1. Deploy [Chainlink Operator](https://github.com/smartcontractkit/chainlink/blob/develop/contracts/src/v0.7/Operator.sol) contract via [Remix](https://remix.ethereum.org/) or by cloning the [Chainlink contracts repo](https://github.com/smartcontractkit/chainlink/tree/develop/contracts) and using Hardhat
+2. [Set up a Chainlink node](https://github.com/utu-protocol/utu-trust-token-solidity/main/README.md#set-up-a-chainlink-node-in-aws)
+3. Whitelist the node address by calling `setAuthorizedSenders` from the `Operator` contract
+
+### Deploy UTT Contract
+
 The following require the `PRIVATE_KEY` and `<NETWORK>_URL` 
 environment variables to be set appropriately.
+
+Create a deploy args config file in `scripts/` named `deploy.args.${network}.js` for the network you want to deploy on.
+
+```javascript
+const { ethers } = require("hardhat");
+
+module.exports = [
+	1000000, // test value
+	"0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f", // mumbai oracle
+	"0eec7e1dd0d2476ca1a872dfb6633f48", // mumbai job id
+	ethers.utils.parseEther("0.01"), // mumbai fee
+	"0x326C977E6efc84E512bB9C30f76E30c160eD06FB" // mumbai link token address
+]
+```
 
 E.g. for Polygon Mumbai:
 
@@ -181,8 +203,3 @@ $ cd ~/.chainlink
 ```shell
 $ docker run -p 6688:6688 -v ~/.chainlink:/chainlink -it --env-file=.env smartcontract/chainlink:1.0.1 local n
 ```
-
-### Deploy Oracle Contract
-
-1. Deploy [Chainlink Operator](https://github.com/smartcontractkit/chainlink/blob/develop/contracts/src/v0.7/Operator.sol) contract via [Remix](https://remix.ethereum.org/) or by cloning the [Chainlink contracts repo](https://github.com/smartcontractkit/chainlink/tree/develop/contracts) and using Hardhat
-2. Whitelist the node address by calling `setAuthorizedSenders` from the `Operator` contract
