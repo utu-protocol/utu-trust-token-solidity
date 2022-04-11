@@ -62,7 +62,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
 
     // Events for connecting social media accounts/other user ids.
     event AddConnection(address indexed _user, uint indexed _connectedTypeId, bytes32 indexed _connectedUserIdHash);
-    event RemoveConnection(address indexed _user, uint indexed _connectedTypeId, bytes32 indexed _connectedUserIdHash);
+    event RemoveConnection(address indexed _user, uint indexed _connectedTypeId,bytes32 indexed _connectedUserIdHash);
 
     // Events for endorsements.
     event Endorse(address indexed _from, address indexed _to, uint _value, string _transactionId);
@@ -236,7 +236,9 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
             // mint reward
             super._mint(user, socialConnectionReward);
 
-            emit AddConnection(user, connectedTypeId, connectedUserIdHash);
+            hashedUserId = hashUserId(connectedUserIdHash);
+
+            emit AddConnection(user, connectedTypeId, hashedUserId);
         }
     }
 
@@ -320,5 +322,9 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         assembly {
             result := mload(add(source, 32))
         }
+    }
+
+    function hashUserId(_connectedUserIdHash){
+        return sha256(_connectedUserIdHash);
     }
 }
