@@ -262,5 +262,14 @@ describe("UTT", function () {
         )
       ).to.be.revertedWith("Contract is migrating");
     });
+
+
+    it("should allow not allow add connection during migration", async function () {
+      await utt.connect(admin).toggleMigrationFlag();
+      await expect(addConnection(utt, admin, user1.address)).to.be.revertedWith(
+          "Contract is migrating"
+      );
+    });
+
   });
 });

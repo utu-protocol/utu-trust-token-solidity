@@ -235,6 +235,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         bytes32 connectedUserIdHash
     )
         public
+        notMigrating
         onlyOwner
     {
         // only add connection if not previously added
