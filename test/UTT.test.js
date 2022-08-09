@@ -43,7 +43,7 @@ describe("UTT", function () {
   let utt;
   let mockOperator;
 
-  let mockTransactionId = '123456';
+  const mockTransactionId = "123456";
 
   let admin;
   let user1;
@@ -231,6 +231,36 @@ describe("UTT", function () {
       )
         .to.emit(utt, "RewardPreviousEndorserLevel2")
         .withArgs(user1.address, 8);
+    });
+  });
+
+  describe("Migration", function () {
+    it("should allow admin toggle migration flag", async function () {
+      await utt.connect(admin).toggleMigrationFlag();
+      const isMigrationFlagSet = await utt.isMigrating();
+      await expect(isMigrationFlagSet).to.be.true;
+    });
+
+    it("should allow not allow non admin toggle migration flag", async function () {
+      await expect(utt.connect(user1).toggleMigrationFlag()).to.be.revertedWith(
+        "Ownable: caller is not the owner"
+      );
+    });
+
+    it("should pause endorse when migration is set", async function () {
+      await utt.connect(admin).toggleMigrationFlag();
+      await expect(
+        endorse(
+          utt,
+          mockOperator,
+          admin,
+          service1.address,
+          1,
+          mockTransactionId,
+          [user2.address, user3.address],
+          []
+        )
+      ).to.be.revertedWith("Contract is migrating");
     });
   });
 });
