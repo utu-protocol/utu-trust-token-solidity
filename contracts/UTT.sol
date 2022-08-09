@@ -27,10 +27,13 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     // See the whitepaper for the meaning of the following parameters:
 
     /** New stake offset */
-    uint256 public constant O_n = 1;
+    uint256 public O_n = 1;
 
     /** Discounting component for the new stake */
     uint256 public constant D_n = 30;
+
+    /** Penalty factor */
+    uint256 public D_p = 30;
 
     /** Discounting component for the stake of first-level previous endorsers */
     uint256 public constant D_lvl1 = 2;
@@ -120,7 +123,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     }
 
     /**
-     * 
+     *
      * Setting the decimals to 0 instead of 18 since we don't need decimals for this particular use case
      *
      */
@@ -320,5 +323,13 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         assembly {
             result := mload(add(source, 32))
         }
+    }
+
+    function setRewardConstant(uint256 val) public onlyOwner {
+        O_n = val;
+    }
+
+    function setPenaltyConstant(uint256 val) public onlyOwner {
+        D_p = val;
     }
 }

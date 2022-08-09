@@ -233,4 +233,21 @@ describe("UTT", function () {
         .withArgs(user1.address, 8);
     });
   });
+
+  describe("Admin Set Constants", function () {
+    it("should set reward constant", async function () {
+        await utt.connect(admin).setRewardConstant(20);
+        const rewardConstant = await utt.connect(admin).O_n();
+        expect(rewardConstant).to.equal(20);
+
+    });
+
+    it("should set penalty constant", async function () {
+      await utt.connect(admin).setPenaltyConstant(20);
+      const penaltyConstant = await utt.connect(admin).D_p();
+      expect(penaltyConstant).to.equal(20);
+
+    });
+
+  });
 });
