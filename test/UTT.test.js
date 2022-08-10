@@ -272,4 +272,43 @@ describe("UTT", function () {
     });
 
   });
+
+  describe("Admin Set Constants", function () {
+    it("should set O_n", async function () {
+        await utt.connect(admin).setO_n(20);
+        const O_n = await utt.connect(admin).O_n();
+        expect(O_n).to.equal(20);
+
+    });
+
+    it("should set D_n", async function () {
+        await utt.connect(admin).setD_n(20);
+        const D_n = await utt.connect(admin).D_n();
+        expect(D_n).to.equal(20);
+    });
+
+    it("should set D_lvl1", async function () {
+        await utt.connect(admin).setD_lvl1(20);
+        const D_lvl1 = await utt.connect(admin).D_lvl1();
+        expect(D_lvl1).to.equal(20);
+    });
+
+    it("should set D_lvl2", async function () {
+        await utt.connect(admin).setD_lvl2(20);
+        const D_lvl2 = await utt.connect(admin).D_lvl2();
+        expect(D_lvl2).to.equal(20);
+    });
+
+    it("should set D_o", async function () {
+        await utt.connect(admin).setD_o(20);
+        const D_o = await utt.connect(admin).D_o();
+        expect(D_o).to.equal(20);
+    });
+
+    it("should set D_d", async function () {
+        await utt.connect(admin).setD_d(20);
+        const D_d = await utt.connect(admin).D_d();
+        expect(D_d).to.equal(20);
+    });
+  });
 });
