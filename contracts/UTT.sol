@@ -30,20 +30,19 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     uint256 public O_n = 1;
 
     /** Discounting component for the new stake */
-    uint256 public constant D_n = 30;
-
-    /** Penalty factor */
-    uint256 public D_p = 30;
+    uint256 public D_n = 30;
 
     /** Discounting component for the stake of first-level previous endorsers */
-    uint256 public constant D_lvl1 = 2;
+    uint256 public D_lvl1 = 2;
 
     /** Discounting component for the stake of second-level previous endorsers */
-    uint256 public constant D_lvl2 = 20; //
+    uint256 public D_lvl2 = 20; //
 
     /** Discounting component for other previous endorsers' total stake */
-    uint256 public constant D_o = 5000;
+    uint256 public D_o = 5000;
 
+    /** Discounting component for penalties */
+    uint256 public D_d = 2;
 
     /** A map targetAddress => endorserAddress => stake mapping all endorser's stakes by their endorsement target */
     mapping (address => mapping(address => uint256)) public previousEndorserStakes;
@@ -137,6 +136,32 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
      */
     function decimals() public view virtual override returns (uint8) {
         return 0;
+    }
+
+    // Governance functions for setting the reward and penalty parameters
+
+    function setO_n(uint256 val) public onlyOwner {
+        O_n = val;
+    }
+
+    function setD_n(uint256 val) public onlyOwner {
+        D_p = val;
+    }
+
+    function setD_lvl1(uint256 val) public onlyOwner {
+        D_lvl1 = val;
+    }
+
+    function setD_lvl2(uint256 val) public onlyOwner {
+        D_lvl2 = val;
+    }
+
+    function setD_o(uint256 val) public onlyOwner {
+        D_o = val;
+    }
+
+    function setD_d(uint256 val) public onlyOwner {
+        D_d = val;
     }
 
     /**
@@ -339,14 +364,5 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
 	 */
     function toggleMigrationFlag() public onlyOwner {
         isMigrating = !isMigrating;
-    }
-
-
-    function setRewardConstant(uint256 val) public onlyOwner {
-        O_n = val;
-    }
-
-    function setPenaltyConstant(uint256 val) public onlyOwner {
-        D_p = val;
     }
 }
