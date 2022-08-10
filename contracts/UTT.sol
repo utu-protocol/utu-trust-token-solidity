@@ -60,6 +60,9 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     bytes32 private jobId;
     uint256 private fee;
 
+    // contract migration flag
+    bool public isMigrating;
+
     // Events for connecting social media accounts/other user ids.
     event AddConnection(address indexed _user, uint indexed _connectedTypeId, bytes32 indexed _connectedUserIdHash);
     event RemoveConnection(address indexed _user, uint indexed _connectedTypeId, bytes32 indexed _connectedUserIdHash);
@@ -91,6 +94,11 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         fee = _fee;
     }
 
+    modifier notMigrating() {
+        require(!isMigrating, "Contract is migrating");
+        _;
+    }
+
     /**
      * @dev Pauses all token transfers.
      *
@@ -117,6 +125,15 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         onlyOwner
     {
         _unpause();
+    }
+
+    /**
+     *
+     * Setting the decimals to 0 instead of 18 since we don't need decimals for this particular use case
+     *
+     */
+    function decimals() public view virtual override returns (uint8) {
+        return 0;
     }
 
     /**
@@ -184,7 +201,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         emit Endorse(from, target, amount, transactionId);
     }
 
-    function endorse(address target, uint256 amount, string memory transactionId) external {
+    function endorse(address target, uint256 amount, string memory transactionId) notMigrating external {
         require(msg.sender == tx.origin, "should be an user");
         Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), this.fulfillEndorse.selector);
         request.add("targetAddress", addressToString(target));
@@ -218,6 +235,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         bytes32 connectedUserIdHash
     )
         public
+        notMigrating
         onlyOwner
     {
         // only add connection if not previously added
@@ -312,4 +330,12 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
             result := mload(add(source, 32))
         }
     }
+
+    /**
+        * @dev Starting the migration process means that no new tokens can be minted.
+	 */
+    function toggleMigrationFlag() public onlyOwner {
+        isMigrating = !isMigrating;
+    }
+
 }

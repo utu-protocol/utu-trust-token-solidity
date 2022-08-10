@@ -22,8 +22,30 @@ npm start
 
 ## Deploying 
 
+### Deploy Oracle Contract
+
+1. Deploy [Chainlink Operator](https://github.com/smartcontractkit/chainlink/blob/develop/contracts/src/v0.7/Operator.sol) contract via [Remix](https://remix.ethereum.org/) or by cloning the [Chainlink contracts repo](https://github.com/smartcontractkit/chainlink/tree/develop/contracts) and using Hardhat
+2. [Set up a Chainlink node](https://github.com/utu-protocol/utu-trust-token-solidity/main/README.md#set-up-a-chainlink-node-in-aws)
+3. Whitelist the node address by calling `setAuthorizedSenders` from the `Operator` contract
+
+### Deploy UTT Contract
+
 The following require the `PRIVATE_KEY` and `<NETWORK>_URL` 
 environment variables to be set appropriately.
+
+Create a deploy args config file in `scripts/` named `deploy.args.${network}.js` for the network you want to deploy on.
+
+```javascript
+const { ethers } = require("hardhat");
+
+module.exports = [
+	1000000, // test value
+	"0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f", // mumbai oracle
+	"0eec7e1dd0d2476ca1a872dfb6633f48", // mumbai job id
+	ethers.utils.parseEther("0.01"), // mumbai fee
+	"0x326C977E6efc84E512bB9C30f76E30c160eD06FB" // mumbai link token address
+]
+```
 
 E.g. for Polygon Mumbai:
 
@@ -180,4 +202,60 @@ $ cd ~/.chainlink
 
 ```shell
 $ docker run -p 6688:6688 -v ~/.chainlink:/chainlink -it --env-file=.env smartcontract/chainlink:1.0.1 local n
+```
+
+### Set up a Chainlink Node job
+
+1. Visit `$NODE_ADDRESS:6688` (`$NODE_ADDRESS` is the public IPv4 DNS of your previously configured EC2 instance).
+2. Login with your ChainLink node account credentials.
+3. Navigate to the jobs page (press the "Jobs" button in the top menu).
+4. Press the "New Job" button.
+5. Paste the following TOML job specification and press "Create Job".
+
+```toml
+type = "directrequest"
+schemaVersion = 1
+name = "example eth request event spec 2"
+contractAddress = "0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f"
+maxTaskDuration = "0s"
+observationSource = """
+    decode_log  [type="ethabidecodelog"
+                 abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+                 data="$(jobRun.logData)"
+                 topics="$(jobRun.logTopics)"]
+
+    decode_cbor  [type="cborparse" data="$(decode_log.data)"]
+
+    decode_log -> decode_cbor -> http
+
+    http [type="http"
+          method=POST
+          url="https://stage-api.ututrust.com/core-api/previousEndorsersRequest"
+          requestData="{\\"sourceAddress\\": $(decode_cbor.sourceAddress), \\"targetAddress\\": $(decode_cbor.targetAddress), \\"transactionId\\":  $(decode_cbor.transactionId)}"
+          allowUnrestrictedNetworkAccess=true]
+
+    firstLevelPreviousEndorsers [type="jsonparse"
+                data="$(http)"
+                path="result,firstLevelPreviousEndorsers"]
+
+    secondLevelPreviousEndorsers [type="jsonparse"
+                data="$(http)"
+                path="result,secondLevelPreviousEndorsers"]
+
+    http -> firstLevelPreviousEndorsers -> encode_mwr
+    http -> secondLevelPreviousEndorsers -> encode_mwr
+
+    encode_mwr [type="ethabiencode"
+                abi="(bytes32 requestId, address[] firstLevelPreviousEndorsers, address[] secondLevelPreviousEndorsers)"
+                data="{\\"requestId\\": $(decode_log.requestId), \\"firstLevelPreviousEndorsers\\": $(firstLevelPreviousEndorsers), \\"secondLevelPreviousEndorsers\\": $(secondLevelPreviousEndorsers) }"]
+
+    encode_tx  [type="ethabiencode"
+                abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
+                data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\":   $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_mwr)}"]
+
+    submit_tx  [type="ethtx" to="0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f" data="$(encode_tx)" minConfirmations="2"]
+
+    encode_mwr -> encode_tx -> submit_tx
+"""
+externalJobID = "0eec7e1d-d0d2-476c-a1a8-72dfb6633f48"
 ```
