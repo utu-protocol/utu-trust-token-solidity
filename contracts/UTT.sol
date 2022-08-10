@@ -26,6 +26,8 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
 
     // See the whitepaper for the meaning of the following parameters:
 
+    // Reward parameters:
+
     /** New stake offset */
     uint256 public O_n = 1;
 
@@ -41,8 +43,14 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     /** Discounting component for other previous endorsers' total stake */
     uint256 public D_o = 5000;
 
+    // Penalty parameters:
+
     /** Discounting component for penalties */
+    uint256 public D_min = 50;
+
     uint256 public D_d = 2;
+
+    // Keeping track of stakes on endorsements:
 
     /** A map targetAddress => endorserAddress => stake mapping all endorser's stakes by their endorsement target */
     mapping (address => mapping(address => uint256)) public previousEndorserStakes;
@@ -158,6 +166,10 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
 
     function setD_o(uint256 val) public onlyOwner {
         D_o = val;
+    }
+
+    function setD_min(uint256 val) public onlyOwner {
+        D_min = val;
     }
 
     function setD_d(uint256 val) public onlyOwner {
