@@ -145,7 +145,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     }
 
     function setD_n(uint256 val) public onlyOwner {
-        D_p = val;
+        D_n = val;
     }
 
     function setD_lvl1(uint256 val) public onlyOwner {
