@@ -28,13 +28,16 @@ async function endorse(
   return mockOperator.fulfillOracleRequest2(...fulfillParams);
 }
 
+function getHash(address) {
+  return ethers.utils.formatBytes32String(address.slice(0,31));
+}
+
 /**
  * Invokes the addConnection() method on the contract for the given user address, which, if successful, will mint some
  * UTT to their account.
  */
 async function addConnection(utt, admin, userAddress, connectedTypeId = 0) {
-  connectedUserIdHash = ethers.utils.formatBytes32String(userAddress.slice(0,31));
-  return await utt.connect(admin).addConnection(userAddress, connectedTypeId, connectedUserIdHash);
+  return await utt.connect(admin).addConnection(userAddress, connectedTypeId, getHash(userAddress));
 }
 
 describe("UTT", function () {
@@ -231,6 +234,20 @@ describe("UTT", function () {
       )
         .to.emit(utt, "RewardPreviousEndorserLevel2")
         .withArgs(user1.address, 8);
+    });
+  });
+
+  describe("User tries to addConnection", function () {
+    it("should not allow a user to add a connection by themselves", async function () {
+      await expect(
+        utt.connect(user1).addConnection(user1.address, 0, getHash(user1.address))
+      ).to.be.revertedWith("Ownable: caller is not the owner");
+    });
+
+    it("should not allow a user to remove a connection by themselves", async function () {
+      await expect(
+        utt.connect(user1).removeConnection(user1.address, 0)
+      ).to.be.revertedWith("Ownable: caller is not the owner");
     });
   });
 
