@@ -310,4 +310,39 @@ describe("UTT", function () {
         expectSetParameter("D_d");
     });
   });
+
+  describe("User tries to set parameters", function () {
+    async function expectSetParameterNotAllowed(name) {
+      const setter = `set${name}`
+      expect(utt.connect(user1)[setter](20)).to.revertedWith("Ownable: caller is not the owner");
+    }
+
+    it("should not be allowed to set O_n", async function () {
+      expectSetParameterNotAllowed("O_n");
+    });
+
+    it("should not be allowed to set D_n", async function () {
+      expectSetParameterNotAllowed("D_n");
+    });
+
+    it("should not be allowed to set D_lvl1", async function () {
+      expectSetParameterNotAllowed("D_lvl1");
+    });
+
+    it("should not be allowed to set D_lvl2", async function () {
+      expectSetParameterNotAllowed("D_lvl2");
+    });
+
+    it("should not be allowed to set D_o", async function () {
+      expectSetParameterNotAllowed("D_o");
+    });
+
+    it("should not be allowed to set D_min", async function () {
+      expectSetParameterNotAllowed("D_min");
+    });
+
+    it("should not be allowed to set D_d", async function () {
+      expectSetParameterNotAllowed("D_d");
+    });
+  });
 });
