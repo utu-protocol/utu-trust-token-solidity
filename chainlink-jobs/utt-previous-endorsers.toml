@@ -1,0 +1,46 @@
+type = "directrequest"
+schemaVersion = 1
+name = "UTT Check Previous Endorsers Job"
+contractAddress = "0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f"
+maxTaskDuration = "0s"
+observationSource = """
+    decode_log  [type="ethabidecodelog"
+                 abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+                 data="$(jobRun.logData)"
+                 topics="$(jobRun.logTopics)"]
+
+    decode_cbor  [type="cborparse" data="$(decode_log.data)"]
+
+    decode_log -> decode_cbor -> http
+
+    http [type="http"
+          method=POST
+          url="http://trust-api-core-service/previousEndorsersRequest"
+          headers="[\\"UTU-Trust-Api-Client-Id\\", \\"REPLACE_WITH_UTU_CLIENT_DB_ID\\"]"
+          requestData="{\\"sourceAddress\\": $(decode_cbor.sourceAddress), \\"targetAddress\\": $(decode_cbor.targetAddress), \\"transactionId\\":  $(decode_cbor.transactionId)}"
+          allowUnrestrictedNetworkAccess=true]
+
+    firstLevelPreviousEndorsers [type="jsonparse"
+                data="$(http)"
+                path="result,firstLevelPreviousEndorsers"]
+
+    secondLevelPreviousEndorsers [type="jsonparse"
+                data="$(http)"
+                path="result,secondLevelPreviousEndorsers"]
+
+    http -> firstLevelPreviousEndorsers -> encode_mwr
+    http -> secondLevelPreviousEndorsers -> encode_mwr
+
+    encode_mwr [type="ethabiencode"
+                abi="(bytes32 requestId, address[] firstLevelPreviousEndorsers, address[] secondLevelPreviousEndorsers)"
+                data="{\\"requestId\\": $(decode_log.requestId), \\"firstLevelPreviousEndorsers\\": $(firstLevelPreviousEndorsers), \\"secondLevelPreviousEndorsers\\": $(secondLevelPreviousEndorsers) }"]
+
+    encode_tx  [type="ethabiencode"
+                abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
+                data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\":   $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_mwr)}"]
+
+    submit_tx  [type="ethtx" to="0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f" data="$(encode_tx)" minConfirmations="2"]
+
+    encode_mwr -> encode_tx -> submit_tx
+"""
+externalJobID = "0eec7e1d-d0d2-476c-a1a8-72dfb6633f48"

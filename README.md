@@ -158,7 +158,7 @@ RDS instance:
    * 3.1\. Visit the RDS dashboard. If there’s a PostgreSQL instance running (and it’s dedicated for the chainlink node job), skip to step 4.1. If there’s no such instance, proceed to the next step.
    * 3.2\. Click on the `Create database` button.
    * 3.3\. Select PostgreSQL.
-   * 3.4\. Select PostgerSQL 12.9-R1 version.
+   * 3.4\. Select PostgerSQL 14.5 version.
    * 3.5\. Select `Free tier` template (if it’s not available, try with different versions and keep in mind that the UI might take several seconds to update the set of available templates).
    * 3.6\. Set database identifier, e.g. `chainlink-db`.
    * 3.7\. Set master username, e.g. `postgres`.
@@ -189,7 +189,7 @@ Docker:
    * 5.1\. Pull the image from hub.docker.com/r/smartcontract/chainlink.
 
 ```shell
-$ docker pull smartcontract/chainlink:1.0.1
+$ docker pull smartcontract/chainlink:1.7.1-root
 ```
 
    * 5.2\. Change your working directory
@@ -201,7 +201,7 @@ $ cd ~/.chainlink
    * 5.3\. Start the container.
 
 ```shell
-$ docker run -p 6688:6688 -v ~/.chainlink:/chainlink -it --env-file=.env smartcontract/chainlink:1.0.1 local n
+$ docker run -p 6688:6688 -v ~/.chainlink:/chainlink -it --env-file=.env smartcontract/chainlink:1.7.1-root local n
 ```
 
 ### Set up a Chainlink Node job
@@ -215,7 +215,7 @@ $ docker run -p 6688:6688 -v ~/.chainlink:/chainlink -it --env-file=.env smartco
 ```toml
 type = "directrequest"
 schemaVersion = 1
-name = "example eth request event spec 2"
+name = "UTT Check Previous Endorsers Job"
 contractAddress = "0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f"
 maxTaskDuration = "0s"
 observationSource = """
@@ -230,7 +230,8 @@ observationSource = """
 
     http [type="http"
           method=POST
-          url="https://stage-api.ututrust.com/core-api/previousEndorsersRequest"
+          url="http://trust-api-core-service/previousEndorsersRequest"
+          headers="[\\"UTU-Trust-Api-Client-Id\\", \\"REPLACE_WITH_UTU_CLIENT_DB_ID\\"]"
           requestData="{\\"sourceAddress\\": $(decode_cbor.sourceAddress), \\"targetAddress\\": $(decode_cbor.targetAddress), \\"transactionId\\":  $(decode_cbor.transactionId)}"
           allowUnrestrictedNetworkAccess=true]
 
