@@ -431,7 +431,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     /**
      * @dev Converts a byte value to its readable char value.@param
      * @param b byte value
-     * @return the value as a readable char
+     * @return c the value as a readable char
      */
     function char(bytes1 b) internal pure returns (bytes1 c) {
         if (uint8(b) < 10) return bytes1(uint8(b) + 0x30);
@@ -441,7 +441,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     /**
      * @dev Converts a string to a bytes32 representation
      * @param source a string
-     * @return a bytes32
+     * @return result a bytes32
      */
     function stringToBytes32(string memory source) public pure returns (bytes32 result) {
         bytes memory tempEmptyStringTest = bytes(source);
