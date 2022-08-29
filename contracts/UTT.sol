@@ -14,7 +14,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
      * The `socialConnections` mapping is storing the connected socialIds
      * as so: address => socialTypeId => socialUserIdHash
      */
-    mapping (address => mapping (uint256 => bytes32) ) socialConnections;
+    mapping(address => mapping(uint256 => bytes32)) socialConnections;
 
     /**
      * The `socialConnectionReward` variable is the amount of tokens to be minted
@@ -53,10 +53,10 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     // Keeping track of stakes on endorsements:
 
     /** A map targetAddress => endorserAddress => stake mapping all endorser's stakes by their endorsement target */
-    mapping (address => mapping(address => uint256)) public previousEndorserStakes;
+    mapping(address => mapping(address => uint256)) public previousEndorserStakes;
 
     /** A map targetAddress => stake with the total stake by target */
-    mapping (address => uint) public totalStake;
+    mapping(address => uint) public totalStake;
 
     // Oracle related
     struct OracleRequest {
@@ -65,7 +65,8 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         uint256 amount;
         string transactionId;
     }
-    mapping (bytes32 => OracleRequest) private oracleRequests;
+
+    mapping(bytes32 => OracleRequest) private oracleRequests;
     address private oracle;
     bytes32 private jobId;
     uint256 private fee;
@@ -95,7 +96,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         uint256 _fee,
         address _link
     )
-        ERC20("UTU Trust Token", "UTT")
+    ERC20("UTU Trust Token", "UTT")
     {
         _mint(msg.sender, _mintAmount);
         setChainlinkToken(_link);
@@ -116,9 +117,9 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
      *
      */
     function pause()
-        public
-        virtual
-        onlyOwner
+    public
+    virtual
+    onlyOwner
     {
         _pause();
     }
@@ -130,9 +131,9 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
      *
      */
     function unpause()
-        public
-        virtual
-        onlyOwner
+    public
+    virtual
+    onlyOwner
     {
         _unpause();
     }
@@ -176,6 +177,10 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         D_d = val;
     }
 
+    function setFee(uint256 _fee) public onlyOwner {
+        fee = _fee;
+    }
+
     /**
      * Computes the reward to be given to previousEndorser for a new endorsement of s_n on the given target and the
      * previous endorser level-dependent discount D_lvl_p. It assumes that the new endorsement s_n has not yet been
@@ -195,9 +200,9 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         uint256 s_o = totalStake[target] - s_p;
 
         return
-            (s_p *  (s_n + O_n) * D_o)
-            /
-            (D_lvl_p * (s_n + D_n) * (D_o + s_o));
+        (s_p * (s_n + O_n) * D_o)
+        /
+        (D_lvl_p * (s_n + D_n) * (D_o + s_o));
     }
 
 
@@ -215,10 +220,10 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         address[] memory endorsersLevel1,
         address[] memory endorsersLevel2
     )
-        internal
+    internal
     {
         //reward first-level previous endorsers
-        for(uint8 i=0; i < endorsersLevel1.length; i++){
+        for (uint8 i = 0; i < endorsersLevel1.length; i++) {
             uint256 endorserReward = computeReward(target, endorsersLevel1[i], D_lvl1, amount);
 
             // mint rewarded tokens to endorser
@@ -227,7 +232,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         }
 
         //reward first-level previous endorsers
-        for(uint8 i=0; i < endorsersLevel2.length; i++){
+        for (uint8 i = 0; i < endorsersLevel2.length; i++) {
             uint256 endorserReward = computeReward(target, endorsersLevel2[i], D_lvl2, amount);
 
             // mint rewarded tokens to endorser
@@ -248,7 +253,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         request.add("sourceAddress", addressToString(msg.sender));
         request.add("transactionId", transactionId);
         bytes32 requestId = sendOperatorRequestTo(oracle, request, fee);
-        oracleRequests[requestId] = OracleRequest({ from: msg.sender, target: target, amount: amount, transactionId: transactionId });
+        oracleRequests[requestId] = OracleRequest({from : msg.sender, target : target, amount : amount, transactionId : transactionId});
     }
 
     function fulfillEndorse(
@@ -256,8 +261,8 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         address[] calldata endorsersLevel1,
         address[] calldata endorsersLevel2
     )
-        external
-        recordChainlinkFulfillment(_requestId)
+    external
+    recordChainlinkFulfillment(_requestId)
     {
         OracleRequest memory r = oracleRequests[_requestId];
         require(r.target != address(0), "unknown endorsment");
@@ -274,9 +279,9 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         uint256 connectedTypeId,
         bytes32 connectedUserIdHash
     )
-        public
-        notMigrating
-        onlyOwner
+    public
+    notMigrating
+    onlyOwner
     {
         // only add connection if not previously added
         if (socialConnections[user][connectedTypeId] == 0) {
@@ -296,8 +301,8 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         address user,
         uint256 connectedTypeId
     )
-        public
-        onlyOwner
+    public
+    onlyOwner
     {
         // only remove connection if currently connected
         if (socialConnections[user][connectedTypeId] != 0) {
@@ -313,8 +318,8 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     function setSocialConnectionReward(
         uint256 amount
     )
-        public
-        onlyOwner
+    public
+    onlyOwner
     {
         socialConnectionReward = amount;
     }
@@ -324,8 +329,8 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         address to,
         uint256 amount
     )
-        internal
-        override(ERC20, ERC20Pausable)
+    internal
+    override(ERC20, ERC20Pausable)
     {
         super._beforeTokenTransfer(from, to, amount);
     }
@@ -334,24 +339,24 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
      * @dev - forbid external calls on transfer
      */
     function transfer(address recipient, uint256 amount) public pure override returns (bool) {
-      revert('Not allowed.');
+        revert('Not allowed.');
     }
 
     /**
      * @dev - forbid external calls on approve
      */
     function approve(address spender, uint256 amount) public pure override returns (bool) {
-      revert('Not allowed.');
+        revert('Not allowed.');
     }
 
     function addressToString(address x) internal pure returns (string memory) {
         bytes memory s = new bytes(40);
         for (uint i = 0; i < 20; i++) {
-            bytes1 b = bytes1(uint8(uint(uint160(x)) / (2**(8*(19 - i)))));
+            bytes1 b = bytes1(uint8(uint(uint160(x)) / (2 ** (8 * (19 - i)))));
             bytes1 hi = bytes1(uint8(b) / 16);
             bytes1 lo = bytes1(uint8(b) - 16 * uint8(hi));
-            s[2*i] = char(hi);
-            s[2*i+1] = char(lo);
+            s[2 * i] = char(hi);
+            s[2 * i + 1] = char(lo);
         }
         return string(abi.encodePacked("0x", string(s)));
     }
