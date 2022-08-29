@@ -191,16 +191,6 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         D_o = val;
     }
 
-    /** Sets the D_min reward formula parameter */
-    function setD_min(uint256 val) public onlyOwner {
-        D_min = val;
-    }
-
-    /** Sets the D_d reward formula parameter */
-    function setD_d(uint256 val) public onlyOwner {
-        D_d = val;
-    }
-
 
     /** Sets the LINK fee to be paid for each request */
     function setFee(uint256 _fee) public onlyOwner {
