@@ -176,6 +176,10 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         D_d = val;
     }
 
+    function setFee(uint256 _fee) public onlyOwner {
+        fee = _fee;
+    }
+
     /**
      * Computes the reward to be given to previousEndorser for a new endorsement of s_n on the given target and the
      * previous endorser level-dependent discount D_lvl_p. It assumes that the new endorsement s_n has not yet been
