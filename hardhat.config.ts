@@ -44,7 +44,7 @@ const config: HardhatUserConfig = {
       },
       {
         version: "0.4.11",
-      }
+      },
     ],
     settings: {
       optimizer: {
@@ -54,20 +54,33 @@ const config: HardhatUserConfig = {
     },
   },
   networks: {
+    matic: {
+      url: process.env.MATIC_URL || "",
+      accounts:
+        process.env.MAIN_PRIVATE_KEY !== undefined
+          ? [process.env.MAIN_PRIVATE_KEY]
+          : [],
+    },
     mumbai: {
       url: process.env.MUMBAI_URL || "",
       accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+        process.env.TEST_PRIVATE_KEY !== undefined
+          ? [process.env.TEST_PRIVATE_KEY]
+          : [],
     },
     ropsten: {
       url: process.env.ROPSTEN_URL || "",
       accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+        process.env.TEST_PRIVATE_KEY !== undefined
+          ? [process.env.TEST_PRIVATE_KEY]
+          : [],
     },
     ganache: {
       url: process.env.GANACHE_URL || "http://127.0.0.1:7545",
       accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+        process.env.TEST_PRIVATE_KEY !== undefined
+          ? [process.env.TEST_PRIVATE_KEY]
+          : [],
     },
   },
   gasReporter: {

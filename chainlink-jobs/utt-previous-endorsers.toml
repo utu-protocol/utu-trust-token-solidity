@@ -1,7 +1,7 @@
 type = "directrequest"
 schemaVersion = 1
 name = "UTT Check Previous Endorsers Job"
-contractAddress = "0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f"
+contractAddress = "0x6aeb4210F87dC1fC22979C286258f26EcF7a1247"
 maxTaskDuration = "0s"
 observationSource = """
     decode_log  [type="ethabidecodelog"
@@ -16,7 +16,7 @@ observationSource = """
     http [type="http"
           method=POST
           url="http://trust-api-core-service/previousEndorsersRequest"
-          headers="[\\"UTU-Trust-Api-Client-Id\\", \\"REPLACE_WITH_UTU_CLIENT_DB_ID\\"]"
+          headers="[\\"UTU-Trust-Api-Client-Id\\", \\"utu3BrVHAnofuRtQUHRFzKCM4\\"]"
           requestData="{\\"sourceAddress\\": $(decode_cbor.sourceAddress), \\"targetAddress\\": $(decode_cbor.targetAddress), \\"transactionId\\":  $(decode_cbor.transactionId)}"
           allowUnrestrictedNetworkAccess=true]
 
@@ -39,7 +39,7 @@ observationSource = """
                 abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
                 data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\":   $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_mwr)}"]
 
-    submit_tx  [type="ethtx" to="0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f" data="$(encode_tx)" minConfirmations="2"]
+    submit_tx  [type="ethtx" to="0x6aeb4210F87dC1fC22979C286258f26EcF7a1247" data="$(encode_tx)" minConfirmations="2"]
 
     encode_mwr -> encode_tx -> submit_tx
 """
