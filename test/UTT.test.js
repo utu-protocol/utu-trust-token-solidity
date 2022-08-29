@@ -318,14 +318,6 @@ describe("UTT", function () {
     it("should set D_o", async function () {
         expectSetParameter("D_o");
     });
-
-    it("should set D_min", async function () {
-        expectSetParameter("D_min");
-    });
-
-    it("should set D_d", async function () {
-        expectSetParameter("D_d");
-    });
   });
 
   describe("User tries to set parameters", function () {
@@ -352,14 +344,6 @@ describe("UTT", function () {
 
     it("should not be allowed to set D_o", async function () {
       expectSetParameterNotAllowed("D_o");
-    });
-
-    it("should not be allowed to set D_min", async function () {
-      expectSetParameterNotAllowed("D_min");
-    });
-
-    it("should not be allowed to set D_d", async function () {
-      expectSetParameterNotAllowed("D_d");
     });
   });
 });
