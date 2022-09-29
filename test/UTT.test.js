@@ -101,6 +101,24 @@ describe("UTT", function () {
 
   describe("Endorsements", function () {
 
+    it("should not be allowed to endorse an amount greater than the balance", async function () {
+      const balance = await utt.connect(user1).balanceOf(user1.address);
+      const amount = 100;
+      expect(balance).to.be.lt(amount);
+      await expect(
+        endorse(
+          utt,
+          mockOperator,
+          user1,
+          service1.address,
+          amount,
+          mockTransactionId,
+          [user2.address, user3.address],
+          []
+        )
+      ).to.be.revertedWith("UTT: endorse amount exceeds balance");
+    });
+
     it("should take your tokens when you endorsing", async function () {
       const balanceBefore = await utt.connect(admin).balanceOf(admin.address);
       await endorse(
