@@ -287,6 +287,10 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
      */
     function endorse(address target, uint256 amount, string memory transactionId) notMigrating external {
         require(msg.sender == tx.origin, "should be an user");
+
+        uint256 fromBalance = balanceOf(msg.sender);
+        require(fromBalance >= amount, "UTT: endorse amount exceeds balance");
+
         Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), this.fulfillEndorse.selector);
         request.add("targetAddress", addressToString(target));
         request.add("sourceAddress", addressToString(msg.sender));
