@@ -1,7 +1,7 @@
 type = "directrequest"
 schemaVersion = 1
 name = "UTT Check Previous Endorsers Job"
-contractAddress = "0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f"
+contractAddress = "REPLACE_WITH_ORACLE_CONTRACT_ADDRESS"
 maxTaskDuration = "0s"
 observationSource = """
     decode_log  [type="ethabidecodelog"
@@ -39,7 +39,7 @@ observationSource = """
                 abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
                 data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\":   $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_mwr)}"]
 
-    submit_tx  [type="ethtx" to="0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f" data="$(encode_tx)" minConfirmations="2"]
+    submit_tx  [type="ethtx" to="REPLACE_WITH_ORACLE_CONTRACT_ADDRESS" data="$(encode_tx)" minConfirmations="2"]
 
     encode_mwr -> encode_tx -> submit_tx
 """
