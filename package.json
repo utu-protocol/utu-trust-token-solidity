@@ -5,6 +5,7 @@
     "clean": "npx hardhat clean",
     "start": "npx hardhat node",
     "deploy": "npx hardhat run scripts/deploy.ts",
+    "deploy:proxy": "npx hardhat run scripts/deploy.proxy.ts",
     "verify": "npx hardhat verify --constructor-args",
     "test": "npx hardhat test"
   },

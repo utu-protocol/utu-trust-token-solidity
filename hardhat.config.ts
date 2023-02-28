@@ -68,6 +68,12 @@ const config: HardhatUserConfig = {
           ? [process.env.TEST_PRIVATE_KEY]
           : [],
     },
+    testnet_aurora: {
+      url: process.env.AURORA_URL || "https://testnet.aurora.dev",
+      accounts: [process.env.TEST_PRIVATE_KEY ?? ""],
+      chainId: 1313161555,
+      gasPrice: 120 * 1000000000,
+    },
     ropsten: {
       url: process.env.ROPSTEN_URL || "",
       accounts:
