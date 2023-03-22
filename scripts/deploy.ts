@@ -14,7 +14,7 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const UTT = await ethers.getContractFactory("UTT");
+  const UTT = await ethers.getContractFactory("UTTProxy");
   const deployArgs = require(`./deploy.args.${network.name}`);
   const utt = await UTT.deploy.apply(UTT, deployArgs);
 

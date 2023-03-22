@@ -3,9 +3,11 @@ pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
-contract NearUTTProxy is Ownable, ChainlinkClient {
+contract UTTProxy is Ownable, ChainlinkClient {
     using Chainlink for Chainlink.Request;
+    using Strings for uint256;
 
     /**
      * Chainlinkg orcale request data structure
@@ -65,6 +67,16 @@ contract NearUTTProxy is Ownable, ChainlinkClient {
         fee = _fee;
     }
 
+    /** Sets the LINK fee to be paid for each request */
+    function getFee() public view virtual returns (bytes32) {
+        return jobId;
+    }
+
+    /** Sets the JobId for chainlink request */
+    function setJobId(string memory _jobId) public onlyOwner {
+         jobId = stringToBytes32(_jobId);
+    }
+
     function endorse(
         address target,
         uint256 amount,
@@ -80,6 +92,8 @@ contract NearUTTProxy is Ownable, ChainlinkClient {
         request.add("targetAddress", addressToString(target));
         request.add("sourceAddress", addressToString(msg.sender));
         request.add("transactionId", transactionId);
+        request.add("amount", amount.toString());
+
         bytes32 requestId = sendOperatorRequestTo(oracle, request, fee);
         oracleRequests[requestId] = OracleRequest({
             from: msg.sender,

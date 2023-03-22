@@ -1,47 +1,21 @@
-type = "directrequest"
-schemaVersion = 1
-name = "UTT Proxy Endorse"
-contractAddress = "0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f"
-maxTaskDuration = "0s"
-observationSource = """
-    decode_log  [type="ethabidecodelog"
-                 abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
-                 data="$(jobRun.logData)"
-                 topics="$(jobRun.logTopics)"]
+type                = "directrequest"
+schemaVersion       = 1
+name                = "UTT Proxy Endorse"
+evmChainID          = 1313161555
+contractAddress     = "0x08bC44B3d592f7F746F33E50Ab0433BbEf3f9071"
+# Optional externalJobID: Automatically generated if unspecified
+externalJobID = "ce9c161d576e41598b5599f7e111c808"
+observationSource   = """
+    decode_log   [type="ethabidecodelog"
+                  abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+                  data="$(jobRun.logData)"
+                  topics="$(jobRun.logTopics)"]
 
     decode_cbor  [type="cborparse" data="$(decode_log.data)"]
 
-    decode_log -> decode_cbor -> http
+    endorse_tx  [type="ethabiencode" abi="endorse(address source, address target, uint256 amount, string transactionId)" data="{\\"source\\": $(decode_cbor.sourceAddress), \\"target\\": $(decode_cbor.targetAddress),  \\"amount\\": $(decode_cbor.amount),  \\"transactionId\\": $(decode_cbor.transactionId) }"]
 
-    http [type="http"
-          method=POST
-          url="http://trust-api-core-service/previousEndorsersRequest"
-          headers="[\\"UTU-Trust-Api-Client-Id\\", \\"REPLACE_WITH_UTU_CLIENT_DB_ID\\"]"
-          requestData="{\\"sourceAddress\\": $(decode_cbor.sourceAddress), \\"targetAddress\\": $(decode_cbor.targetAddress), \\"transactionId\\":  $(decode_cbor.transactionId)}"
-          allowUnrestrictedNetworkAccess=true]
+    submit_endorse_tx    [type="ethtx" evmChainID="80001" to="0x7E63f0e3C1Bf9158926f7e87566195b60B684E45" data="$(endorse_tx)" minConfirmations="1" failOnRevert="true"]
 
-    firstLevelPreviousEndorsers [type="jsonparse"
-                data="$(http)"
-                path="result,firstLevelPreviousEndorsers"]
-
-    secondLevelPreviousEndorsers [type="jsonparse"
-                data="$(http)"
-                path="result,secondLevelPreviousEndorsers"]
-
-    http -> firstLevelPreviousEndorsers -> encode_mwr
-    http -> secondLevelPreviousEndorsers -> encode_mwr
-
-    encode_mwr [type="ethabiencode"
-                abi="(bytes32 requestId, address[] firstLevelPreviousEndorsers, address[] secondLevelPreviousEndorsers)"
-                data="{\\"requestId\\": $(decode_log.requestId), \\"firstLevelPreviousEndorsers\\": $(firstLevelPreviousEndorsers), \\"secondLevelPreviousEndorsers\\": $(secondLevelPreviousEndorsers) }"]
-
-    encode_tx  [type="ethabiencode"
-                evmChainID=""
-                abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
-                data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\":   $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_mwr)}"]
-
-    submit_tx  [type="ethtx" to="0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f" data="$(encode_tx)" minConfirmations="2"]
-
-    encode_mwr -> encode_tx -> submit_tx
+    decode_log -> decode_cbor -> endorse_tx -> submit_endorse_tx
 """
-externalJobID = "9opc5e1dd8d2476ca1a890dfb6656f34"

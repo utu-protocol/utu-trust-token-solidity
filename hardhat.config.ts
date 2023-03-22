@@ -1,14 +1,14 @@
 import * as dotenv from "dotenv";
 
-import { HardhatUserConfig, task } from "hardhat/config";
+import "@appliedblockchain/chainlink-plugins-fund-link";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
 import "@typechain/hardhat";
-import "hardhat-gas-reporter";
-import "solidity-coverage";
 import "hardhat-abi-exporter";
+import "hardhat-gas-reporter";
 import "hardhat-tracer";
-import "@appliedblockchain/chainlink-plugins-fund-link";
+import { task } from "hardhat/config";
+import "solidity-coverage";
 
 dotenv.config();
 
@@ -25,13 +25,17 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 
-const config: HardhatUserConfig = {
+const config = {
   solidity: {
     compilers: [
       {
         version: "0.8.7",
       },
       // Operator
+      // Operator
+      {
+        version: "0.7.6",
+      },
       {
         version: "0.7.0",
       },
@@ -72,7 +76,6 @@ const config: HardhatUserConfig = {
       url: process.env.AURORA_URL || "https://testnet.aurora.dev",
       accounts: [process.env.TEST_PRIVATE_KEY ?? ""],
       chainId: 1313161555,
-      gasPrice: 120 * 1000000000,
     },
     ropsten: {
       url: process.env.ROPSTEN_URL || "",
@@ -95,6 +98,16 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,
+    customChains: [
+      {
+        network: "testnet_aurora",
+        chainId: 1313161555,
+        urls: {
+          apiURL: "https://explorer.testnet.aurora.dev/api",
+          browserURL: "https://explorer.testnet.aurora.dev",
+        },
+      },
+    ],
   },
 };
 
