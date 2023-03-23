@@ -13,7 +13,7 @@ observationSource   = """
 
     decode_cbor  [type="cborparse" data="$(decode_log.data)"]
 
-    endorse_tx  [type="ethabiencode" abi="endorse(address source, address target, uint256 amount, string transactionId)" data="{\\"source\\": $(decode_cbor.sourceAddress), \\"target\\": $(decode_cbor.targetAddress),  \\"amount\\": $(decode_cbor.amount),  \\"transactionId\\": $(decode_cbor.transactionId) }"]
+    endorse_tx  [type="ethabiencode" abi="proxyEndorse(address source, address target, uint256 amount, string transactionId)" data="{\\"source\\": $(decode_cbor.sourceAddress), \\"target\\": $(decode_cbor.targetAddress),  \\"amount\\": $(decode_cbor.amount),  \\"transactionId\\": $(decode_cbor.transactionId) }"]
 
     submit_endorse_tx    [type="ethtx" evmChainID="80001" to="0x7E63f0e3C1Bf9158926f7e87566195b60B684E45" data="$(endorse_tx)" minConfirmations="1" failOnRevert="true"]
 
