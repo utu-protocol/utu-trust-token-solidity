@@ -5,17 +5,12 @@ const {
   convertFufillParams,
 } = require("@chainlink/test-helpers/dist/src/contracts/oracle");
 
-async function endorse(
-  utt,
+async function fullfilEndorse(
+  tx,
   mockOperator,
-  sender,
-  target,
-  amount,
-  transactionId,
   endorsersLevel1,
   endorsersLevel2
 ) {
-  const tx = await utt.connect(sender).endorse(target, amount, transactionId);
   const receipt = await tx.wait(1);
   const requestId = receipt.events[0].topics[1];
   const request = decodeRunRequest(receipt.logs[3]);
@@ -28,16 +23,49 @@ async function endorse(
   return mockOperator.fulfillOracleRequest2(...fulfillParams);
 }
 
+async function endorse(
+  utt,
+  mockOperator,
+  sender,
+  target,
+  amount,
+  transactionId,
+  endorsersLevel1,
+  endorsersLevel2
+) {
+  const tx = await utt.connect(sender).endorse(target, amount, transactionId);
+  return fullfilEndorse(tx, mockOperator, endorsersLevel1, endorsersLevel2);
+}
+
+async function proxyEndorse(
+  utt,
+  proxySender,
+  mockOperator,
+  sender,
+  target,
+  amount,
+  transactionId,
+  endorsersLevel1,
+  endorsersLevel2
+) {
+  const tx = await utt
+    .connect(proxySender)
+    .proxyEndorse(sender, target, amount, transactionId);
+  return fullfilEndorse(tx, mockOperator, endorsersLevel1, endorsersLevel2);
+}
+
 function getHash(address) {
-  return ethers.utils.formatBytes32String(address.slice(0,31));
+  return ethers.utils.formatBytes32String(address.slice(0, 31));
 }
 
 /**
  * Invokes the addConnection() method on the contract for the given user address, which, if successful, will mint some
  * UTT to their account.
  */
-async function addConnection(utt, admin, userAddress, connectedTypeId = 0) {
-  return await utt.connect(admin).addConnection(userAddress, connectedTypeId, getHash(userAddress));
+async function addConnection(utt, connector, userAddress, connectedTypeId = 0) {
+  return await utt
+    .connect(connector)
+    .addConnection(userAddress, connectedTypeId, getHash(userAddress));
 }
 
 describe("UTT", function () {
@@ -53,10 +81,11 @@ describe("UTT", function () {
   let user2;
   let user3;
   let service1;
-  let service2;
+  let connector;
+  let proxyOracle;
 
   before(async function () {
-    [admin, user1, user2, user3, service1, service2] =
+    [admin, user1, user2, user3, service1, connector, proxyOracle] =
       await ethers.getSigners();
   });
 
@@ -84,6 +113,14 @@ describe("UTT", function () {
       linkaddress: linkToken.address,
     });
 
+    await utt
+      .connect(admin)
+      .grantRole(await utt.SOCIAL_CONNECTOR_ROLE(), connector.address);
+
+    await utt
+      .connect(admin)
+      .grantRole(await utt.PROXY_ENDORSER_ROLE(), proxyOracle.address);
+
     // send initial coins to first 3 addresses
     // await utt
     //   .connect(admin)
@@ -100,7 +137,6 @@ describe("UTT", function () {
   });
 
   describe("Endorsements", function () {
-
     it("should not be allowed to endorse an amount greater than the balance", async function () {
       const balance = await utt.connect(user1).balanceOf(user1.address);
       const amount = 100;
@@ -122,15 +158,15 @@ describe("UTT", function () {
     it("should take your tokens when you endorsing", async function () {
       const balanceBefore = await utt.connect(admin).balanceOf(admin.address);
       await endorse(
-          utt,
-          mockOperator,
-          admin,
-          service1.address,
-          1,
-          mockTransactionId,
-          [user2.address, user3.address],
-          []
-        );
+        utt,
+        mockOperator,
+        admin,
+        service1.address,
+        1,
+        mockTransactionId,
+        [user2.address, user3.address],
+        []
+      );
       const balanceAfter = await utt.connect(admin).balanceOf(admin.address);
       expect(balanceAfter).to.be.lt(balanceBefore);
     });
@@ -152,8 +188,7 @@ describe("UTT", function () {
         .withArgs(admin.address, service1.address, 3, mockTransactionId);
     });
 
-    it("should not emit and RewardPreviousEndorserLevel2 event when there are no 2nd-level previous endorsers",
-      async function () {
+    it("should not emit and RewardPreviousEndorserLevel2 event when there are no 2nd-level previous endorsers", async function () {
       await expect(
         endorse(
           utt,
@@ -188,7 +223,7 @@ describe("UTT", function () {
 
     it("Reward 1st-level previous endorsers for user1", async function () {
       // First obtain some UTT for user1 which they can stake:
-      await addConnection(utt, admin, user1.address);
+      await addConnection(utt, connector, user1.address);
 
       await expect(
         endorse(
@@ -209,9 +244,18 @@ describe("UTT", function () {
 
     it("Reward the correct amount for the first-level endorser", async function () {
       // Obtain some UTT for user1 which they can stake:
-      await addConnection(utt, admin, user1.address);
+      await addConnection(utt, connector, user1.address);
 
-      await endorse(utt, mockOperator, admin, service1.address, 200, mockTransactionId, [], []);
+      await endorse(
+        utt,
+        mockOperator,
+        admin,
+        service1.address,
+        200,
+        mockTransactionId,
+        [],
+        []
+      );
 
       await expect(
         endorse(
@@ -232,11 +276,29 @@ describe("UTT", function () {
 
     it("Reward the correct amount for the second-level endorser", async function () {
       // Obtain some UTT for user1 and user2 which they can stake:
-      await addConnection(utt, admin, user1.address);
-      await addConnection(utt, admin, user2.address);
+      await addConnection(utt, connector, user1.address);
+      await addConnection(utt, connector, user2.address);
 
-      await endorse(utt, mockOperator, admin, service1.address, 200, mockTransactionId, [], []);
-      await endorse(utt, mockOperator, user1, service1.address, 200, mockTransactionId, [admin.address], []);
+      await endorse(
+        utt,
+        mockOperator,
+        admin,
+        service1.address,
+        200,
+        mockTransactionId,
+        [],
+        []
+      );
+      await endorse(
+        utt,
+        mockOperator,
+        user1,
+        service1.address,
+        200,
+        mockTransactionId,
+        [admin.address],
+        []
+      );
 
       await expect(
         endorse(
@@ -258,14 +320,16 @@ describe("UTT", function () {
   describe("User tries to addConnection", function () {
     it("should not allow a user to add a connection by themselves", async function () {
       await expect(
-        utt.connect(user1).addConnection(user1.address, 0, getHash(user1.address))
-      ).to.be.revertedWith("Ownable: caller is not the owner");
+        utt
+          .connect(user1)
+          .addConnection(user1.address, 0, getHash(user1.address))
+      ).to.be.revertedWith(`AccessControl:`);
     });
 
     it("should not allow a user to remove a connection by themselves", async function () {
       await expect(
         utt.connect(user1).removeConnection(user1.address, 0)
-      ).to.be.revertedWith("Ownable: caller is not the owner");
+      ).to.be.revertedWith(`AccessControl:`);
     });
   });
 
@@ -298,50 +362,49 @@ describe("UTT", function () {
       ).to.be.revertedWith("Contract is migrating");
     });
 
-
     it("should allow not allow add connection during migration", async function () {
       await utt.connect(admin).toggleMigrationFlag();
-      await expect(addConnection(utt, admin, user1.address)).to.be.revertedWith(
-          "Contract is migrating"
-      );
+      await expect(
+        addConnection(utt, connector, user1.address)
+      ).to.be.revertedWith("Contract is migrating");
     });
-
   });
 
   describe("Admin Set Parameters", function () {
-
     async function expectSetParameter(name) {
-      const setter = `set${name}`
+      const setter = `set${name}`;
       await utt.connect(admin)[setter](20);
       const val = await utt.connect(admin)[name]();
       expect(val).to.equal(20);
     }
 
     it("should set O_n", async function () {
-        expectSetParameter("O_n");
+      expectSetParameter("O_n");
     });
 
     it("should set D_n", async function () {
-        expectSetParameter("D_n");
+      expectSetParameter("D_n");
     });
 
     it("should set D_lvl1", async function () {
-        expectSetParameter("D_lvl1");
+      expectSetParameter("D_lvl1");
     });
 
     it("should set D_lvl2", async function () {
-        expectSetParameter("D_lvl2");
+      expectSetParameter("D_lvl2");
     });
 
     it("should set D_o", async function () {
-        expectSetParameter("D_o");
+      expectSetParameter("D_o");
     });
   });
 
   describe("User tries to set parameters", function () {
     async function expectSetParameterNotAllowed(name) {
-      const setter = `set${name}`
-      expect(utt.connect(user1)[setter](20)).to.revertedWith("Ownable: caller is not the owner");
+      const setter = `set${name}`;
+      expect(utt.connect(user1)[setter](20)).to.revertedWith(
+        "Ownable: caller is not the owner"
+      );
     }
 
     it("should not be allowed to set O_n", async function () {
@@ -362,6 +425,33 @@ describe("UTT", function () {
 
     it("should not be allowed to set D_o", async function () {
       expectSetParameterNotAllowed("D_o");
+    });
+  });
+
+  describe("Proxy endorsing", function () {
+    it("should allow proxy role holders to proxy endorse", async function () {
+      await addConnection(utt, connector, user1.address);
+      const balanceBefore = await utt.connect(admin).balanceOf(user1.address);
+      await proxyEndorse(
+        utt,
+        proxyOracle,
+        mockOperator,
+        user1.address,
+        user2.address,
+        1000,
+        mockTransactionId,
+        [user2.address],
+        []
+      );
+      const balanceAfter = await utt.connect(admin).balanceOf(user1.address);
+      expect(balanceAfter).to.be.lt(balanceBefore);
+    });
+    it("should not allow non proxy role holder to proxy endorse", async function () {
+      await expect(
+        utt
+          .connect(user1)
+          .proxyEndorse(user1.address, user2.address, 1, getHash(user1.address))
+      ).to.be.revertedWith(`AccessControl:`);
     });
   });
 });
