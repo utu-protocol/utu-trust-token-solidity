@@ -1,0 +1,21 @@
+type                = "directrequest"
+schemaVersion       = 1
+name                = "UTT Proxy Endorse"
+evmChainID          = 1313161555
+contractAddress     = "0x08bC44B3d592f7F746F33E50Ab0433BbEf3f9071"
+# Optional externalJobID: Automatically generated if unspecified
+externalJobID = "ce9c161d576e41598b5599f7e111c808"
+observationSource   = """
+    decode_log   [type="ethabidecodelog"
+                  abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+                  data="$(jobRun.logData)"
+                  topics="$(jobRun.logTopics)"]
+
+    decode_cbor  [type="cborparse" data="$(decode_log.data)"]
+
+    endorse_tx  [type="ethabiencode" abi="proxyEndorse(address source, address target, uint256 amount, string transactionId)" data="{\\"source\\": $(decode_cbor.sourceAddress), \\"target\\": $(decode_cbor.targetAddress),  \\"amount\\": $(decode_cbor.amount),  \\"transactionId\\": $(decode_cbor.transactionId) }"]
+
+    submit_endorse_tx    [type="ethtx" evmChainID="80001" to="0x7E63f0e3C1Bf9158926f7e87566195b60B684E45" data="$(endorse_tx)" minConfirmations="1" failOnRevert="true"]
+
+    decode_log -> decode_cbor -> endorse_tx -> submit_endorse_tx
+"""

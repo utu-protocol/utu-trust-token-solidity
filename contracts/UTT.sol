@@ -6,9 +6,13 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
-contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
+contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient, AccessControl {
     using Chainlink for Chainlink.Request;
+
+    bytes32 public constant SOCIAL_CONNECTOR_ROLE = keccak256("SOCIAL_CONNECTOR_ROLE");
+    bytes32 public constant PROXY_ENDORSER_ROLE = keccak256("PROXY_ENDORSER_ROLE");
 
     /**
      * The `socialConnections` mapping is storing the connected socialIds
@@ -119,6 +123,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         oracle = _oracle;
         jobId = stringToBytes32(_jobId);
         fee = _fee;
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     /**
@@ -275,29 +280,41 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
         emit Endorse(from, target, amount, transactionId);
     }
 
+    function proxyEndorse(address source, address target, uint256 amount, string memory transactionId) notMigrating external onlyRole(PROXY_ENDORSER_ROLE) { 
+       _triggerEndorse(source, target, amount, transactionId);
+    }
+
+    
+    function endorse(address target, uint256 amount, string memory transactionId) notMigrating external {
+        require(msg.sender == tx.origin, "should be a user");
+
+       _triggerEndorse(msg.sender, target, amount, transactionId);
+    }
+
     /**
      * @notice Creates a new staked endorsement, where the caller is the endorser. Previous endorsers, retrieved
      *         from the UTU Trust API via an oracle, will be rewarded according to the reward formula from the
      *         whitepaper.
      * @dev This creates an oracle request. The actual endorsement, staking and rewarding is done on its fulfillment.
+     * @param source the endorser's address
      * @param target the endorsed entity (address is just used as an id here)
      * @param amount the stake for the new endorsement
      * @param transactionId an id representing the "business transaction" for which the endorsement was made; this is
      *        _not_ necessarily an Ethereum transaction id.
      */
-    function endorse(address target, uint256 amount, string memory transactionId) notMigrating external {
-        require(msg.sender == tx.origin, "should be an user");
+    function _triggerEndorse(address source, address target, uint256 amount, string memory transactionId) private {
 
-        uint256 fromBalance = balanceOf(msg.sender);
+        uint256 fromBalance = balanceOf(source);
         require(fromBalance >= amount, "UTT: endorse amount exceeds balance");
 
         Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), this.fulfillEndorse.selector);
         request.add("targetAddress", addressToString(target));
-        request.add("sourceAddress", addressToString(msg.sender));
+        request.add("sourceAddress", addressToString(source));
         request.add("transactionId", transactionId);
         bytes32 requestId = sendOperatorRequestTo(oracle, request, fee);
-        oracleRequests[requestId] = OracleRequest({ from: msg.sender, target: target, amount: amount, transactionId: transactionId });
+        oracleRequests[requestId] = OracleRequest({ from: source, target: target, amount: amount, transactionId: transactionId });
     }
+
 
     /**
      * @dev Called back from the oracle operator contract when the oracle request was fulfilled, with the retrieved
@@ -338,7 +355,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     )
         public
         notMigrating
-        onlyOwner
+        onlyRole(SOCIAL_CONNECTOR_ROLE)
     {
         // only add connection if not previously added
         if (socialConnections[user][connectedTypeId] == 0) {
@@ -363,7 +380,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient {
     )
         public
         notMigrating
-        onlyOwner
+        onlyRole(SOCIAL_CONNECTOR_ROLE)
     {
         // only remove connection if currently connected
         if (socialConnections[user][connectedTypeId] != 0) {
