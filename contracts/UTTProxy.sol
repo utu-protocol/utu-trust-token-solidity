@@ -67,16 +67,6 @@ contract UTTProxy is Ownable, ChainlinkClient {
         fee = _fee;
     }
 
-    /** Sets the LINK fee to be paid for each request */
-    function getFee() public view virtual returns (bytes32) {
-        return jobId;
-    }
-
-    /** Sets the JobId for chainlink request */
-    function setJobId(string memory _jobId) public onlyOwner {
-         jobId = stringToBytes32(_jobId);
-    }
-
     function endorse(
         address target,
         uint256 amount,

@@ -1,126 +1,22 @@
-const { ethers, run } = require("hardhat");
-const { expect } = require("chai");
-const {
-  decodeRunRequest,
-  convertFufillParams,
-} = require("@chainlink/test-helpers/dist/src/contracts/oracle");
-
-async function fullfilEndorse(
-  tx,
-  mockOperator,
-  endorsersLevel1,
-  endorsersLevel2
-) {
-  const receipt = await tx.wait(1);
-  const requestId = receipt.events[0].topics[1];
-  const request = decodeRunRequest(receipt.logs[3]);
-  const abiCoder = new ethers.utils.AbiCoder();
-  const data = abiCoder.encode(
-    ["bytes32", "address[]", "address[]"],
-    [requestId, [...endorsersLevel1], [...endorsersLevel2]]
-  );
-  const fulfillParams = convertFufillParams(request, data);
-  return mockOperator.fulfillOracleRequest2(...fulfillParams);
-}
-
-async function endorse(
-  utt,
-  mockOperator,
-  sender,
-  target,
-  amount,
-  transactionId,
-  endorsersLevel1,
-  endorsersLevel2
-) {
-  const tx = await utt.connect(sender).endorse(target, amount, transactionId);
-  return fullfilEndorse(tx, mockOperator, endorsersLevel1, endorsersLevel2);
-}
-
-async function proxyEndorse(
-  utt,
-  proxySender,
-  mockOperator,
-  sender,
-  target,
-  amount,
-  transactionId,
-  endorsersLevel1,
-  endorsersLevel2
-) {
-  const tx = await utt
-    .connect(proxySender)
-    .proxyEndorse(sender, target, amount, transactionId);
-  return fullfilEndorse(tx, mockOperator, endorsersLevel1, endorsersLevel2);
-}
-
-function getHash(address) {
-  return ethers.utils.formatBytes32String(address.slice(0, 31));
-}
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { expect } from "chai";
+import {
+  addConnection,
+  deployUTT,
+  endorse,
+  getHash,
+  proxyEndorse,
+} from "./UTT.fixture";
 
 /**
  * Invokes the addConnection() method on the contract for the given user address, which, if successful, will mint some
  * UTT to their account.
  */
-async function addConnection(utt, connector, userAddress, connectedTypeId = 0) {
-  return await utt
-    .connect(connector)
-    .addConnection(userAddress, connectedTypeId, getHash(userAddress));
-}
 
 describe("UTT", function () {
-  const mintAmount = ethers.utils.parseEther("1000000");
-
-  let utt;
-  let mockOperator;
-
   const mockTransactionId = "123456";
 
-  let admin;
-  let user1;
-  let user2;
-  let user3;
-  let service1;
-  let connector;
-  let proxyOracle;
-
-  before(async function () {
-    [admin, user1, user2, user3, service1, connector, proxyOracle] =
-      await ethers.getSigners();
-  });
-
   beforeEach(async function () {
-    const LinkToken = await ethers.getContractFactory("LinkToken");
-    const linkToken = await LinkToken.deploy().then((f) => f.deployed());
-    const MockOperator = await ethers.getContractFactory("Operator");
-    mockOperator = await MockOperator.deploy(
-      linkToken.address,
-      admin.address
-    ).then((f) => f.deployed());
-    await mockOperator.setAuthorizedSenders([admin.address]);
-
-    const UTT = await ethers.getContractFactory("UTT");
-    utt = await UTT.deploy(
-      mintAmount,
-      mockOperator.address,
-      "",
-      ethers.utils.parseEther("0.1"),
-      linkToken.address
-    ).then((f) => f.deployed());
-
-    await run("fund-link", {
-      contract: utt.address,
-      linkaddress: linkToken.address,
-    });
-
-    await utt
-      .connect(admin)
-      .grantRole(await utt.SOCIAL_CONNECTOR_ROLE(), connector.address);
-
-    await utt
-      .connect(admin)
-      .grantRole(await utt.PROXY_ENDORSER_ROLE(), proxyOracle.address);
-
     // send initial coins to first 3 addresses
     // await utt
     //   .connect(admin)
@@ -131,13 +27,14 @@ describe("UTT", function () {
     // await utt
     //   .connect(admin)
     //   .transfer(user3.address, ethers.utils.parseEther("10"));
-
     // await utt.connect(this.admin).endorse(service.address, 1, [], []);
     // await utt.connect(this.admin).endorse(service.address, 1, [], []);
   });
 
   describe("Endorsements", function () {
     it("should not be allowed to endorse an amount greater than the balance", async function () {
+      const { utt, mockOperator, user1, service1, user2, user3 } =
+        await loadFixture(deployUTT);
       const balance = await utt.connect(user1).balanceOf(user1.address);
       const amount = 100;
       expect(balance).to.be.lt(amount);
@@ -156,6 +53,8 @@ describe("UTT", function () {
     });
 
     it("should take your tokens when you endorsing", async function () {
+      const { utt, mockOperator, admin, service1, user2, user3 } =
+        await loadFixture(deployUTT);
       const balanceBefore = await utt.connect(admin).balanceOf(admin.address);
       await endorse(
         utt,
@@ -172,6 +71,8 @@ describe("UTT", function () {
     });
 
     it("should emit an Endorse event with correct parameters", async function () {
+      const { utt, mockOperator, admin, service1, user2, user3 } =
+        await loadFixture(deployUTT);
       await expect(
         endorse(
           utt,
@@ -189,6 +90,8 @@ describe("UTT", function () {
     });
 
     it("should not emit and RewardPreviousEndorserLevel2 event when there are no 2nd-level previous endorsers", async function () {
+      const { utt, mockOperator, admin, service1, user2, user3 } =
+        await loadFixture(deployUTT);
       await expect(
         endorse(
           utt,
@@ -204,6 +107,9 @@ describe("UTT", function () {
     });
 
     it("Reward 1st-level previous endorsers for admin", async function () {
+      const { utt, mockOperator, admin, service1, user2 } = await loadFixture(
+        deployUTT
+      );
       await expect(
         endorse(
           utt,
@@ -222,6 +128,8 @@ describe("UTT", function () {
     });
 
     it("Reward 1st-level previous endorsers for user1", async function () {
+      const { utt, mockOperator, user1, service1, user2, connector } =
+        await loadFixture(deployUTT);
       // First obtain some UTT for user1 which they can stake:
       await addConnection(utt, connector, user1.address);
 
@@ -244,8 +152,9 @@ describe("UTT", function () {
 
     it("Reward the correct amount for the first-level endorser", async function () {
       // Obtain some UTT for user1 which they can stake:
+      const { utt, mockOperator, admin, service1, user1, connector } =
+        await loadFixture(deployUTT);
       await addConnection(utt, connector, user1.address);
-
       await endorse(
         utt,
         mockOperator,
@@ -256,7 +165,6 @@ describe("UTT", function () {
         [],
         []
       );
-
       await expect(
         endorse(
           utt,
@@ -275,6 +183,8 @@ describe("UTT", function () {
     });
 
     it("Reward the correct amount for the second-level endorser", async function () {
+      const { utt, mockOperator, admin, service1, user1, user2, connector } =
+        await loadFixture(deployUTT);
       // Obtain some UTT for user1 and user2 which they can stake:
       await addConnection(utt, connector, user1.address);
       await addConnection(utt, connector, user2.address);
@@ -319,6 +229,7 @@ describe("UTT", function () {
 
   describe("User tries to addConnection", function () {
     it("should not allow a user to add a connection by themselves", async function () {
+      const { utt, user1 } = await loadFixture(deployUTT);
       await expect(
         utt
           .connect(user1)
@@ -327,6 +238,7 @@ describe("UTT", function () {
     });
 
     it("should not allow a user to remove a connection by themselves", async function () {
+      const { utt, user1 } = await loadFixture(deployUTT);
       await expect(
         utt.connect(user1).removeConnection(user1.address, 0)
       ).to.be.revertedWith(`AccessControl:`);
@@ -335,18 +247,22 @@ describe("UTT", function () {
 
   describe("Migration", function () {
     it("should allow admin toggle migration flag", async function () {
+      const { utt, admin } = await loadFixture(deployUTT);
       await utt.connect(admin).toggleMigrationFlag();
       const isMigrationFlagSet = await utt.isMigrating();
       await expect(isMigrationFlagSet).to.be.true;
     });
 
     it("should allow not allow non admin toggle migration flag", async function () {
+      const { utt, user1 } = await loadFixture(deployUTT);
       await expect(utt.connect(user1).toggleMigrationFlag()).to.be.revertedWith(
         "Ownable: caller is not the owner"
       );
     });
 
     it("should pause endorse when migration is set", async function () {
+      const { utt, admin, mockOperator, service1, user2, user3 } =
+        await loadFixture(deployUTT);
       await utt.connect(admin).toggleMigrationFlag();
       await expect(
         endorse(
@@ -363,6 +279,7 @@ describe("UTT", function () {
     });
 
     it("should allow not allow add connection during migration", async function () {
+      const { utt, admin, connector, user1 } = await loadFixture(deployUTT);
       await utt.connect(admin).toggleMigrationFlag();
       await expect(
         addConnection(utt, connector, user1.address)
@@ -371,7 +288,8 @@ describe("UTT", function () {
   });
 
   describe("Admin Set Parameters", function () {
-    async function expectSetParameter(name) {
+    async function expectSetParameter(name: string) {
+      const { utt, admin } = await loadFixture(deployUTT);
       const setter = `set${name}`;
       await utt.connect(admin)[setter](20);
       const val = await utt.connect(admin)[name]();
@@ -400,7 +318,8 @@ describe("UTT", function () {
   });
 
   describe("User tries to set parameters", function () {
-    async function expectSetParameterNotAllowed(name) {
+    async function expectSetParameterNotAllowed(name: string) {
+      const { utt, user1 } = await loadFixture(deployUTT);
       const setter = `set${name}`;
       expect(utt.connect(user1)[setter](20)).to.revertedWith(
         "Ownable: caller is not the owner"
@@ -430,6 +349,8 @@ describe("UTT", function () {
 
   describe("Proxy endorsing", function () {
     it("should allow proxy role holders to proxy endorse", async function () {
+      const { utt, admin, mockOperator, connector, user1, proxyOracle, user2 } =
+        await loadFixture(deployUTT);
       await addConnection(utt, connector, user1.address);
       const balanceBefore = await utt.connect(admin).balanceOf(user1.address);
       await proxyEndorse(
@@ -447,6 +368,7 @@ describe("UTT", function () {
       expect(balanceAfter).to.be.lt(balanceBefore);
     });
     it("should not allow non proxy role holder to proxy endorse", async function () {
+      const { utt, user1, user2 } = await loadFixture(deployUTT);
       await expect(
         utt
           .connect(user1)
