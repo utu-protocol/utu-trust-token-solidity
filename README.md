@@ -24,7 +24,7 @@ npm start
 
 ### Deploy Oracle Contract
 
-1. Deploy [Chainlink Operator](https://github.com/smartcontractkit/chainlink/blob/develop/contracts/src/v0.7/Operator.sol) contract via [Remix](https://remix.ethereum.org/) or by cloning the [Chainlink contracts repo](https://github.com/smartcontractkit/chainlink/tree/develop/contracts) and using Hardhat
+1. Deploy [Chainlink Operator v0.7 Contract](https://github.com/smartcontractkit/chainlink/blob/develop/contracts/src/v0.7/Operator.sol) via [Remix](https://remix.ethereum.org/) or by cloning the [Chainlink contracts repo](https://github.com/smartcontractkit/chainlink/tree/develop/contracts) and using Hardhat
 2. [Set up a Chainlink node](https://github.com/utu-protocol/utu-trust-token-solidity/main/README.md#set-up-a-chainlink-node-in-aws)
 3. Whitelist the node address by calling `setAuthorizedSenders` from the `Operator` contract
 
@@ -42,7 +42,7 @@ module.exports = [
 	1000000, // test value
 	"0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f", // mumbai oracle
 	"0eec7e1dd0d2476ca1a872dfb6633f48", // mumbai job id
-	ethers.utils.parseEther("0.01"), // mumbai fee
+	ethers.utils.parseEther("0.001"), // mumbai link fee
 	"0x326C977E6efc84E512bB9C30f76E30c160eD06FB" // mumbai link token address
 ]
 ```
@@ -210,13 +210,16 @@ $ docker run -p 6688:6688 -v ~/.chainlink:/chainlink -it --env-file=.env smartco
 2. Login with your ChainLink node account credentials.
 3. Navigate to the jobs page (press the "Jobs" button in the top menu).
 4. Press the "New Job" button.
-5. Paste the following TOML job specification and press "Create Job".
+5. Paste the following TOML job specification
+6. Replace `REPLACE_WITH_ORACLE_CONTRACT_ADDRESS` with the oracle contract address everywhere specified in the job definition
+7. Replace `REPLACE_WITH_UTU_CLIENT_DB_ID` with the utu client db id in the job definition
+8. Press Create Job 
 
 ```toml
 type = "directrequest"
 schemaVersion = 1
 name = "UTT Check Previous Endorsers Job"
-contractAddress = "0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f"
+contractAddress = "REPLACE_WITH_ORACLE_CONTRACT_ADDRESS"
 maxTaskDuration = "0s"
 observationSource = """
     decode_log  [type="ethabidecodelog"
@@ -254,9 +257,15 @@ observationSource = """
                 abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
                 data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\":   $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_mwr)}"]
 
-    submit_tx  [type="ethtx" to="0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f" data="$(encode_tx)" minConfirmations="2"]
+    submit_tx  [type="ethtx" to="REPLACE_WITH_ORACLE_CONTRACT_ADDRESS" data="$(encode_tx)" minConfirmations="2"]
 
     encode_mwr -> encode_tx -> submit_tx
 """
 externalJobID = "0eec7e1d-d0d2-476c-a1a8-72dfb6633f48"
 ```
+
+### Feed contracts with tokens
+
+1. Send Link tokens to the UTT contract.
+2. Send Matic tokens to the chainlink oracle node address (you can get the chainlink oracle node address from it's dashboard).
+3. Make sure the UTT Contract Owner's address has enough Matic tokens since they will be needed in case the `addConnection` function will be used (from the social media connector).
