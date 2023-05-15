@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "./CanMigrate.sol";
 
-contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient, AccessControl {
+contract UTT is ERC20Burnable, ERC20Pausable, CanMigrate, ChainlinkClient, AccessControl {
     using Chainlink for Chainlink.Request;
 
     bytes32 public constant SOCIAL_CONNECTOR_ROLE = keccak256("SOCIAL_CONNECTOR_ROLE");
@@ -130,7 +130,7 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient, AccessCo
      * Requires that the contract is not migrating.
      */
     modifier notMigrating() {
-        require(!isMigrating, "Contract is migrating");
+        require(!isMigrating && !isMigratingData, "Contract is migrating");
         _;
     }
 
@@ -337,6 +337,15 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient, AccessCo
         _endorse(r.from, r.target, r.amount, r.transactionId, endorsersLevel1, endorsersLevel2);
     }
 
+    function _saveConnection(
+        address user, 
+        uint256 connectedTypeId, 
+        bytes32 connectedUserIdHash
+        ) internal override {
+        socialConnections[user][connectedTypeId] = connectedUserIdHash;
+        emit AddConnection(user, connectedTypeId, connectedUserIdHash);
+    }
+
     /**
      * @dev Called by UTU's social media connector when the user connects a supported social media account, and rewards
      *      them for it with a configured amount of UTT. It's callable only by owner to prevent calls for which the
@@ -359,12 +368,10 @@ contract UTT is ERC20Burnable, ERC20Pausable, Ownable, ChainlinkClient, AccessCo
     {
         // only add connection if not previously added
         if (socialConnections[user][connectedTypeId] == 0) {
-            socialConnections[user][connectedTypeId] = connectedUserIdHash;
+            _saveConnection(user, connectedTypeId, connectedUserIdHash);
 
             // mint reward
             super._mint(user, socialConnectionReward);
-
-            emit AddConnection(user, connectedTypeId, connectedUserIdHash);
         }
     }
 

@@ -11,7 +11,7 @@ import { task } from "hardhat/config";
 import "solidity-coverage";
 
 dotenv.config();
-
+require("./tasks");
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
@@ -57,6 +57,7 @@ const config = {
       },
     },
   },
+  defaultNetwork: process.env.NETWORK,
   networks: {
     matic: {
       url: process.env.MATIC_URL || "",
