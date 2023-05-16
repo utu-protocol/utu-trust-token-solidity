@@ -3,10 +3,14 @@ import { expect } from "chai";
 import {
   addConnection,
   deployUTT,
+  deployUTTUnmigrated,
   endorse,
+  generateRandomAccounts,
   getHash,
   proxyEndorse,
 } from "./UTT.fixture";
+
+import { ethers } from "hardhat";
 
 /**
  * Invokes the addConnection() method on the contract for the given user address, which, if successful, will mint some
@@ -374,6 +378,30 @@ describe("UTT", function () {
           .connect(user1)
           .proxyEndorse(user1.address, user2.address, 1, getHash(user1.address))
       ).to.be.revertedWith(`AccessControl:`);
+    });
+  });
+
+  describe("Migration", function () {
+    it("should allow balance migration", async function () {
+      const accounts = await generateRandomAccounts(200);
+      const { utt: oldContract, connector } = await loadFixture(deployUTT);
+      const user1 = accounts[0];
+      const { utt, admin } = await loadFixture(deployUTTUnmigrated);
+      // to check if it doesn't double mint
+      accounts.push(user1);
+
+      await addConnection(oldContract, connector, user1.address);
+
+      const balanceBefore = await oldContract.balanceOf(user1.address);
+
+      const addresses = accounts.map((account) => account.address);
+
+      await expect(
+        utt.connect(admin).migrateBalance(addresses, oldContract.address)
+      ).to.emit(utt, "Transfer");
+
+      const balanceAfter = await utt.balanceOf(user1.address);
+      expect(balanceAfter).to.be.eq(balanceBefore);
     });
   });
 });

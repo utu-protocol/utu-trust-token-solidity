@@ -30,32 +30,92 @@ const config = {
     compilers: [
       {
         version: "0.8.7",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+        contractSizer: {
+          alphaSort: true,
+          runOnCompile: true,
+          disambiguatePaths: false,
+        },
       },
       // Operator
       // Operator
       {
         version: "0.7.6",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+        contractSizer: {
+          alphaSort: true,
+          runOnCompile: true,
+          disambiguatePaths: false,
+        },
       },
       {
         version: "0.7.0",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+        contractSizer: {
+          alphaSort: true,
+          runOnCompile: true,
+          disambiguatePaths: false,
+        },
       },
       // LinkToken
       {
         version: "0.4.24",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+        contractSizer: {
+          alphaSort: true,
+          runOnCompile: true,
+          disambiguatePaths: false,
+        },
       },
       {
         version: "0.4.23",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+        contractSizer: {
+          alphaSort: true,
+          runOnCompile: true,
+          disambiguatePaths: false,
+        },
       },
       {
         version: "0.4.11",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+        contractSizer: {
+          alphaSort: true,
+          runOnCompile: true,
+          disambiguatePaths: false,
+        },
       },
     ],
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 200,
-      },
-    },
   },
   defaultNetwork: process.env.NETWORK,
   networks: {

@@ -9,6 +9,9 @@ abstract contract CanMigrate is ERC20, Ownable {
     /** Contract migration data flag; when migrating data from the old contract. */
     bool public isMigratingData = true;
 
+    /** Contract migration flag; when migrating any further endorsements or social connections are disabled. */
+    bool public isMigrating;
+
     struct Connection {
         address user;
         uint256 connectedTypeId;
@@ -23,6 +26,14 @@ abstract contract CanMigrate is ERC20, Ownable {
         _;
     }
 
+    /**
+     * Requires that the contract is not migrating.
+     */
+    modifier notMigrating() {
+        require(!isMigrating && !isMigratingData, "Contract is migrating");
+        _;
+    }
+
     function migrateBalance(
         address[] calldata addresses,
         address oldContractAddress
@@ -31,7 +42,8 @@ abstract contract CanMigrate is ERC20, Ownable {
         for (uint i = 0; i < addresses.length; i++) {
             address addr = addresses[i];
             uint256 balance = oldContract.balanceOf(addr);
-            if (balance > 0) {
+            uint256 currentBalance = balanceOf(addr);
+            if (balance > currentBalance) {
                 _mint(addr, balance);
             }
         }
@@ -59,4 +71,13 @@ abstract contract CanMigrate is ERC20, Ownable {
         uint256 connectedTypeId,
         bytes32 connectedUserIdHash
     ) internal virtual;
+
+    /**
+     * Toggles the migration flag. While migrating, no new endorsements or social media (dis)connections can be made.
+     * @dev Endorsements can still be fulfilled; thus the actual migration process should not be started until
+     *      all pending fulfillments are done.
+     */
+    function toggleMigrationFlag() public onlyOwner {
+        isMigrating = !isMigrating;
+    }
 }
