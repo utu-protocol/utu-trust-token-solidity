@@ -42,6 +42,10 @@ contract UTTProxy is Ownable, ChainlinkClient {
         string _transactionId
     );
 
+    event ProxiedEndorseFulfilled(
+        bytes32 indexed _requestId
+    );
+
     constructor(
         address _oracle,
         string memory _jobId,
@@ -100,7 +104,7 @@ contract UTTProxy is Ownable, ChainlinkClient {
         external
         recordChainlinkFulfillment(_requestId)
     {
-    
+        emit ProxiedEndorseFulfilled(_requestId);
     }
 
     /**
