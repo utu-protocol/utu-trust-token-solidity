@@ -117,7 +117,6 @@ const config = {
       },
     ],
   },
-  defaultNetwork: process.env.NETWORK,
   networks: {
     matic: {
       url: process.env.MATIC_URL || "",

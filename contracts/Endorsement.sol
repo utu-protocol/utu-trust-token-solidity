@@ -4,9 +4,9 @@ pragma solidity ^0.8.7;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "./SocialConnector.sol";
+import "./Roles.sol";
 
-abstract contract Endorse is ERC20, ChainlinkClient, SocialConnector {
+abstract contract Endorsement is ERC20, ChainlinkClient, Roles {
     using Chainlink for Chainlink.Request;
     // Reward parameters:
 
@@ -199,13 +199,13 @@ abstract contract Endorse is ERC20, ChainlinkClient, SocialConnector {
         address target,
         uint256 amount,
         string memory transactionId
-    ) external notMigrating {
+    ) public virtual {
         require(msg.sender == tx.origin, "should be a user");
 
         _triggerEndorse(msg.sender, target, amount, transactionId);
     }
 
-    function proxyEndorse(address source, address target, uint256 amount, string memory transactionId) notMigrating external onlyRole(PROXY_ENDORSER_ROLE) { 
+    function proxyEndorse(address source, address target, uint256 amount, string memory transactionId) public virtual onlyRole(PROXY_ENDORSER_ROLE) { 
        _triggerEndorse(source, target, amount, transactionId);
     }
 

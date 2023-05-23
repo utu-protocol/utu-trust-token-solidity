@@ -253,7 +253,7 @@ describe("UTT", function () {
     it("should allow admin toggle migration flag", async function () {
       const { utt, admin } = await loadFixture(deployUTT);
       await utt.connect(admin).toggleMigrationFlag();
-      const isMigrationFlagSet = await utt.isMigrating();
+      const isMigrationFlagSet = await utt.isMigratingToNewContract();
       await expect(isMigrationFlagSet).to.be.true;
     });
 

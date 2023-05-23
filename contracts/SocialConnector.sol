@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "./CanMigrate.sol";
+import "./Roles.sol";
 
-abstract contract SocialConnector is CanMigrate, AccessControl {
+abstract contract SocialConnector is ERC20, Roles {
     /**
      * The `socialConnections` mapping is storing the connected socialIds
      * as so: address => socialTypeId => socialUserIdHash
@@ -40,7 +38,7 @@ abstract contract SocialConnector is CanMigrate, AccessControl {
         address user,
         uint256 connectedTypeId,
         bytes32 connectedUserIdHash
-    ) internal override {
+    ) internal {
         socialConnections[user][connectedTypeId] = connectedUserIdHash;
         emit AddConnection(user, connectedTypeId, connectedUserIdHash);
     }
@@ -60,7 +58,7 @@ abstract contract SocialConnector is CanMigrate, AccessControl {
         address user,
         uint256 connectedTypeId,
         bytes32 connectedUserIdHash
-    ) public notMigrating onlyRole(SOCIAL_CONNECTOR_ROLE) {
+    ) public virtual onlyRole(SOCIAL_CONNECTOR_ROLE) {
         // only add connection if not previously added
         if (socialConnections[user][connectedTypeId] == 0) {
             _saveConnection(user, connectedTypeId, connectedUserIdHash);
@@ -79,7 +77,7 @@ abstract contract SocialConnector is CanMigrate, AccessControl {
     function removeConnection(
         address user,
         uint256 connectedTypeId
-    ) public notMigrating onlyRole(SOCIAL_CONNECTOR_ROLE) {
+    ) public virtual onlyRole(SOCIAL_CONNECTOR_ROLE) {
         // only remove connection if currently connected
         if (socialConnections[user][connectedTypeId] != 0) {
             socialConnections[user][connectedTypeId] = 0;

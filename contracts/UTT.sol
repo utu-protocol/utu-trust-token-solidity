@@ -4,9 +4,10 @@ pragma solidity ^0.8.7;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
-import "./Endorse.sol";
+import "./Endorsement.sol";
+import "./SocialConnector.sol";
 
-contract UTT is Endorse, ERC20Burnable, ERC20Pausable {
+contract UTT is Endorsement, SocialConnector, ERC20Burnable, ERC20Pausable {
     /**
      * Constructs new UTU Trust Token contract.
      * See also {ERC20-constructor}.
@@ -30,7 +31,6 @@ contract UTT is Endorse, ERC20Burnable, ERC20Pausable {
         oracle = _oracle;
         jobId = stringToBytes32(_jobId);
         fee = _fee;
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
     /**
@@ -67,7 +67,7 @@ contract UTT is Endorse, ERC20Burnable, ERC20Pausable {
         address from,
         address to,
         uint256 amount
-    ) internal override(ERC20, ERC20Pausable) {
+    ) internal virtual override(ERC20, ERC20Pausable) {
         super._beforeTokenTransfer(from, to, amount);
     }
 
@@ -77,7 +77,7 @@ contract UTT is Endorse, ERC20Burnable, ERC20Pausable {
     function transfer(
         address recipient,
         uint256 amount
-    ) public pure override returns (bool) {
+    ) public pure virtual override returns (bool) {
         revert("Not allowed.");
     }
 
@@ -87,7 +87,7 @@ contract UTT is Endorse, ERC20Burnable, ERC20Pausable {
     function approve(
         address spender,
         uint256 amount
-    ) public pure override returns (bool) {
+    ) public pure virtual override returns (bool) {
         revert("Not allowed.");
     }
 }
