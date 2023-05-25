@@ -1,9 +1,9 @@
-import { ethers, run } from "hardhat";
 import {
-  decodeRunRequest,
   convertFufillParams,
+  decodeRunRequest,
 } from "@chainlink/test-helpers/dist/src/contracts/oracle";
-import { Contract, Signer, ContractTransaction } from "ethers";
+import { Contract, ContractTransaction, Signer } from "ethers";
+import { ethers, run } from "hardhat";
 
 export async function deployUTT(migrated: boolean = true) {
   const mintAmount = ethers.utils.parseEther("10000000");

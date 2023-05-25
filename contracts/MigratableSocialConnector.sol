@@ -11,7 +11,7 @@ abstract contract MigratableSocialConnector is Migratable, SocialConnector {
         bytes32 connectedUserIdHash;
     }
 
-    function migrateAddConnections(
+    function migrateSocialConnections(
         Connection[] calldata _connections
     ) public onlyOwner onlyMigratingDataFromOldContract {
         for (uint256 i = 0; i < _connections.length; i++) {

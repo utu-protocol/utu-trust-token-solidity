@@ -5,6 +5,13 @@ import "./Migratable.sol";
 import "./Endorsement.sol";
 
 abstract contract MigratableEndorsement is Migratable, Endorsement {
+    struct EndorsementData {
+        address from;
+        address target;
+        uint256 amount;
+        string transactionId;
+    }
+
     function migrateBalance(
         address[] calldata addresses,
         address oldContractAddress
@@ -17,6 +24,21 @@ abstract contract MigratableEndorsement is Migratable, Endorsement {
             if (balance > currentBalance) {
                 _mint(addr, balance);
             }
+        }
+    }
+
+    function migrateEndorsements(
+        EndorsementData[] calldata _endorsements,
+        address oldContractAddress
+    ) public onlyOwner onlyMigratingDataFromOldContract {
+        Endorsement oldContract = Endorsement(oldContractAddress);
+        for (uint i = 0; i < _endorsements.length; i++) {
+            EndorsementData memory endorsement = _endorsements[i];
+
+            totalStake[endorsement.target] = oldContract.totalStake(endorsement.target);
+            previousEndorserStakes[endorsement.target][endorsement.from] = oldContract.previousEndorserStakes(endorsement.target, endorsement.from);
+
+            emit Endorse(endorsement.from, endorsement.target, endorsement.amount, endorsement.transactionId);
         }
     }
 
