@@ -30,13 +30,10 @@ contract UTT is
         uint256 _fee,
         address _link
     ) external initializer {
-        __ERC20_init("UTU Trust Token", "UTT");
+        __Endorsement_init("UTU Trust Token", "UTT", _oracle, _jobId, _fee, _link);
         __Roles_init();
         _mint(msg.sender, _mintAmount);
-        setChainlinkToken(_link);
-        oracle = _oracle;
-        jobId = stringToBytes32(_jobId);
-        fee = _fee;
+        
     }
 
     /**

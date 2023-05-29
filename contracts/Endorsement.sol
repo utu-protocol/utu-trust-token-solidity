@@ -7,27 +7,61 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./Roles.sol";
 
-abstract contract Endorsement is Initializable, ERC20Upgradeable, ChainlinkClient, Roles {
+abstract contract Endorsement is
+    Initializable,
+    ERC20Upgradeable,
+    ChainlinkClient,
+    Roles
+{
     using Chainlink for Chainlink.Request;
     // Reward parameters:
 
     /** New stake offset (see whitepaper) */
-    uint256 public O_n = 1;
+    uint256 public O_n;
 
     /** Discounting component for the new stake (see whitepaper) */
-    uint256 public D_n = 30;
+    uint256 public D_n;
 
     /** Discounting component for the stake of first-level previous endorsers (see whitepaper) */
-    uint256 public D_lvl1 = 2;
+    uint256 public D_lvl1;
 
     /** Discounting component for the stake of second-level previous endorsers (see whitepaper) */
-    uint256 public D_lvl2 = 20; //
+    uint256 public D_lvl2; //
 
     /** Discounting component for other previous endorsers' total stake (see whitepaper) */
-    uint256 public D_o = 5000;
+    uint256 public D_o;
 
     bytes32 public constant PROXY_ENDORSER_ROLE =
         keccak256("PROXY_ENDORSER_ROLE");
+
+    function __Endorsement_init(
+        string memory name_,
+        string memory symbol_,
+        address _oracle,
+        string memory _jobId,
+        uint256 _fee,
+        address _link
+    ) internal onlyInitializing {
+        __ERC20_init(name_, symbol_);
+        __Endorsement_init_unchained(_oracle, _jobId, _fee, _link);
+    }
+
+    function __Endorsement_init_unchained(
+        address _oracle,
+        string memory _jobId,
+        uint256 _fee,
+        address _link
+    ) internal onlyInitializing {
+        setChainlinkToken(_link);
+        oracle = _oracle;
+        jobId = stringToBytes32(_jobId);
+        fee = _fee;
+        O_n = 1;
+        D_n = 30;
+        D_lvl1 = 2;
+        D_lvl2 = 20;
+        D_o = 5000;
+    }
 
     // Keeping track of stakes on endorsements:
 
@@ -77,7 +111,6 @@ abstract contract Endorsement is Initializable, ERC20Upgradeable, ChainlinkClien
 
     /** A second-level previous endorser was rewarded */
     event RewardPreviousEndorserLevel2(address endorser, uint256 reward);
-
 
     // Governance functions for setting the reward and penalty parameters
 
@@ -206,8 +239,13 @@ abstract contract Endorsement is Initializable, ERC20Upgradeable, ChainlinkClien
         _triggerEndorse(msg.sender, target, amount, transactionId);
     }
 
-    function proxyEndorse(address source, address target, uint256 amount, string memory transactionId) public virtual onlyRole(PROXY_ENDORSER_ROLE) { 
-       _triggerEndorse(source, target, amount, transactionId);
+    function proxyEndorse(
+        address source,
+        address target,
+        uint256 amount,
+        string memory transactionId
+    ) public virtual onlyRole(PROXY_ENDORSER_ROLE) {
+        _triggerEndorse(source, target, amount, transactionId);
     }
 
     /**
