@@ -26,7 +26,7 @@ export async function deployUTT(migrated: boolean = true) {
   ).then((f) => f.deployed());
   await mockOperator.setAuthorizedSenders([admin.address]);
 
-  const UTT = await ethers.getContractFactory("MigratableUTT");
+  const UTT = await ethers.getContractFactory("UTT");
   const utt: Contract = await UTT.deploy(
     mintAmount,
     mockOperator.address,

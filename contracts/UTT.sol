@@ -4,10 +4,10 @@ pragma solidity ^0.8.7;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
-import "./Endorsement.sol";
-import "./SocialConnector.sol";
+import "./MigratableEndorsement.sol";
+import "./MigratableSocialConnector.sol";
 
-contract UTT is Endorsement, SocialConnector, ERC20Burnable, ERC20Pausable {
+contract UTT is MigratableEndorsement, MigratableSocialConnector, ERC20Burnable, ERC20Pausable {
     /**
      * Constructs new UTU Trust Token contract.
      * See also {ERC20-constructor}.

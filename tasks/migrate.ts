@@ -11,7 +11,7 @@ task("migrate-data", "Mints from the NFT contract")
     const accountsWithBalance = getAccountWithBalance();
     console.log(taskArguments);
     const UTT = await ethers.getContractAt(
-      "MigratableUTT",
+      "UTT",
       taskArguments.targetaddress
     );
     const transactionResponse = await UTT.migrateBalance(
