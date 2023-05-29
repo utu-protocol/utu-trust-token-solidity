@@ -16,7 +16,7 @@ abstract contract MigratableEndorsement is Migratable, Endorsement {
         address[] calldata addresses,
         address oldContractAddress
     ) public onlyOwner onlyMigratingDataFromOldContract {
-        IERC20 oldContract = IERC20(oldContractAddress);
+        IERC20Upgradeable oldContract = IERC20Upgradeable(oldContractAddress);
         for (uint i = 0; i < addresses.length; i++) {
             address addr = addresses[i];
             uint256 balance = oldContract.balanceOf(addr);
@@ -58,4 +58,12 @@ abstract contract MigratableEndorsement is Migratable, Endorsement {
     ) public virtual override onlyNotMigrating onlyRole(PROXY_ENDORSER_ROLE) {
         super.proxyEndorse(source, target, amount, transactionId);
     }
+
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[49] private __gap;
 }

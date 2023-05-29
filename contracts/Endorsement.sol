@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./Roles.sol";
 
-abstract contract Endorsement is ERC20, ChainlinkClient, Roles {
+abstract contract Endorsement is Initializable, ERC20Upgradeable, ChainlinkClient, Roles {
     using Chainlink for Chainlink.Request;
     // Reward parameters:
 
@@ -314,4 +315,11 @@ abstract contract Endorsement is ERC20, ChainlinkClient, Roles {
             result := mload(add(source, 32))
         }
     }
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[49] private __gap;
 }

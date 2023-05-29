@@ -3,7 +3,7 @@ import {
   decodeRunRequest,
 } from "@chainlink/test-helpers/dist/src/contracts/oracle";
 import { Contract, ContractTransaction, Signer } from "ethers";
-import { ethers, run } from "hardhat";
+import { ethers, run, upgrades } from "hardhat";
 
 export async function deployUTT(migrated: boolean = true) {
   const mintAmount = ethers.utils.parseEther("10000000");
@@ -27,13 +27,15 @@ export async function deployUTT(migrated: boolean = true) {
   await mockOperator.setAuthorizedSenders([admin.address]);
 
   const UTT = await ethers.getContractFactory("UTT");
-  const utt: Contract = await UTT.deploy(
-    mintAmount,
-    mockOperator.address,
-    "",
-    ethers.utils.parseEther("0.1"),
-    linkToken.address
-  ).then((f) => f.deployed());
+  const utt: Contract = await upgrades
+    .deployProxy(UTT, [
+      mintAmount,
+      mockOperator.address,
+      "",
+      ethers.utils.parseEther("0.1"),
+      linkToken.address,
+    ])
+    .then((f: any) => f.deployed());
 
   await run("fund-link", {
     contract: utt.address,

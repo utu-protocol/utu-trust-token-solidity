@@ -1,13 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
 import "./MigratableEndorsement.sol";
 import "./MigratableSocialConnector.sol";
 
-contract UTT is MigratableEndorsement, MigratableSocialConnector, ERC20Burnable, ERC20Pausable {
+contract UTT is
+    MigratableEndorsement,
+    MigratableSocialConnector,
+    ERC20BurnableUpgradeable,
+    ERC20PausableUpgradeable
+{
     /**
      * Constructs new UTU Trust Token contract.
      * See also {ERC20-constructor}.
@@ -17,15 +22,16 @@ contract UTT is MigratableEndorsement, MigratableSocialConnector, ERC20Burnable,
      * @param _fee Initial value for the LINK fee
      * @param _link LINK token address
      */
-    constructor(
+
+    function initialize(
         uint256 _mintAmount,
         address _oracle,
         string memory _jobId,
         uint256 _fee,
         address _link
-    )
-        ERC20("UTU Trust Token", "UTT")
-    {
+    ) external initializer {
+        __ERC20_init("UTU Trust Token", "UTT");
+        __Roles_init();
         _mint(msg.sender, _mintAmount);
         setChainlinkToken(_link);
         oracle = _oracle;
@@ -67,7 +73,7 @@ contract UTT is MigratableEndorsement, MigratableSocialConnector, ERC20Burnable,
         address from,
         address to,
         uint256 amount
-    ) internal virtual override(ERC20, ERC20Pausable) {
+    ) internal virtual override(ERC20Upgradeable, ERC20PausableUpgradeable) {
         super._beforeTokenTransfer(from, to, amount);
     }
 
@@ -90,4 +96,12 @@ contract UTT is MigratableEndorsement, MigratableSocialConnector, ERC20Burnable,
     ) public pure virtual override returns (bool) {
         revert("Not allowed.");
     }
+
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[49] private __gap;
 }
