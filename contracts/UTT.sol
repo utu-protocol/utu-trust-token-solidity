@@ -30,10 +30,10 @@ contract UTT is
         uint256 _fee,
         address _link
     ) external initializer {
-        __Endorsement_init("UTU Trust Token", "UTT", _oracle, _jobId, _fee, _link);
         __Roles_init();
+        __Endorsement_init("UTU Trust Token", "UTT", _oracle, _jobId, _fee, _link);
+        __SocialConnector_init();
         _mint(msg.sender, _mintAmount);
-        
     }
 
     /**

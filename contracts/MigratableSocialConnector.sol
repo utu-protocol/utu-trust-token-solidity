@@ -11,6 +11,11 @@ abstract contract MigratableSocialConnector is Migratable, SocialConnector {
         bytes32 connectedUserIdHash;
     }
 
+    function __SocialConnector_init() internal override onlyInitializing {
+        super.__SocialConnector_init();
+        __Migratable_init();
+    }
+
     function migrateSocialConnections(
         Connection[] calldata _connections
     ) public onlyOwner onlyMigratingDataFromOldContract {

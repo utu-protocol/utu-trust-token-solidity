@@ -18,7 +18,7 @@ abstract contract SocialConnector is ERC20Upgradeable, Roles {
      * The `socialConnectionReward` variable is the amount of tokens to be minted
      * as a reward for connecting/verifying with a social platform user id.
      */
-    uint256 public socialConnectionReward = 10000;
+    uint256 public socialConnectionReward;
     // Events for connecting social media accounts/other user ids.
 
     /** Social media account was connected */
@@ -34,6 +34,14 @@ abstract contract SocialConnector is ERC20Upgradeable, Roles {
         uint indexed _connectedTypeId,
         bytes32 indexed _connectedUserIdHash
     );
+
+    function __SocialConnector_init() internal virtual onlyInitializing {
+        __SocialConnector_init_unchained();
+    }
+
+    function __SocialConnector_init_unchained() internal onlyInitializing {
+        socialConnectionReward = 10000;
+    }
 
     function _saveConnection(
         address user,

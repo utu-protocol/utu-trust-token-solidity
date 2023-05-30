@@ -12,6 +12,18 @@ abstract contract MigratableEndorsement is Migratable, Endorsement {
         string transactionId;
     }
 
+    function __Endorsement_init(
+        string memory name_,
+        string memory symbol_,
+        address _oracle,
+        string memory _jobId,
+        uint256 _fee,
+        address _link
+    ) internal override onlyInitializing {
+        super.__Endorsement_init(name_, symbol_, _oracle, _jobId, _fee, _link);
+        __Migratable_init();
+    }
+
     function migrateBalance(
         address[] calldata addresses,
         address oldContractAddress
@@ -35,10 +47,22 @@ abstract contract MigratableEndorsement is Migratable, Endorsement {
         for (uint i = 0; i < _endorsements.length; i++) {
             EndorsementData memory endorsement = _endorsements[i];
 
-            totalStake[endorsement.target] = oldContract.totalStake(endorsement.target);
-            previousEndorserStakes[endorsement.target][endorsement.from] = oldContract.previousEndorserStakes(endorsement.target, endorsement.from);
+            totalStake[endorsement.target] = oldContract.totalStake(
+                endorsement.target
+            );
+            previousEndorserStakes[endorsement.target][
+                endorsement.from
+            ] = oldContract.previousEndorserStakes(
+                endorsement.target,
+                endorsement.from
+            );
 
-            emit Endorse(endorsement.from, endorsement.target, endorsement.amount, endorsement.transactionId);
+            emit Endorse(
+                endorsement.from,
+                endorsement.target,
+                endorsement.amount,
+                endorsement.transactionId
+            );
         }
     }
 
@@ -58,7 +82,6 @@ abstract contract MigratableEndorsement is Migratable, Endorsement {
     ) public virtual override onlyNotMigrating onlyRole(PROXY_ENDORSER_ROLE) {
         super.proxyEndorse(source, target, amount, transactionId);
     }
-
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new

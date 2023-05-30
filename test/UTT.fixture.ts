@@ -146,3 +146,12 @@ export async function generateRandomAccounts(numAccounts: number) {
 
   return randomAccounts;
 }
+
+export async function accessControlRevertError(
+  contract: any,
+  address: string,
+  role: string
+) {
+  const roleValue = await contract[role]();
+  return `AccessControl: account ${address.toLowerCase()} is missing role ${roleValue}`;
+}

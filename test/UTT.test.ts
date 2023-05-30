@@ -1,6 +1,7 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import {
+  accessControlRevertError,
   addConnection,
   deployUTT,
   deployUTTUnmigrated,
@@ -236,14 +237,26 @@ describe("UTT", function () {
         utt
           .connect(user1)
           .addConnection(user1.address, 0, getHash(user1.address))
-      ).to.be.revertedWith(`AccessControl:`);
+      ).to.be.revertedWith(
+        await accessControlRevertError(
+          utt,
+          user1.address,
+          "SOCIAL_CONNECTOR_ROLE"
+        )
+      );
     });
 
     it("should not allow a user to remove a connection by themselves", async function () {
       const { utt, user1 } = await loadFixture(deployUTT);
       await expect(
         utt.connect(user1).removeConnection(user1.address, 0)
-      ).to.be.revertedWith(`AccessControl:`);
+      ).to.be.revertedWith(
+        await accessControlRevertError(
+          utt,
+          user1.address,
+          "SOCIAL_CONNECTOR_ROLE"
+        )
+      );
     });
   });
 
@@ -375,7 +388,13 @@ describe("UTT", function () {
         utt
           .connect(user1)
           .proxyEndorse(user1.address, user2.address, 1, getHash(user1.address))
-      ).to.be.revertedWith(`AccessControl:`);
+      ).to.be.revertedWith(
+        await accessControlRevertError(
+          utt,
+          user1.address,
+          "PROXY_ENDORSER_ROLE"
+        )
+      );
     });
   });
 
