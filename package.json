@@ -4,6 +4,7 @@
     "build": "npx hardhat compile",
     "clean": "npx hardhat clean",
     "start": "npx hardhat node",
+    "export-logs": "npx hardhat run scripts/export-logs.ts",
     "deploy": "npx hardhat run scripts/deploy.ts",
     "deploy:proxy": "npx hardhat run scripts/deploy.proxy.ts",
     "verify": "npx hardhat verify --constructor-args",
@@ -48,6 +49,7 @@
     "@chainlink/contracts": "^0.4.0",
     "@chainlink/test-helpers": "0.0.7-alpha",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.8",
+    "bignumber.js": "^9.1.1",
     "hardhat-tracer": "^1.0.0-alpha.6"
   }
 }

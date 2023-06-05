@@ -3,7 +3,9 @@ import { expect } from "chai";
 import {
   addConnection,
   deployUTT,
+  deployUTTUnmigrated,
   endorse,
+  generateRandomAccounts,
   getHash,
   proxyEndorse,
 } from "./UTT.fixture";
@@ -249,7 +251,7 @@ describe("UTT", function () {
     it("should allow admin toggle migration flag", async function () {
       const { utt, admin } = await loadFixture(deployUTT);
       await utt.connect(admin).toggleMigrationFlag();
-      const isMigrationFlagSet = await utt.isMigrating();
+      const isMigrationFlagSet = await utt.isMigratingToNewContract();
       await expect(isMigrationFlagSet).to.be.true;
     });
 
@@ -374,6 +376,102 @@ describe("UTT", function () {
           .connect(user1)
           .proxyEndorse(user1.address, user2.address, 1, getHash(user1.address))
       ).to.be.revertedWith(`AccessControl:`);
+    });
+  });
+
+  describe("Migration", function () {
+    it("should allow balance migration", async function () {
+      const accounts = await generateRandomAccounts(200);
+      const { utt: oldContract, connector } = await loadFixture(deployUTT);
+      const user1 = accounts[0];
+      const { utt, admin } = await loadFixture(deployUTTUnmigrated);
+      // to check if it doesn't double mint
+      accounts.push(user1);
+
+      await addConnection(oldContract, connector, user1.address);
+
+      const balanceBefore = await oldContract.balanceOf(user1.address);
+
+      const addresses = accounts.map((account) => account.address);
+
+      await expect(
+        utt.connect(admin).migrateBalance(addresses, oldContract.address)
+      ).to.emit(utt, "Transfer");
+
+      const balanceAfter = await utt.balanceOf(user1.address);
+      expect(balanceAfter).to.be.eq(balanceBefore);
+    });
+
+    it("should allow social connection migration", async function () {
+      const accounts = await generateRandomAccounts(200);
+      const { utt, admin } = await loadFixture(deployUTTUnmigrated);
+      const connections = accounts.map((account) => ({
+        user: account.address,
+        connectedTypeId: 1,
+        connectedUserIdHash: getHash(account.address),
+      }));
+      await expect(
+        utt.connect(admin).migrateSocialConnections(connections)
+      ).to.emit(utt, "AddConnection");
+
+      const events = await utt.queryFilter("AddConnection");
+      expect(events.length).to.be.eq(200);
+    });
+
+    it("should allow endorsements migration", async function () {
+      const {
+        utt: oldContract,
+        connector,
+        mockOperator,
+        service1,
+        user1,
+      } = await loadFixture(deployUTT);
+
+      await addConnection(oldContract, connector, user1.address);
+
+      await expect(
+        endorse(
+          oldContract,
+          mockOperator,
+          user1,
+          service1.address,
+          3,
+          mockTransactionId,
+          [],
+          []
+        )
+      ).to.emit(oldContract, "Endorse");
+
+      const { utt, admin } = await loadFixture(deployUTTUnmigrated);
+      const previousEndorserStakes = await oldContract.previousEndorserStakes(
+        service1.address,
+        user1.address
+      );
+      const totalStake = await oldContract.totalStake(service1.address);
+      expect(previousEndorserStakes).to.be.gt(
+        await utt.previousEndorserStakes(service1.address, user1.address)
+      );
+      expect(totalStake).to.be.gt(await utt.totalStake(service1.address));
+
+      const endorsementsData = [
+        {
+          from: user1.address,
+          target: service1.address,
+          amount: 3,
+          transactionId: mockTransactionId,
+        },
+      ];
+
+      await expect(
+        utt
+          .connect(admin)
+          .migrateEndorsements(endorsementsData, oldContract.address)
+      ).to.emit(utt, "Endorse");
+
+      expect(previousEndorserStakes).to.be.eq(
+        await utt.previousEndorserStakes(service1.address, user1.address)
+      );
+      expect(totalStake).to.be.eq(await utt.totalStake(service1.address));
     });
   });
 });

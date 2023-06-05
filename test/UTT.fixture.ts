@@ -1,11 +1,11 @@
-import { ethers, run } from "hardhat";
 import {
-  decodeRunRequest,
   convertFufillParams,
+  decodeRunRequest,
 } from "@chainlink/test-helpers/dist/src/contracts/oracle";
-import { Contract, Signer, ContractTransaction } from "ethers";
+import { Contract, ContractTransaction, Signer } from "ethers";
+import { ethers, run } from "hardhat";
 
-export async function deployUTT() {
+export async function deployUTT(migrated: boolean = true) {
   const mintAmount = ethers.utils.parseEther("10000000");
   const [
     admin,
@@ -48,6 +48,9 @@ export async function deployUTT() {
     .connect(admin)
     .grantRole(await utt.PROXY_ENDORSER_ROLE(), proxyOracle.address);
 
+  if (migrated) {
+    await utt.connect(admin).setDataMigrationCompleted();
+  }
   return {
     admin,
     user1,
@@ -61,6 +64,10 @@ export async function deployUTT() {
     mockOperator,
     linkToken,
   };
+}
+
+export async function deployUTTUnmigrated() {
+  return deployUTT(false);
 }
 
 async function fullfilEndorse(
@@ -125,4 +132,15 @@ export async function addConnection(
 
 export function getHash(address: string) {
   return ethers.utils.formatBytes32String(address.slice(0, 31));
+}
+
+export async function generateRandomAccounts(numAccounts: number) {
+  const randomAccounts = [];
+
+  for (let i = 0; i < numAccounts; i++) {
+    const wallet = ethers.Wallet.createRandom();
+    randomAccounts.push(wallet);
+  }
+
+  return randomAccounts;
 }
