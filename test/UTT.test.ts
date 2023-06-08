@@ -9,7 +9,10 @@ import {
   generateRandomAccounts,
   getHash,
   proxyEndorse,
+  upgradeUTT,
 } from "./UTT.fixture";
+
+import { ethers } from "hardhat";
 
 /**
  * Invokes the addConnection() method on the contract for the given user address, which, if successful, will mint some
@@ -491,6 +494,43 @@ describe("UTT", function () {
         await utt.previousEndorserStakes(service1.address, user1.address)
       );
       expect(totalStake).to.be.eq(await utt.totalStake(service1.address));
+    });
+  });
+
+  describe("Upgradable", function () {
+    it("Should allow upgrading the contract", async function () {
+      const {
+        utt: originalContract,
+        admin,
+        user1,
+        connector,
+      } = await loadFixture(deployUTT);
+
+      await addConnection(originalContract, connector, user1.address);
+
+      const originalBalance = await originalContract.balanceOf(user1.address);
+
+      expect(originalBalance).to.be.eq(10000);
+
+      const upgradedContract = await upgradeUTT(originalContract.address);
+
+      const balance = await upgradedContract.balanceOf(user1.address);
+
+      expect(originalBalance).to.be.eq(balance);
+
+      const currentOwner = await upgradedContract.owner();
+      expect(currentOwner).to.be.eq(admin.address);
+    });
+
+    it("Should contract with other attributes and functions", async function () {
+      const { utt: originalContract } = await loadFixture(deployUTT);
+
+      const UTT = await ethers.getContractFactory("TestUpgradeUTT");
+
+      const upgradedContract = await upgradeUTT(originalContract.address, UTT);
+
+      upgradedContract.incrementCounter();
+      expect(await upgradedContract.getCounter()).to.be.eq(1);
     });
   });
 });

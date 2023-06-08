@@ -2,8 +2,46 @@ import {
   convertFufillParams,
   decodeRunRequest,
 } from "@chainlink/test-helpers/dist/src/contracts/oracle";
-import { Contract, ContractTransaction, Signer } from "ethers";
+import {
+  BigNumber,
+  Contract,
+  ContractFactory,
+  ContractTransaction,
+  Signer,
+} from "ethers";
 import { ethers, run, upgrades } from "hardhat";
+
+export async function baseDeploy(
+  mockOperator: Contract,
+  linkToken: Contract,
+  mintAmount: BigNumber
+) {
+  const UTT = await ethers.getContractFactory("UTT");
+  const utt: Contract = await upgrades
+    .deployProxy(UTT, [
+      mintAmount,
+      mockOperator.address,
+      "",
+      ethers.utils.parseEther("0.1"),
+      linkToken.address,
+    ])
+    .then((f: any) => f.deployed());
+  return utt;
+}
+
+export async function upgradeUTT(
+  proxyAddress: string,
+  contractFactory: ContractFactory | null = null
+) {
+  let UTT: any = contractFactory;
+  if (!UTT) {
+    UTT = await ethers.getContractFactory("UTT");
+  }
+  const utt: Contract = await upgrades
+    .upgradeProxy(proxyAddress, UTT)
+    .then((f: any) => f.deployed());
+  return utt;
+}
 
 export async function deployUTT(migrated: boolean = true) {
   const mintAmount = ethers.utils.parseEther("10000000");
@@ -26,16 +64,7 @@ export async function deployUTT(migrated: boolean = true) {
   ).then((f) => f.deployed());
   await mockOperator.setAuthorizedSenders([admin.address]);
 
-  const UTT = await ethers.getContractFactory("UTT");
-  const utt: Contract = await upgrades
-    .deployProxy(UTT, [
-      mintAmount,
-      mockOperator.address,
-      "",
-      ethers.utils.parseEther("0.1"),
-      linkToken.address,
-    ])
-    .then((f: any) => f.deployed());
+  const utt = await baseDeploy(mockOperator, linkToken, mintAmount);
 
   await run("fund-link", {
     contract: utt.address,
@@ -65,6 +94,7 @@ export async function deployUTT(migrated: boolean = true) {
     utt,
     mockOperator,
     linkToken,
+    mintAmount,
   };
 }
 

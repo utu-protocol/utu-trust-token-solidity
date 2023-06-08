@@ -1,8 +1,9 @@
 type = "directrequest"
 schemaVersion = 1
 name = "UTT Check Previous Endorsers Job"
-contractAddress = "REPLACE_WITH_ORACLE_CONTRACT_ADDRESS"
+contractAddress = "0x73ac0B4ba4Fc1c42B8DFFA39f3E4E0e95eb9b8Fd"
 maxTaskDuration = "0s"
+evmChainID = "137"
 observationSource = """
     decode_log  [type="ethabidecodelog"
                  abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
@@ -16,7 +17,7 @@ observationSource = """
     http [type="http"
           method=POST
           url="http://trust-api-core-service/previousEndorsersRequest"
-          headers="[\\"UTU-Trust-Api-Client-Id\\", \\"REPLACE_WITH_UTU_CLIENT_DB_ID\\"]"
+          headers="[\\"UTU-Trust-Api-Client-Id\\", \\"utu3BrVHAnofuRtQUHRFzKCM4\\"]"
           requestData="{\\"sourceAddress\\": $(decode_cbor.sourceAddress), \\"targetAddress\\": $(decode_cbor.targetAddress), \\"transactionId\\":  $(decode_cbor.transactionId)}"
           allowUnrestrictedNetworkAccess=true]
 
@@ -39,7 +40,7 @@ observationSource = """
                 abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
                 data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\":   $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_mwr)}"]
 
-    submit_tx  [type="ethtx" to="REPLACE_WITH_ORACLE_CONTRACT_ADDRESS" data="$(encode_tx)" minConfirmations="2"]
+    submit_tx  [type="ethtx" to="0x73ac0B4ba4Fc1c42B8DFFA39f3E4E0e95eb9b8Fd" data="$(encode_tx)" minConfirmations="2"]
 
     encode_mwr -> encode_tx -> submit_tx
 """
