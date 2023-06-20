@@ -65,7 +65,7 @@ Create an upgrade args config file in `scripts/` named `upgrade.args.${network}.
 ```js
 
 module.exports = [
-   "0xb0897686c545045afc77cf20ec7a532e3120e0f1", // UTT contract address to update
+   "0xb0897686c545045afc77cf20ec7a532e3120e0f1", // UTT contract address to upgrade
 ];
 ```
 
