@@ -1,13 +1,13 @@
 # UTU Trust Token Contract
 
-This project implements the UTU Trust Token (UTT) smart contract. 
+This project implements the UTU Trust Token (UTT) smart contract.
 
 
-## Building, Testing 
+## Building, Testing
 
 Compile the contract:
 ```shell
-npm run build                     
+npm run build
 ```
 
 Run tests:
@@ -18,9 +18,9 @@ npm run test
 Start a local testnet:
 ```shell
 npm start
-```                                     
+```
 
-## Deploying 
+## Deploying
 
 ### Deploy Oracle Contract
 
@@ -30,7 +30,7 @@ npm start
 
 ### Deploy UTT Contract
 
-The following require the `PRIVATE_KEY` and `<NETWORK>_URL` 
+The following require the `PRIVATE_KEY` and `<NETWORK>_URL`
 environment variables to be set appropriately.
 
 Create a deploy args config file in `scripts/` named `deploy.args.${network}.js` for the network you want to deploy on.
@@ -49,38 +49,63 @@ module.exports = [
 
 E.g. for Polygon Mumbai:
 
-```MUMBAI_URL=https://polygon-mumbai.g.alchemy.com/v2/<key>``` 
+```MUMBAI_URL=https://polygon-mumbai.g.alchemy.com/v2/<key>```
 
 Deploy on `<network>` (e.g. mumbai):
 ```shell
 npm run deploy -- --network <network>
-```                                     
+```
+
+### Upgrade UTT Contract
+
+The following requires the `PRIVATE_KEY` and `<NETWORK>_URL` environment variables to be set appropriately.
+
+Create an upgrade args config file in `scripts/` named `upgrade.args.${network}.js` for the network you want to deploy on.
+
+```js
+
+module.exports = [
+   "0xb0897686c545045afc77cf20ec7a532e3120e0f1", // UTT contract address to update
+];
+```
+
+The address provided must be the deployed UTT contract that needs to be updated.
+
+E.g. for Polygon Mumbai:
+
+`MUMBAI_URL=https://polygon-mumbai.g.alchemy.com/v2/<key>`
+
+Deploy on `<network>` (e.g. mumbai):
+
+```bash
+npm run upgrade -- --network <network>
+```
 
 ## Verifying
 
-### Using etherscan API 
+### Using etherscan API
 
-Verify deployment at `<address>` on `<network>`  
+Verify deployment at `<address>` on `<network>`
 (additionally requires an API key in the `ETHERSCAN_API_KEY` env variable):
 ```shell
 npm run verify --  ./scripts/deploy.args.<network>.js --network <network> <address>
-```                                     
+```
 
-### Using flattened contract source 
+### Using flattened contract source
 
-Note that the etherscan API isn't available on Polygon Mumbai. One can 
-verify manually using the UI and single-file verification. A 
+Note that the etherscan API isn't available on Polygon Mumbai. One can
+verify manually using the UI and single-file verification. A
 flattened source file for this purpose can be created like so:
 
 1. `npx hardhat flatten contracts/UTT.sol > UTT.flattened.sol`
 2. remove all but one `// SPDX-License-Identifier:` lines
-3. replace occurrences of `ENSResolver_Chainlink` with `ENSResolver` (because the 
+3. replace occurrences of `ENSResolver_Chainlink` with `ENSResolver` (because the
    flattener seems to ignore the "as" in `import ... as ...` statements).
 
 ### Other hardhat commands
 
-Since this is a `hardhat` project, so one can also use the usual hardhat 
-commands to 
+Since this is a `hardhat` project, so one can also use the usual hardhat
+commands to
 build/test/deploy:
 
 ```shell
@@ -94,12 +119,12 @@ etc.
 
 ## Previous Endorsers Oracle
 
-The smart contract uses a Chainlink Oracle to retrieve the first- and 
-second-level previous endorsers from the UTU Trust API to compute the 
+The smart contract uses a Chainlink Oracle to retrieve the first- and
+second-level previous endorsers from the UTU Trust API to compute the
 endorsement rewards (see
 [Whitepaper](https://docs.google.com/document/d/1syxWDbJ5Ch0OiMiMfPQ3AWDiyY0Ol4pLJacTvczDo6I/edit?usp=sharing)).
 
-The following describes how to set up and run a custom Chainlink Oracle node 
+The following describes how to set up and run a custom Chainlink Oracle node
 on AWS.
 
 ### Set up a Chainlink Node in AWS
@@ -213,7 +238,7 @@ $ docker run -p 6688:6688 -v ~/.chainlink:/chainlink -it --env-file=.env smartco
 5. Paste the following TOML job specification
 6. Replace `REPLACE_WITH_ORACLE_CONTRACT_ADDRESS` with the oracle contract address everywhere specified in the job definition
 7. Replace `REPLACE_WITH_UTU_CLIENT_DB_ID` with the utu client db id in the job definition
-8. Press Create Job 
+8. Press Create Job
 
 ```toml
 type = "directrequest"
