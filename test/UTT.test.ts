@@ -434,10 +434,10 @@ describe("UTT", function () {
       }));
       await expect(
         utt.connect(admin).migrateSocialConnections(connections)
-      ).to.emit(utt, "AddConnection");
+      ).to.not.emit(utt, "AddConnection");
 
       const events = await utt.queryFilter("AddConnection");
-      expect(events.length).to.be.eq(200);
+      expect(events.length).to.be.eq(0);
     });
 
     it("should allow endorsements migration", async function () {
@@ -488,7 +488,7 @@ describe("UTT", function () {
         utt
           .connect(admin)
           .migrateEndorsements(endorsementsData, oldContract.address)
-      ).to.emit(utt, "Endorse");
+      ).to.not.emit(utt, "Endorse");
 
       expect(previousEndorserStakes).to.be.eq(
         await utt.previousEndorserStakes(service1.address, user1.address)
@@ -522,7 +522,7 @@ describe("UTT", function () {
       expect(currentOwner).to.be.eq(admin.address);
     });
 
-    it("Should contract with other attributes and functions", async function () {
+    it("Should allow contract upgrading with other attributes and functions", async function () {
       const { utt: originalContract } = await loadFixture(deployUTT);
 
       const UTT = await ethers.getContractFactory("TestUpgradeUTT");

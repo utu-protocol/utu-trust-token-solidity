@@ -56,13 +56,6 @@ abstract contract MigratableEndorsement is Migratable, Endorsement {
                 endorsement.target,
                 endorsement.from
             );
-
-            emit Endorse(
-                endorsement.from,
-                endorsement.target,
-                endorsement.amount,
-                endorsement.transactionId
-            );
         }
     }
 

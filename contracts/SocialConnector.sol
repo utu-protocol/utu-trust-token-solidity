@@ -49,7 +49,6 @@ abstract contract SocialConnector is ERC20Upgradeable, Roles {
         bytes32 connectedUserIdHash
     ) internal {
         socialConnections[user][connectedTypeId] = connectedUserIdHash;
-        emit AddConnection(user, connectedTypeId, connectedUserIdHash);
     }
 
     /**
@@ -71,7 +70,7 @@ abstract contract SocialConnector is ERC20Upgradeable, Roles {
         // only add connection if not previously added
         if (socialConnections[user][connectedTypeId] == 0) {
             _saveConnection(user, connectedTypeId, connectedUserIdHash);
-
+            emit AddConnection(user, connectedTypeId, connectedUserIdHash);
             // mint reward
             super._mint(user, socialConnectionReward);
         }
