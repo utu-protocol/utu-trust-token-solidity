@@ -113,8 +113,12 @@ contract TestUpgradeUTT is
         return counter;
     }
 
-    /**
-     * @dev This empty reserved space is put in place to allow future versions to add new
+    function reward(address user, uint256 rewardUTT) internal override(Endorsement, SocialConnector) {
+        super._mint(user, rewardUTT);
+    }
+
+        /**
+         * @dev This empty reserved space is put in place to allow future versions to add new
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
