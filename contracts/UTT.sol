@@ -148,7 +148,7 @@ contract UTT is
      * Claims the available $UTU rewards by sending the corresponding amount of $UTU to the user. Resets the amount of
      * claimable $UTU to 0.
      */
-    function claimRewards() public onlyIfKYCed {
+    function claimRewards() public onlyIfKYCed(msg.sender) {
         uint256 amount = claimableUTU[msg.sender];
         claimableUTU[msg.sender] = 0;
 
