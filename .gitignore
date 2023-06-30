@@ -10,3 +10,4 @@ artifacts
 
 UTT.flattened.sol
 exports
+typechain-types

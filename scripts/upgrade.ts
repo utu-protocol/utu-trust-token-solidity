@@ -5,7 +5,7 @@
 // Runtime Environment's members available in the global scope.
 const { ethers, network, upgrades } = require("hardhat");
 
-async function deployUTT() {
+async function upgradeUTT() {
   // Hardhat always runs the compile task when running scripts with its command
   // line interface.
   //
@@ -15,17 +15,18 @@ async function deployUTT() {
 
   // We get the contract to deploy
   const UTT = await ethers.getContractFactory("UTT");
-  const deployArgs = require(`./deploy.args.${network.name}`);
-  const utt = await upgrades.deployProxy(UTT, deployArgs);
+  const updagradeArgs = require(`./deploy.args.${network.name}`);
+  const contractAddress = updagradeArgs[0];
+  const utt = await upgrades.upgradeProxy(contractAddress, UTT);
 
   await utt.deployed();
 
-  console.log("UTT deployed to:", utt.address);
+  console.log("UTT upgraded to:", utt.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
-deployUTT().catch((error) => {
+upgradeUTT().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });

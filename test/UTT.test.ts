@@ -1,6 +1,7 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import {
+  accessControlRevertError,
   addConnection,
   deployUTT,
   deployUTTUnmigrated,
@@ -8,7 +9,10 @@ import {
   generateRandomAccounts,
   getHash,
   proxyEndorse,
+  upgradeUTT,
 } from "./UTT.fixture";
+
+import { ethers } from "hardhat";
 
 /**
  * Invokes the addConnection() method on the contract for the given user address, which, if successful, will mint some
@@ -236,14 +240,26 @@ describe("UTT", function () {
         utt
           .connect(user1)
           .addConnection(user1.address, 0, getHash(user1.address))
-      ).to.be.revertedWith(`AccessControl:`);
+      ).to.be.revertedWith(
+        await accessControlRevertError(
+          utt,
+          user1.address,
+          "SOCIAL_CONNECTOR_ROLE"
+        )
+      );
     });
 
     it("should not allow a user to remove a connection by themselves", async function () {
       const { utt, user1 } = await loadFixture(deployUTT);
       await expect(
         utt.connect(user1).removeConnection(user1.address, 0)
-      ).to.be.revertedWith(`AccessControl:`);
+      ).to.be.revertedWith(
+        await accessControlRevertError(
+          utt,
+          user1.address,
+          "SOCIAL_CONNECTOR_ROLE"
+        )
+      );
     });
   });
 
@@ -375,7 +391,13 @@ describe("UTT", function () {
         utt
           .connect(user1)
           .proxyEndorse(user1.address, user2.address, 1, getHash(user1.address))
-      ).to.be.revertedWith(`AccessControl:`);
+      ).to.be.revertedWith(
+        await accessControlRevertError(
+          utt,
+          user1.address,
+          "PROXY_ENDORSER_ROLE"
+        )
+      );
     });
   });
 
@@ -412,10 +434,10 @@ describe("UTT", function () {
       }));
       await expect(
         utt.connect(admin).migrateSocialConnections(connections)
-      ).to.emit(utt, "AddConnection");
+      ).to.not.emit(utt, "AddConnection");
 
       const events = await utt.queryFilter("AddConnection");
-      expect(events.length).to.be.eq(200);
+      expect(events.length).to.be.eq(0);
     });
 
     it("should allow endorsements migration", async function () {
@@ -466,12 +488,49 @@ describe("UTT", function () {
         utt
           .connect(admin)
           .migrateEndorsements(endorsementsData, oldContract.address)
-      ).to.emit(utt, "Endorse");
+      ).to.not.emit(utt, "Endorse");
 
       expect(previousEndorserStakes).to.be.eq(
         await utt.previousEndorserStakes(service1.address, user1.address)
       );
       expect(totalStake).to.be.eq(await utt.totalStake(service1.address));
+    });
+  });
+
+  describe("Upgradable", function () {
+    it("Should allow upgrading the contract", async function () {
+      const {
+        utt: originalContract,
+        admin,
+        user1,
+        connector,
+      } = await loadFixture(deployUTT);
+
+      await addConnection(originalContract, connector, user1.address);
+
+      const originalBalance = await originalContract.balanceOf(user1.address);
+
+      expect(originalBalance).to.be.eq(10000);
+
+      const upgradedContract = await upgradeUTT(originalContract.address);
+
+      const balance = await upgradedContract.balanceOf(user1.address);
+
+      expect(originalBalance).to.be.eq(balance);
+
+      const currentOwner = await upgradedContract.owner();
+      expect(currentOwner).to.be.eq(admin.address);
+    });
+
+    it("Should allow contract upgrading with other attributes and functions", async function () {
+      const { utt: originalContract } = await loadFixture(deployUTT);
+
+      const UTT = await ethers.getContractFactory("TestUpgradeUTT");
+
+      const upgradedContract = await upgradeUTT(originalContract.address, UTT);
+
+      upgradedContract.incrementCounter();
+      expect(await upgradedContract.getCounter()).to.be.eq(1);
     });
   });
 });

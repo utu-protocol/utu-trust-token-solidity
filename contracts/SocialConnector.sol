@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./Roles.sol";
 
-abstract contract SocialConnector is ERC20, Roles {
+abstract contract SocialConnector is ERC20Upgradeable, Roles {
     /**
      * The `socialConnections` mapping is storing the connected socialIds
      * as so: address => socialTypeId => socialUserIdHash
@@ -17,7 +18,7 @@ abstract contract SocialConnector is ERC20, Roles {
      * The `socialConnectionReward` variable is the amount of tokens to be minted
      * as a reward for connecting/verifying with a social platform user id.
      */
-    uint256 public socialConnectionReward = 10000;
+    uint256 public socialConnectionReward;
     // Events for connecting social media accounts/other user ids.
 
     /** Social media account was connected */
@@ -34,13 +35,20 @@ abstract contract SocialConnector is ERC20, Roles {
         bytes32 indexed _connectedUserIdHash
     );
 
+    function __SocialConnector_init() internal virtual onlyInitializing {
+        __SocialConnector_init_unchained();
+    }
+
+    function __SocialConnector_init_unchained() internal onlyInitializing {
+        socialConnectionReward = 10000;
+    }
+
     function _saveConnection(
         address user,
         uint256 connectedTypeId,
         bytes32 connectedUserIdHash
     ) internal {
         socialConnections[user][connectedTypeId] = connectedUserIdHash;
-        emit AddConnection(user, connectedTypeId, connectedUserIdHash);
     }
 
     /**
@@ -62,7 +70,7 @@ abstract contract SocialConnector is ERC20, Roles {
         // only add connection if not previously added
         if (socialConnections[user][connectedTypeId] == 0) {
             _saveConnection(user, connectedTypeId, connectedUserIdHash);
-
+            emit AddConnection(user, connectedTypeId, connectedUserIdHash);
             // mint reward
             super._mint(user, socialConnectionReward);
         }
@@ -93,4 +101,12 @@ abstract contract SocialConnector is ERC20, Roles {
     function setSocialConnectionReward(uint256 amount) public onlyOwner {
         socialConnectionReward = amount;
     }
+
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[49] private __gap;
 }
