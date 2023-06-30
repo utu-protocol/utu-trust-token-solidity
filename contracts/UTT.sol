@@ -4,6 +4,8 @@ pragma solidity ^0.8.7;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+
 import "./MigratableEndorsement.sol";
 import "./MigratableSocialConnector.sol";
 
@@ -13,6 +15,8 @@ contract UTT is
     ERC20BurnableUpgradeable,
     ERC20PausableUpgradeable
 {
+    using SafeERC20 for ERC20;
+
     /** Discounting component for computing $UTU rewards corresponding to UTT rewards (see whitepaper) */
     uint256 public D_UTT;
 
