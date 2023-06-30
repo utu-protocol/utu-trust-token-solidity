@@ -40,7 +40,7 @@ contract UTT is
                 return;
             }
         }
-        error("User is not KYCed");
+        revert("User is not KYCed");
      }
 
     /**
