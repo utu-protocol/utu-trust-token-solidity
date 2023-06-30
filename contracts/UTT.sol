@@ -137,7 +137,7 @@ contract UTT is
     /**
     * Mints rewardUTT to the user and adds the corresponding amount of $UTU to the claimableUTU mapping.
     */
-    function reward(address user, uint256 rewardUTT) internal {
+    function reward(address user, uint256 rewardUTT) internal override(Endorsement, SocialConnector) {
         super._mint(user, rewardUTT);
         rewardUTU = rewardUTT / D_UTT;
         claimableUTU[user] += rewardUTU;

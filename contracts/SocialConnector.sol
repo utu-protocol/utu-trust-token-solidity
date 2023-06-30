@@ -113,7 +113,7 @@ abstract contract SocialConnector is ERC20Upgradeable, Roles {
         connectedTypeWhitelistedForKYC[connectedTypeId] = true;
     }
 
-    function reward(address user, uint256 rewardUTT) internal;
+    function reward(address user, uint256 rewardUTT) internal virtual;
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
