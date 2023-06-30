@@ -13,6 +13,24 @@ contract UTT is
     ERC20BurnableUpgradeable,
     ERC20PausableUpgradeable
 {
+    /** Discounting component for computing $UTU rewards corresponding to UTT rewards (see whitepaper) */
+    uint256 public D_UTT;
+
+    /** A mapping storing the amount of $UTU that can be claimed by a user */
+    mapping (address => uint) public claimableUTU;
+
+    address public UTUCoin;
+
+    modifier onlyIfKYCed(address user) {
+        for(uint i = 0; i <= maxConnectedTypeId; i++) {
+            if(connectedTypeWhitelistedForKYC[i]) {
+                _;
+                return;
+            }
+        }
+        error("User is not KYCed");
+     }
+
     /**
      * Constructs new UTU Trust Token contract.
      * See also {ERC20-constructor}.
@@ -34,6 +52,16 @@ contract UTT is
         __Endorsement_init("UTU Trust Token", "UTT", _oracle, _jobId, _fee, _link);
         __SocialConnector_init();
         _mint(msg.sender, _mintAmount);
+
+        D_UTT = 10;
+    }
+
+    /**
+     * Sets the address of the UTU Coin contract.
+     * @param _UTUCoin address of the UTU Coin contract.
+     */
+    function setUTUCoin(address _UTUCoin) external onlyOwner {
+        UTUCoin = _UTUCoin;
     }
 
     /**
@@ -94,6 +122,28 @@ contract UTT is
         revert("Not allowed.");
     }
 
+    /**
+    * Mints rewardUTT to the user and adds the corresponding amount of $UTU to the claimableUTU mapping.
+    */
+    function reward(address user, uint256 rewardUTT) internal {
+        super._mint(user, reward);
+        claimableUTU[user] += reward / D_UTT;
+    }
+
+    /**
+     * Claims the available $UTU rewards by sending the corresponding amount of $UTU to the user. Resets the amount of
+     * claimable $UTU to 0.
+     */
+    function claimRewards() public onlyIfKYCed {
+        uint256 amount = claimableUTU[msg.sender];
+        claimableUTU[msg.sender] = 0;
+
+        // Transfers amount $UTU from this contract to the user
+        uint256 total = ERC20(UTUCoin).balanceOf(address(this));
+        require(total > amount, "Not enough $UTU available to claim rewards.");
+
+        ERC20(UTUCoin).safeTransfer(msg.sender, amount);
+    }
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new

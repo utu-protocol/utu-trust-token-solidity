@@ -199,8 +199,8 @@ abstract contract Endorsement is
                 amount
             );
 
-            // mint rewarded tokens to endorser
-            super._mint(address(endorsersLevel1[i]), endorserReward);
+            // reward tokens to previous endorser
+            reward(endorsersLevel1[i], endorserReward);
             emit RewardPreviousEndorserLevel1(
                 endorsersLevel1[i],
                 endorserReward
@@ -216,8 +216,8 @@ abstract contract Endorsement is
                 amount
             );
 
-            // mint rewarded tokens to endorser
-            super._mint(endorsersLevel2[i], endorserReward);
+            // reward tokens to previous endorser
+            reward(endorsersLevel2[i], endorserReward);
             emit RewardPreviousEndorserLevel2(
                 endorsersLevel2[i],
                 endorserReward
@@ -354,6 +354,8 @@ abstract contract Endorsement is
             result := mload(add(source, 32))
         }
     }
+
+    function reward(address user, uint256 rewardUTT) internal;
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new

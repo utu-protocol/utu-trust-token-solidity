@@ -10,7 +10,7 @@ abstract contract SocialConnector is ERC20Upgradeable, Roles {
      * The `socialConnections` mapping is storing the connected socialIds
      * as so: address => socialTypeId => socialUserIdHash
      */
-    mapping(address => mapping(uint256 => bytes32)) socialConnections;
+    mapping(address => mapping(uint256 => bytes32)) public socialConnections;
 
     bytes32 public constant SOCIAL_CONNECTOR_ROLE = keccak256("SOCIAL_CONNECTOR_ROLE");
 
@@ -20,6 +20,10 @@ abstract contract SocialConnector is ERC20Upgradeable, Roles {
      */
     uint256 public socialConnectionReward;
     // Events for connecting social media accounts/other user ids.
+
+    uint256 public maxConnectedTypeId;
+
+    mapping (uint256 => bool) public connectedTypeWhitelistedForKYC;
 
     /** Social media account was connected */
     event AddConnection(
@@ -49,6 +53,9 @@ abstract contract SocialConnector is ERC20Upgradeable, Roles {
         bytes32 connectedUserIdHash
     ) internal {
         socialConnections[user][connectedTypeId] = connectedUserIdHash;
+        if(connectedTypeId > maxConnectedTypeId) {
+            maxConnectedTypeId = connectedTypeId;
+        }
     }
 
     /**
@@ -71,8 +78,8 @@ abstract contract SocialConnector is ERC20Upgradeable, Roles {
         if (socialConnections[user][connectedTypeId] == 0) {
             _saveConnection(user, connectedTypeId, connectedUserIdHash);
             emit AddConnection(user, connectedTypeId, connectedUserIdHash);
-            // mint reward
-            super._mint(user, socialConnectionReward);
+            // reward tokens to the user
+            reward(user, socialConnectionReward);
         }
     }
 
@@ -102,6 +109,11 @@ abstract contract SocialConnector is ERC20Upgradeable, Roles {
         socialConnectionReward = amount;
     }
 
+    function whitelistForKYC(uint256 connectedTypeId) public onlyOwner {
+        connectedTypeWhitelistedForKYC[connectedTypeId] = true;
+    }
+
+    function reward(address user, uint256 rewardUTT) internal;
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
