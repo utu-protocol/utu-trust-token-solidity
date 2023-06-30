@@ -21,6 +21,18 @@ contract UTT is
 
     address public UTUCoin;
 
+    /** An amount of UTU Coin was rewarded */
+    event RewardUTUCoin(
+        address indexed _to,
+        uint _value
+    );
+
+    /** Rewarded UTU Coin were claimed */
+    event ClaimUTURewards(
+        address indexed _by,
+        uint _value
+    );
+
     modifier onlyIfKYCed(address user) {
         for(uint i = 0; i <= maxConnectedTypeId; i++) {
             if(connectedTypeWhitelistedForKYC[i]) {
@@ -126,8 +138,10 @@ contract UTT is
     * Mints rewardUTT to the user and adds the corresponding amount of $UTU to the claimableUTU mapping.
     */
     function reward(address user, uint256 rewardUTT) internal {
-        super._mint(user, reward);
-        claimableUTU[user] += reward / D_UTT;
+        super._mint(user, rewardUTT);
+        rewardUTU = rewardUTT / D_UTT;
+        claimableUTU[user] += rewardUTU;
+        emit RewardUTUCoin(user, rewardUTU);
     }
 
     /**
@@ -143,6 +157,8 @@ contract UTT is
         require(total > amount, "Not enough $UTU available to claim rewards.");
 
         ERC20(UTUCoin).safeTransfer(msg.sender, amount);
+
+        emit ClaimUTURewards(msg.sender, amount);
     }
 
     /**
