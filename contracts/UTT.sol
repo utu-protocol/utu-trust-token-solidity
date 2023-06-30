@@ -39,7 +39,7 @@ contract UTT is
 
     modifier onlyIfKYCed(address user) {
         for(uint i = 0; i <= maxConnectedTypeId; i++) {
-            if(connectedTypeWhitelistedForKYC[i]) {
+            if(connectedTypeWhitelistedForKYC[i] && socialConnections[user][i] != 0) {
                 _;
                 return;
             }
