@@ -116,21 +116,25 @@ describe("UTT", function () {
       const { utt, mockOperator, admin, service1, user2 } = await loadFixture(
         deployUTT
       );
-      await expect(
-        endorse(
-          utt,
-          mockOperator,
-          admin,
-          service1.address,
-          1000,
-          mockTransactionId,
-          [user2.address],
-          []
-        )
-      )
+
+      const endorseP = endorse(
+        utt,
+        mockOperator,
+        admin,
+        service1.address,
+        1000,
+        mockTransactionId,
+        [user2.address],
+        []
+      );
+
+      await expect(endorseP)
         .to.emit(utt, "RewardPreviousEndorserLevel1")
         // We didn't previously call endorse for user2, so reward should be 0 despite it being in endorsersLevel1:
-        .withArgs(user2.address, 0);
+        .withArgs(user2.address, 0)
+        // Similarly, the rewarded UTU Coin amount should be 0:
+        .to.emit(utt, "RewardUTUCoin")
+        .withArgs(user2.address, 0)
     });
 
     it("Reward 1st-level previous endorsers for user1", async function () {
@@ -153,6 +157,9 @@ describe("UTT", function () {
       )
         .to.emit(utt, "RewardPreviousEndorserLevel1")
         // We didn't previously call endorse for user2, so reward should be 0 despite it being in endorsersLevel1:
+        .withArgs(user2.address, 0)
+        // Similarly, the rewarded UTU Coin amount should be 0:
+        .to.emit(utt, "RewardUTUCoin")
         .withArgs(user2.address, 0);
     });
 
@@ -184,8 +191,11 @@ describe("UTT", function () {
         )
       )
         .to.emit(utt, "RewardPreviousEndorserLevel1")
-        // We didn't previously call endorse for user2, so reward should be 0 despite it being in endorsersLevel1:
-        .withArgs(admin.address, 87);
+        // We previously call endorsed for user2, so reward should be correct for endorsersLevel1:
+        .withArgs(admin.address, 87)
+        // The rewarded UTU Coin amount should be 1/10th of the UTT amount:
+        .to.emit(utt, "RewardUTUCoin")
+        .withArgs(admin.address, 8.7 * 10 ** 18);
     });
 
     it("Reward the correct amount for the second-level endorser", async function () {
@@ -229,7 +239,11 @@ describe("UTT", function () {
         )
       )
         .to.emit(utt, "RewardPreviousEndorserLevel2")
-        .withArgs(user1.address, 8);
+        .withArgs(user1.address, 8)
+        // The rewarded UTU Coin amount should be 1/10th of the UTT amount:
+        .to.emit(utt, "RewardUTUCoin")
+        .withArgs(admin.address, 0.8 * 10 ** 18);
+
     });
   });
 
@@ -260,6 +274,13 @@ describe("UTT", function () {
           "SOCIAL_CONNECTOR_ROLE"
         )
       );
+    });
+  });
+
+  describe("User claims UTU Coin", function () {
+    it.skip("should allow a user to claim UTU Coin", async function () {
+      const { utt, user1 } = await loadFixture(deployUTT);
+      await utt.connect(user1).claimUTUCoin();
     });
   });
 
