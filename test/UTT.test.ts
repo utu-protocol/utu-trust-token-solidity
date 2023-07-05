@@ -10,16 +10,13 @@ import {
   getHash,
   proxyEndorse,
   upgradeUTT,
-} from "./UTT.fixture";
+  UTU_DECIMALS,
+  deployUTUCoinMock,
+}
+  from "./UTT.fixture";
 
 import { ethers } from "hardhat";
 
-/**
- * Invokes the addConnection() method on the contract for the given user address, which, if successful, will mint some
- * UTT to their account.
- */
-
-const DECIMALS: bigint = 10n**18n;
 
 describe("UTT", function () {
   const mockTransactionId = "123456";
@@ -197,7 +194,7 @@ describe("UTT", function () {
         .withArgs(admin.address, 87)
         // The rewarded UTU Coin amount should be 1/10th of the UTT amount:
         .to.emit(utt, "RewardUTUCoin")
-        .withArgs(admin.address, (87n * DECIMALS) / 10n);
+        .withArgs(admin.address, (87n * UTU_DECIMALS) / 10n);
     });
 
     it("Reward the correct amount for the second-level endorser", async function () {
@@ -244,7 +241,7 @@ describe("UTT", function () {
         .withArgs(user1.address, 8)
         // The rewarded UTU Coin amount should be 1/10th of the UTT amount:
         .to.emit(utt, "RewardUTUCoin")
-        .withArgs(user1.address, (8n * DECIMALS) / 10n);
+        .withArgs(user1.address, (8n * UTU_DECIMALS) / 10n);
     });
   });
 
@@ -279,9 +276,89 @@ describe("UTT", function () {
   });
 
   describe("User claims UTU Coin", function () {
-    it.skip("should allow a user to claim UTU Coin", async function () {
+    it("should should revert with 'User is not KYCed'", async function () {
       const { utt, user1 } = await loadFixture(deployUTT);
-      await utt.connect(user1).claimUTUCoin();
+
+      await expect(utt.connect(user1).claimRewards()).to.revertedWith(
+        "User is not KYCed"
+      );
+    });
+
+    it("should should revert with 'User is not KYCed' after removing from whitelist", async function () {
+      const { utt, admin, user1, connector } = await loadFixture(deployUTT);
+      await addConnection(utt, connector, user1.address, 0);
+      await utt.connect(admin).whitelistForKYC(0);
+      await utt.connect(admin).deWhitelistForKYC(0);
+
+      await expect(utt.connect(user1).claimRewards()).to.revertedWith(
+        "User is not KYCed"
+      );
+    });
+
+    it("should should revert with 'UTU Coin address not configured.'", async function () {
+      const { utt, admin, user1, connector } = await loadFixture(deployUTT);
+      await addConnection(utt, connector, user1.address, 0);
+      await utt.connect(admin).whitelistForKYC(0);
+
+      await expect(utt.connect(user1).claimRewards()).to.revertedWith(
+        "UTU Coin address not configured."
+      );
+    });
+
+    it("should should revert with 'Not enough UTU Coin available to claim rewards.'", async function () {
+      const { utt, admin, user1, connector } = await loadFixture(deployUTT);
+      await addConnection(utt, connector, user1.address, 0);
+      await utt.connect(admin).whitelistForKYC(0);
+      const utuCoinAddress = (await deployUTUCoinMock(utt.address, 0n)).address;
+      await utt.connect(admin).setUTUCoin(utuCoinAddress);
+
+      await expect(utt.connect(user1).claimRewards()).to.revertedWith(
+        // User 1 could claim the reward for addConnection but:
+        "Not enough UTU Coin available to claim rewards."
+      );
+    });
+
+    it("should allow a user to claim UTU Coin", async function () {
+      const { utt, mockOperator, admin, service1, user1, connector } =
+        await loadFixture(deployUTT);
+      await addConnection(utt, connector, user1.address, 0);
+      await utt.connect(admin).whitelistForKYC(0);
+      const utuCoinAddress = (await deployUTUCoinMock(utt.address, 2000n))
+        .address;
+      await utt.connect(admin).setUTUCoin(utuCoinAddress);
+
+      await endorse(
+        utt,
+        mockOperator,
+        user1,
+        service1.address,
+        200,
+        mockTransactionId,
+        [],
+        []
+      );
+
+      await endorse(
+        utt,
+        mockOperator,
+        admin,
+        service1.address,
+        200,
+        mockTransactionId,
+        [user1.address],
+        []
+      );
+
+      const addConnectionReward = 1000n * UTU_DECIMALS;
+      const endorsementReward = (87n * UTU_DECIMALS) / 10n;
+
+      await expect(utt.connect(user1).claimRewards())
+        .to.emit(utt, "ClaimUTURewards")
+        .withArgs(user1.address, addConnectionReward + endorsementReward);
+
+      await expect(
+        await utt.connect(user1).totalClaimableUTUCoin()
+      ).to.eq(0);
     });
   });
 

@@ -185,3 +185,18 @@ export async function accessControlRevertError(
   const roleValue = await contract[role]();
   return `AccessControl: account ${address.toLowerCase()} is missing role ${roleValue}`;
 }
+
+export const UTU_DECIMALS: bigint = 10n**18n;
+
+export async function deployUTUCoinMock(
+  initialHolder: string,
+  initialAmount: bigint
+) {
+  const UTUCoinMock = await ethers.getContractFactory("UTUCoinMock");
+  const utuCoinMock = await UTUCoinMock.deploy(
+    initialHolder,
+    initialAmount * UTU_DECIMALS
+  ).then((f) => f.deployed());
+
+  return utuCoinMock;
+}
