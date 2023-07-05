@@ -143,7 +143,7 @@ contract UTT is
     */
     function reward(address user, uint256 rewardUTT) internal override(Endorsement, SocialConnector) {
         super._mint(user, rewardUTT);
-        uint256 rewardUTU = (rewardUTT / D_UTT) * 10**18;
+        uint256 rewardUTU = (rewardUTT * 10**18) / D_UTT ;
         claimableUTU[user] += rewardUTU;
         emit RewardUTUCoin(user, rewardUTU);
     }
