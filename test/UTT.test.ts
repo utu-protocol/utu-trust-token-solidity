@@ -19,6 +19,8 @@ import { ethers } from "hardhat";
  * UTT to their account.
  */
 
+const DECIMALS: bigint = 10n**18n;
+
 describe("UTT", function () {
   const mockTransactionId = "123456";
 
@@ -195,7 +197,7 @@ describe("UTT", function () {
         .withArgs(admin.address, 87)
         // The rewarded UTU Coin amount should be 1/10th of the UTT amount:
         .to.emit(utt, "RewardUTUCoin")
-        .withArgs(admin.address, 8.7 * 10 ** 18);
+        .withArgs(admin.address, (87n * DECIMALS) / 10n);
     });
 
     it("Reward the correct amount for the second-level endorser", async function () {
@@ -242,8 +244,7 @@ describe("UTT", function () {
         .withArgs(user1.address, 8)
         // The rewarded UTU Coin amount should be 1/10th of the UTT amount:
         .to.emit(utt, "RewardUTUCoin")
-        .withArgs(admin.address, 0.8 * 10 ** 18);
-
+        .withArgs(user1.address, (8n * DECIMALS) / 10n);
     });
   });
 
