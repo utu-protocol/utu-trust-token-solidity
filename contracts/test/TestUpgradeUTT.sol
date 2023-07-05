@@ -15,6 +15,14 @@ contract TestUpgradeUTT is
     ERC20BurnableUpgradeable,
     ERC20PausableUpgradeable
 {
+    /** Discounting component for computing $UTU rewards corresponding to UTT rewards (see whitepaper) */
+    uint256 public D_UTT;
+
+    /** A mapping storing the amount of $UTU that can be claimed by a user */
+    mapping (address => uint) public claimableUTU;
+
+    address public UTUCoin;
+
     uint256 private counter;
 
     /**
