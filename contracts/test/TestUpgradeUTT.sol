@@ -18,11 +18,16 @@ contract TestUpgradeUTT is
     /** Discounting component for computing $UTU rewards corresponding to UTT rewards (see whitepaper) */
     uint256 public D_UTT;
 
-    /** A mapping storing the amount of $UTU that can be claimed by a user */
-    mapping (address => uint) public claimableUTU;
+    /** A mapping storing the amount of UTU Coin that can be claimed by a user */
+    mapping (address => uint) public claimableUTUCoin;
 
+    /** Total claimable UTU Coin by all users */
+    uint256 public totalClaimableUTUCoin;
+
+    /** UTU Coin contract address */
     address public UTUCoin;
 
+    /** Add a new variable in the upgrade */
     uint256 private counter;
 
     /**

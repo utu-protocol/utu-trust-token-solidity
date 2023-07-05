@@ -29,7 +29,8 @@ abstract contract SocialConnector is ERC20Upgradeable, Roles {
     event AddConnection(
         address indexed _user,
         uint indexed _connectedTypeId,
-        bytes32 indexed _connectedUserIdHash
+        bytes32 indexed _connectedUserIdHash,
+        uint256 reward
     );
 
     /** Social media account was disconnected */
@@ -77,7 +78,7 @@ abstract contract SocialConnector is ERC20Upgradeable, Roles {
         // only add connection if not previously added
         if (socialConnections[user][connectedTypeId] == 0) {
             _saveConnection(user, connectedTypeId, connectedUserIdHash);
-            emit AddConnection(user, connectedTypeId, connectedUserIdHash);
+            emit AddConnection(user, connectedTypeId, connectedUserIdHash, socialConnectionReward);
             // reward tokens to the user
             reward(user, socialConnectionReward);
         }
@@ -109,6 +110,10 @@ abstract contract SocialConnector is ERC20Upgradeable, Roles {
         socialConnectionReward = amount;
     }
 
+    /**
+     * Whitelists a connectedTypeId to provide sufficient KYC for claiming UTU Coin rewards
+     * @param connectedTypeId id of the social media platform
+     */
     function whitelistForKYC(uint256 connectedTypeId) public onlyOwner {
         connectedTypeWhitelistedForKYC[connectedTypeId] = true;
     }

@@ -17,12 +17,16 @@ contract UTT is
 {
     using SafeERC20 for ERC20;
 
-    /** Discounting component for computing $UTU rewards corresponding to UTT rewards (see whitepaper) */
+    /** Discounting component for computing UTU Coin rewards corresponding to UTT rewards (see whitepaper) */
     uint256 public D_UTT;
 
-    /** A mapping storing the amount of $UTU that can be claimed by a user */
-    mapping (address => uint) public claimableUTU;
+    /** A mapping storing the amount of UTU Coin that can be claimed by a user */
+    mapping (address => uint) public claimableUTUCoin;
 
+    /** Total claimable UTU Coin by all users */
+    uint256 public totalClaimableUTUCoin;
+
+    /** UTU Coin contract address */
     address public UTUCoin;
 
     /** An amount of UTU Coin was rewarded */
@@ -139,28 +143,33 @@ contract UTT is
     }
 
     /**
-    * Mints rewardUTT to the user and adds the corresponding amount of $UTU to the claimableUTU mapping.
+    * Mints rewardUTT to the user and adds the corresponding amount of UTU Coin to the claimableUTU mapping.
     */
     function reward(address user, uint256 rewardUTT) internal override(Endorsement, SocialConnector) {
         super._mint(user, rewardUTT);
-        uint256 rewardUTU = (rewardUTT * 10**18) / D_UTT ;
-        claimableUTU[user] += rewardUTU;
+        uint256 rewardUTU = (rewardUTT * 10**18) / D_UTT;
+        claimableUTUCoin[user] += rewardUTU;
+        totalClaimableUTUCoin += rewardUTU;
         emit RewardUTUCoin(user, rewardUTU);
     }
 
     /**
-     * Claims the available $UTU rewards by sending the corresponding amount of $UTU to the user. Resets the amount of
-     * claimable $UTU to 0.
+     * Claims the available UTU Coin rewards by sending the corresponding amount of UTU Coin to the sender.
+     * Resets the amount of claimable UTU Coin for the sender to 0.
      */
     function claimRewards() public onlyIfKYCed(msg.sender) {
-        uint256 amount = claimableUTU[msg.sender];
-        claimableUTU[msg.sender] = 0;
+        require(UTUCoin != address(0), "UTU Coin address not configured.");
 
-        // Transfers amount $UTU from this contract to the user
+        uint256 amount = claimableUTUCoin[msg.sender];
+
+        // Transfers amount UTU Coin from this contract to the user
         uint256 total = ERC20(UTUCoin).balanceOf(address(this));
-        require(total > amount, "Not enough $UTU available to claim rewards.");
+
+        require(total >= amount, "Not enough UTU Coin available to claim rewards.");
 
         ERC20(UTUCoin).safeTransfer(msg.sender, amount);
+        claimableUTUCoin[msg.sender] = 0;
+        totalClaimableUTUCoin -= amount;
 
         emit ClaimUTURewards(msg.sender, amount);
     }
