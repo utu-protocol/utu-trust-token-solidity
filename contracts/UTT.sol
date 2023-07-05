@@ -8,49 +8,12 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import "./MigratableEndorsement.sol";
 import "./MigratableSocialConnector.sol";
+import "./MigratableReward.sol";
 
-contract UTT is
-    MigratableEndorsement,
-    MigratableSocialConnector,
+contract UTT is MigratableReward,
     ERC20BurnableUpgradeable,
     ERC20PausableUpgradeable
 {
-    using SafeERC20 for ERC20;
-
-    /** Discounting component for computing UTU Coin rewards corresponding to UTT rewards (see whitepaper) */
-    uint256 public D_UTT;
-
-    /** A mapping storing the amount of UTU Coin that can be claimed by a user */
-    mapping (address => uint) public claimableUTUCoin;
-
-    /** Total claimable UTU Coin by all users */
-    uint256 public totalClaimableUTUCoin;
-
-    /** UTU Coin contract address */
-    address public UTUCoin;
-
-    /** An amount of UTU Coin was rewarded */
-    event RewardUTUCoin(
-        address indexed _to,
-        uint _value
-    );
-
-    /** Rewarded UTU Coin were claimed */
-    event ClaimUTURewards(
-        address indexed _by,
-        uint _value
-    );
-
-    modifier onlyIfKYCed(address user) {
-        for(uint i = 0; i <= maxConnectedTypeId; i++) {
-            if(connectedTypeWhitelistedForKYC[i] && socialConnections[user][i] != 0) {
-                _;
-                return;
-            }
-        }
-        revert("User is not KYCed");
-     }
-
     /**
      * Constructs new UTU Trust Token contract.
      * See also {ERC20-constructor}.
@@ -70,18 +33,9 @@ contract UTT is
     ) external initializer {
         __Roles_init();
         __Endorsement_init("UTU Trust Token", "UTT", _oracle, _jobId, _fee, _link);
+        __Reward_init();
         __SocialConnector_init();
         _mint(msg.sender, _mintAmount);
-
-        D_UTT = 10;
-    }
-
-    /**
-     * Sets the address of the UTU Coin contract.
-     * @param _UTUCoin address of the UTU Coin contract.
-     */
-    function setUTUCoin(address _UTUCoin) external onlyOwner {
-        UTUCoin = _UTUCoin;
     }
 
     /**
@@ -140,38 +94,6 @@ contract UTT is
         uint256 amount
     ) public pure virtual override returns (bool) {
         revert("Not allowed.");
-    }
-
-    /**
-    * Mints rewardUTT to the user and adds the corresponding amount of UTU Coin to the claimableUTU mapping.
-    */
-    function reward(address user, uint256 rewardUTT) internal override(Endorsement, SocialConnector) {
-        super._mint(user, rewardUTT);
-        uint256 rewardUTU = (rewardUTT * 10**18) / D_UTT;
-        claimableUTUCoin[user] += rewardUTU;
-        totalClaimableUTUCoin += rewardUTU;
-        emit RewardUTUCoin(user, rewardUTU);
-    }
-
-    /**
-     * Claims the available UTU Coin rewards by sending the corresponding amount of UTU Coin to the sender.
-     * Resets the amount of claimable UTU Coin for the sender to 0.
-     */
-    function claimRewards() public onlyIfKYCed(msg.sender) {
-        require(UTUCoin != address(0), "UTU Coin address not configured.");
-
-        uint256 amount = claimableUTUCoin[msg.sender];
-
-        // Transfers amount UTU Coin from this contract to the user
-        uint256 total = ERC20(UTUCoin).balanceOf(address(this));
-
-        require(total >= amount, "Not enough UTU Coin available to claim rewards.");
-
-        ERC20(UTUCoin).safeTransfer(msg.sender, amount);
-        claimableUTUCoin[msg.sender] = 0;
-        totalClaimableUTUCoin -= amount;
-
-        emit ClaimUTURewards(msg.sender, amount);
     }
 
 }

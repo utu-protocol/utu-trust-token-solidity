@@ -4,28 +4,15 @@ pragma solidity ^0.8.7;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
-import "../MigratableEndorsement.sol";
-import "../MigratableSocialConnector.sol";
+import "../MigratableReward.sol";
 
 
 // this contract shouldn't be deployed it's just used for testing the upgradeability
 contract TestUpgradeUTT is
-    MigratableEndorsement,
-    MigratableSocialConnector,
+    MigratableReward,
     ERC20BurnableUpgradeable,
     ERC20PausableUpgradeable
 {
-    /** Discounting component for computing $UTU rewards corresponding to UTT rewards (see whitepaper) */
-    uint256 public D_UTT;
-
-    /** A mapping storing the amount of UTU Coin that can be claimed by a user */
-    mapping (address => uint) public claimableUTUCoin;
-
-    /** Total claimable UTU Coin by all users */
-    uint256 public totalClaimableUTUCoin;
-
-    /** UTU Coin contract address */
-    address public UTUCoin;
 
     /** Add a new variable in the upgrade */
     uint256 private counter;
@@ -126,7 +113,4 @@ contract TestUpgradeUTT is
         return counter;
     }
 
-    function reward(address user, uint256 rewardUTT) internal override(Endorsement, SocialConnector) {
-        super._mint(user, rewardUTT);
-    }
 }
