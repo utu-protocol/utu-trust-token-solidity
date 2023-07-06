@@ -53,10 +53,9 @@ contract Migratable is Roles {
      * @dev Migratables can still be fulfilled; thus the actual migration process should not be started until
      *      all pending fulfillments are done.
      */
-    function toggleMigrationFlag() public onlyOwner {
+    function startMigrationToNewContract() public onlyOwner {
         isMigratingToNewContract = !isMigratingToNewContract;
     }
-
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
      * variables without shifting down storage in the inheritance chain.

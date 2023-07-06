@@ -156,7 +156,7 @@ contract UTTProxy is Ownable, ChainlinkClient {
      * @dev Endorsements can still be fulfilled; thus the actual migration process should not be started until
      *      all pending fulfillments are done.
      */
-    function toggleMigrationFlag() public onlyOwner {
+    function startMigrationToNewContract() public onlyOwner {
         isMigrating = !isMigrating;
     }
 }
