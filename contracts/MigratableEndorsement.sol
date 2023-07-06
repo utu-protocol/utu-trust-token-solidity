@@ -75,4 +75,11 @@ abstract contract MigratableEndorsement is Migratable, Endorsement {
     ) public virtual override onlyNotMigrating onlyRole(PROXY_ENDORSER_ROLE) {
         super.proxyEndorse(source, target, amount, transactionId);
     }
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[49] private __gap;
 }
