@@ -54,7 +54,7 @@ contract Migratable is Roles {
      *      all pending fulfillments are done.
      */
     function startMigrationToNewContract() public onlyOwner {
-        isMigratingToNewContract = !isMigratingToNewContract;
+        isMigratingToNewContract = true;
     }
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
