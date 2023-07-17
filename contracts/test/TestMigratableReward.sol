@@ -6,15 +6,17 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20Burnable
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import "./MigratableEndorsement.sol";
-import "./MigratableSocialConnector.sol";
-import "./Reward.sol";
+import "./TestMigratableEndorsement.sol";
+import "./TestMigratableSocialConnector.sol";
+import "../Reward.sol";
 
-contract MigratableReward is
+contract TestMigratableReward is
     Reward,
-    MigratableEndorsement,
-    MigratableSocialConnector
+    TestMigratableEndorsement,
+    TestMigratableSocialConnector
 {
+    uint256 newTestRewardVar;
+
     function migrateTotalClaimableUTUCoin(
         address oldContractAddress
     ) public onlyOwner onlyMigratingDataFromOldContract {
@@ -51,7 +53,7 @@ contract MigratableReward is
     )
         internal
         virtual
-        override(Endorsement, MigratableEndorsement)
+        override(Endorsement, TestMigratableEndorsement)
         onlyInitializing
     {
         super.__Endorsement_init(name_, symbol_, _oracle, _jobId, _fee, _link);
@@ -60,7 +62,7 @@ contract MigratableReward is
     function __SocialConnector_init()
         internal
         virtual
-        override(SocialConnector, MigratableSocialConnector)
+        override(SocialConnector, TestMigratableSocialConnector)
         onlyInitializing
     {
         super.__SocialConnector_init();
@@ -73,7 +75,7 @@ contract MigratableReward is
     )
         public
         virtual
-        override(SocialConnector, MigratableSocialConnector)
+        override(SocialConnector, TestMigratableSocialConnector)
         onlyNotMigrating
         onlyRole(SOCIAL_CONNECTOR_ROLE)
     {
@@ -86,7 +88,7 @@ contract MigratableReward is
     )
         public
         virtual
-        override(SocialConnector, MigratableSocialConnector)
+        override(SocialConnector, TestMigratableSocialConnector)
         onlyNotMigrating
         onlyRole(SOCIAL_CONNECTOR_ROLE)
     {
@@ -97,7 +99,7 @@ contract MigratableReward is
         address target,
         uint256 amount,
         string memory transactionId
-    ) public virtual override(Endorsement, MigratableEndorsement) onlyNotMigrating {
+    ) public virtual override(Endorsement, TestMigratableEndorsement) onlyNotMigrating {
         super.endorse(target, amount, transactionId);
     }
 
@@ -109,7 +111,7 @@ contract MigratableReward is
     )
         public
         virtual
-        override(Endorsement, MigratableEndorsement)
+        override(Endorsement, TestMigratableEndorsement)
         onlyNotMigrating
         onlyRole(PROXY_ENDORSER_ROLE)
     {
@@ -121,5 +123,5 @@ contract MigratableReward is
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
-    uint256[49] private __gap;
+    uint256[48] private __gap;
 }

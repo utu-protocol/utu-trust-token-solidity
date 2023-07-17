@@ -6,10 +6,10 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20Burnable
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import "./MigratableEndorsement.sol";
-import "./MigratableSocialConnector.sol";
+import "./Endorsement.sol";
+import "./SocialConnector.sol";
 
-contract Reward is MigratableEndorsement, MigratableSocialConnector {
+contract Reward is Endorsement, SocialConnector {
     using SafeERC20 for ERC20;
 
     /** Discounting component for computing UTU Coin rewards corresponding to UTT rewards (see whitepaper) */
@@ -65,7 +65,7 @@ contract Reward is MigratableEndorsement, MigratableSocialConnector {
     function reward(
         address user,
         uint256 rewardUTT
-    ) internal override(Endorsement, SocialConnector) {
+    ) internal virtual override(Endorsement, SocialConnector) {
         super._mint(user, rewardUTT);
         uint256 rewardUTU = (rewardUTT * 10 ** 18) / D_UTT;
         claimableUTUCoin[user] += rewardUTU;
