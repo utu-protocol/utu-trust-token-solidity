@@ -365,14 +365,14 @@ describe("UTT", function () {
   describe("Migration", function () {
     it("should allow admin toggle migration flag", async function () {
       const { utt, admin } = await loadFixture(deployUTT);
-      await utt.connect(admin).toggleMigrationFlag();
+      await utt.connect(admin).startMigrationToNewContract();
       const isMigrationFlagSet = await utt.isMigratingToNewContract();
       await expect(isMigrationFlagSet).to.be.true;
     });
 
     it("should allow not allow non admin toggle migration flag", async function () {
       const { utt, user1 } = await loadFixture(deployUTT);
-      await expect(utt.connect(user1).toggleMigrationFlag()).to.be.revertedWith(
+      await expect(utt.connect(user1).startMigrationToNewContract()).to.be.revertedWith(
         "Ownable: caller is not the owner"
       );
     });
@@ -380,7 +380,7 @@ describe("UTT", function () {
     it("should pause endorse when migration is set", async function () {
       const { utt, admin, mockOperator, service1, user2, user3 } =
         await loadFixture(deployUTT);
-      await utt.connect(admin).toggleMigrationFlag();
+      await utt.connect(admin).startMigrationToNewContract();
       await expect(
         endorse(
           utt,
@@ -397,7 +397,7 @@ describe("UTT", function () {
 
     it("should allow not allow add connection during migration", async function () {
       const { utt, admin, connector, user1 } = await loadFixture(deployUTT);
-      await utt.connect(admin).toggleMigrationFlag();
+      await utt.connect(admin).startMigrationToNewContract();
       await expect(
         addConnection(utt, connector, user1.address)
       ).to.be.revertedWith("Contract is migrating");

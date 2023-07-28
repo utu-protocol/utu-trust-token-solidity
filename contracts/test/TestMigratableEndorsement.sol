@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "./Migratable.sol";
-import "./Endorsement.sol";
+import "../Migratable.sol";
+import "../Endorsement.sol";
 
-abstract contract MigratableEndorsement is Migratable, Endorsement {
+abstract contract TestMigratableEndorsement is Migratable, Endorsement {
+    uint256 newTestEndorsementVar;
+
     struct EndorsementData {
         address from;
         address target;
@@ -81,5 +83,5 @@ abstract contract MigratableEndorsement is Migratable, Endorsement {
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
-    uint256[49] private __gap;
+    uint256[48] private __gap;
 }

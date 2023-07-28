@@ -12,7 +12,8 @@ abstract contract SocialConnector is ERC20Upgradeable, Roles {
      */
     mapping(address => mapping(uint256 => bytes32)) public socialConnections;
 
-    bytes32 public constant SOCIAL_CONNECTOR_ROLE = keccak256("SOCIAL_CONNECTOR_ROLE");
+    bytes32 public constant SOCIAL_CONNECTOR_ROLE =
+        keccak256("SOCIAL_CONNECTOR_ROLE");
 
     /**
      * The `socialConnectionReward` variable is the amount of tokens to be minted
@@ -23,7 +24,7 @@ abstract contract SocialConnector is ERC20Upgradeable, Roles {
 
     uint256 public maxConnectedTypeId;
 
-    mapping (uint256 => bool) public connectedTypeWhitelistedForKYC;
+    mapping(uint256 => bool) public connectedTypeWhitelistedForKYC;
 
     /** Social media account was connected */
     event AddConnection(
@@ -54,7 +55,7 @@ abstract contract SocialConnector is ERC20Upgradeable, Roles {
         bytes32 connectedUserIdHash
     ) internal {
         socialConnections[user][connectedTypeId] = connectedUserIdHash;
-        if(connectedTypeId > maxConnectedTypeId) {
+        if (connectedTypeId > maxConnectedTypeId) {
             maxConnectedTypeId = connectedTypeId;
         }
     }
@@ -78,7 +79,12 @@ abstract contract SocialConnector is ERC20Upgradeable, Roles {
         // only add connection if not previously added
         if (socialConnections[user][connectedTypeId] == 0) {
             _saveConnection(user, connectedTypeId, connectedUserIdHash);
-            emit AddConnection(user, connectedTypeId, connectedUserIdHash, socialConnectionReward);
+            emit AddConnection(
+                user,
+                connectedTypeId,
+                connectedUserIdHash,
+                socialConnectionReward
+            );
             // reward tokens to the user
             reward(user, socialConnectionReward);
         }
