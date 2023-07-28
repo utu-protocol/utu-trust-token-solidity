@@ -624,12 +624,39 @@ describe("UTT", function () {
     it("Should allow contract upgrading with other attributes and functions", async function () {
       const { utt: originalContract } = await loadFixture(deployUTT);
 
-      const UTT = await ethers.getContractFactory("TestUpgradeUTT");
+      const UTT = await ethers.getContractFactory("TestUpgradedUTT");
 
       const upgradedContract = await upgradeUTT(originalContract.address, UTT);
 
-      upgradedContract.incrementCounter();
-      expect(await upgradedContract.getCounter()).to.be.eq(1);
+      // Test mutating new variables in each upgraded contract. If we'd miss any __gap anywhere, some of these
+      // statements will refer to undefined methods or fail
+
+      upgradedContract.incrementnewTestUpgradedChainlinkClientVar();
+      expect(await upgradedContract.getnewTestUpgradedChainlinkClientVar()).to.be.eq(1);
+
+      upgradedContract.incrementnewTestUpgradedEndorsementVar();
+      expect(await upgradedContract.getnewTestUpgradedEndorsementVar()).to.be.eq(1);
+
+      upgradedContract.incrementnewTestUpgradedMigratableVar();
+      expect(await upgradedContract.getnewTestUpgradedMigratableVar()).to.be.eq(1);
+
+      upgradedContract.incrementnewTestUpgradedMigratableEndorsementVar();
+      expect(await upgradedContract.getnewTestUpgradedMigratableEndorsementVar()).to.be.eq(1);
+
+      upgradedContract.incrementnewTestUpgradedMigratableRewardVar();
+      expect(await upgradedContract.getnewTestUpgradedMigratableRewardVar()).to.be.eq(1);
+
+      upgradedContract.incrementnewTestUpgradedMigratableSocialConnectorVar();
+      expect(await upgradedContract.getnewTestUpgradedMigratableSocialConnectorVar()).to.be.eq(1);
+
+      upgradedContract.incrementnewTestUpgradedRewardVar();
+      expect(await upgradedContract.getnewTestUpgradedRewardVar()).to.be.eq(1);
+
+      upgradedContract.incrementnewTestUpgradedRolesVar();
+      expect(await upgradedContract.getnewTestUpgradedRolesVar()).to.be.eq(1);
+
+      upgradedContract.incrementnewTestUpgradedSocialConnectorVar();
+      expect(await upgradedContract.getnewTestUpgradedSocialConnectorVar()).to.be.eq(1);
     });
   });
 });
