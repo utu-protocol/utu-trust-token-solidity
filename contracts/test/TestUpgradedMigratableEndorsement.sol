@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "../Migratable.sol";
-import "../Endorsement.sol";
+import "./TestUpgradedMigratable.sol";
+import "./TestUpgradedEndorsement.sol";
 
-abstract contract TestMigratableEndorsement is Migratable, Endorsement {
-    uint256 newTestEndorsementVar;
-
+abstract contract TestUpgradedMigratableEndorsement is TestUpgradedMigratable, TestUpgradedEndorsement {
     struct EndorsementData {
         address from;
         address target;
@@ -45,7 +43,7 @@ abstract contract TestMigratableEndorsement is Migratable, Endorsement {
         EndorsementData[] calldata _endorsements,
         address oldContractAddress
     ) public onlyOwner onlyMigratingDataFromOldContract {
-        Endorsement oldContract = Endorsement(oldContractAddress);
+        TestUpgradedEndorsement oldContract = TestUpgradedEndorsement(oldContractAddress);
         for (uint i = 0; i < _endorsements.length; i++) {
             EndorsementData memory endorsement = _endorsements[i];
 
@@ -83,5 +81,14 @@ abstract contract TestMigratableEndorsement is Migratable, Endorsement {
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
+    uint256 newTestUpgradedMigratableEndorsementVar;
     uint256[48] private __gap;
+
+    function incrementnewTestUpgradedMigratableEndorsementVar() public {
+        newTestUpgradedMigratableEndorsementVar += 1;
+    }
+
+    function getnewTestUpgradedMigratableEndorsementVar() public view returns (uint256) {
+        return newTestUpgradedMigratableEndorsementVar;
+    }
 }

@@ -4,21 +4,20 @@ pragma solidity ^0.8.7;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
-import "./TestMigratableReward.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-// this contract shouldn't be deployed it's just used for testing the upgradeability
-contract TestUpgradeUTT is
-    TestMigratableReward,
+import "./TestUpgradedMigratableEndorsement.sol";
+import "./TestUpgradedMigratableSocialConnector.sol";
+import "./TestUpgradedMigratableReward.sol";
+
+contract TestUpgradedUTT is TestUpgradedMigratableReward,
     ERC20BurnableUpgradeable,
     ERC20PausableUpgradeable
 {
-    /** Add a new variable in the upgrade */
-    uint256 private counter;
-
     /**
      * Constructs new UTU Trust Token contract.
      * See also {ERC20-constructor}.
-     * @param _mintAmount amount of UTT minted to the deploying address; only used in testing.
+     * @param _mintAmount amount of TestUpgradedUTT minted to the deploying address; only used in testing.
      * @param _oracle Chainlink oracle operator contract address
      * @param _jobId Id for oracle jobs from this contract
      * @param _fee Initial value for the LINK fee
@@ -33,14 +32,8 @@ contract TestUpgradeUTT is
         address _link
     ) external initializer {
         __Roles_init();
-        __Endorsement_init(
-            "UTU Trust Token",
-            "UTT",
-            _oracle,
-            _jobId,
-            _fee,
-            _link
-        );
+        __Endorsement_init("UTU Trust Token", "TestUpgradedUTT", _oracle, _jobId, _fee, _link);
+        __Reward_init();
         __SocialConnector_init();
         _mint(msg.sender, _mintAmount);
     }
@@ -84,7 +77,7 @@ contract TestUpgradeUTT is
     }
 
     /**
-     * Always reverts on external calls on transfer, since UTT is not transferable.
+     * Always reverts on external calls on transfer, since TestUpgradedUTT is not transferable.
      */
     function transfer(
         address recipient,
@@ -94,7 +87,7 @@ contract TestUpgradeUTT is
     }
 
     /**
-     * * Always reverts on external calls on approve, since UTT is not transferable.
+     * * Always reverts on external calls on approve, since TestUpgradedUTT is not transferable.
      */
     function approve(
         address spender,
@@ -103,11 +96,4 @@ contract TestUpgradeUTT is
         revert("Not allowed.");
     }
 
-    function incrementCounter() public {
-        counter += 1;
-    }
-
-    function getCounter() public view returns (uint256) {
-        return counter;
-    }
 }

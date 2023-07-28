@@ -1,24 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "../Migratable.sol";
-import "../SocialConnector.sol";
+import "./TestUpgradedMigratable.sol";
+import "./TestUpgradedSocialConnector.sol";
 
-abstract contract TestMigratableSocialConnector is Migratable, SocialConnector {
-    uint256 newTestSocialVar;
-
+abstract contract TestUpgradedMigratableSocialConnector is TestUpgradedMigratable, TestUpgradedSocialConnector {
     struct Connection {
         address user;
         uint256 connectedTypeId;
         bytes32 connectedUserIdHash;
     }
 
-    function __SocialConnector_init()
-        internal
-        virtual
-        override
-        onlyInitializing
-    {
+    function __SocialConnector_init() internal virtual override onlyInitializing {
         super.__SocialConnector_init();
         __Migratable_init();
     }
@@ -56,5 +49,14 @@ abstract contract TestMigratableSocialConnector is Migratable, SocialConnector {
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
+    uint256 newTestUpgradedMigratableSocialConnectorVar;
     uint256[48] private __gap;
+
+    function incrementnewTestUpgradedMigratableSocialConnectorVar() public {
+        newTestUpgradedMigratableSocialConnectorVar += 1;
+    }
+
+    function getnewTestUpgradedMigratableSocialConnectorVar() public view returns (uint256) {
+        return newTestUpgradedMigratableSocialConnectorVar;
+    }
 }
