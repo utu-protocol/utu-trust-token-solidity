@@ -1,7 +1,10 @@
+// See README.md for more details
+
 import * as fs from "fs";
 import * as path from "path";
 
-const inputDirectory = "../"; // path to your contracts directory
+const inputDirectory = "./contracts"; // path to your contracts directory
+const outputDirectory = "./contracts/test"; // path to your output directory
 
 fs.readdir(inputDirectory, (err, files) => {
   if (err) {
@@ -44,7 +47,7 @@ fs.readdir(inputDirectory, (err, files) => {
       console.log(`\n    upgradedContract.increment${newVarName}();`);
       console.log(`    expect(await upgradedContract.get${newVarName}()).to.be.eq(1);`);
 
-      fs.writeFileSync(`./${upgradedName}.sol`, upgradedData);
+      fs.writeFileSync(`${outputDirectory}/${upgradedName}.sol`, upgradedData);
     }
   });
 });
