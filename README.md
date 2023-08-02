@@ -5,20 +5,33 @@ This project implements the UTU Trust Token (UTT) smart contract.
 
 ## Building, Testing
 
-Compile the contract:
+### Compile the contract
 ```shell
 npm run build
 ```
 
-Run tests:
+### Run tests
 ```shell
 npm run test
 ```
 
-Start a local testnet:
+### Start a local testnet
 ```shell
 npm start
 ```
+
+### Generate upgraded test contracts
+To test upradability of contracts, particularly that all base contracts have a `__gap` for future storage variables, there's  [scripts/generate-upgraded-test-contracts.ts](scripts/generate-upgraded-test-contracts.ts) 
+
+To run it:
+```shell
+npm run generate-upgraded-test-contracts
+
+```
+
+It generates upgraded test contracts for all contracts in the contracts directory, adding a variable to each so that we can test that the upgrade was successful. The generated files for non-upgradable contracts (Operator.sol, UTTProxy.sol) should be removed.
+
+It also prints out the code to add to the "Should allow contract upgrading with other attributes and functions" test in UTT.test.ts. Remove lines for non-upgradable contracts (such as Operator.sol, UTTProxy.sol).
 
 ## Deploying
 
