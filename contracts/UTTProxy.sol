@@ -4,10 +4,16 @@ pragma solidity ^0.8.7;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20.sol";
 
 contract UTTProxy is Ownable, ChainlinkClient {
     using Chainlink for Chainlink.Request;
     using Strings for uint256;
+    using SafeERC20 for ERC20;
+
+    /** UTU Coin contract address */
+    address public UTUCoin;
 
     /**
      * Chainlinkg orcale request data structure
@@ -19,9 +25,18 @@ contract UTTProxy is Ownable, ChainlinkClient {
         string transactionId;
     }
 
+    /**
+     * Chainlinkg oracle claim request data structure
+     */
+    struct OracleClaimRequest {
+        address target;
+    }
+
     /** Sent oracle requests by id  */
     mapping(bytes32 => OracleRequest) private oracleRequests;
 
+    /** Sent oracle claim requests by id  */
+    mapping(bytes32 => OracleClaimRequest) private oracleClaimRequests;
     /** Address of the Chainlink oracle operator contract */
     address private oracle;
 
@@ -42,9 +57,10 @@ contract UTTProxy is Ownable, ChainlinkClient {
         string _transactionId
     );
 
-    event ProxiedEndorseFulfilled(
-        bytes32 indexed _requestId
-    );
+    event ProxiedEndorseFulfilled(bytes32 indexed _requestId);
+
+    /** Rewarded UTU Coin were claimed */
+    event ClaimUTURewards(address indexed _by, uint _value);
 
     constructor(
         address _oracle,
@@ -69,6 +85,14 @@ contract UTTProxy is Ownable, ChainlinkClient {
     /** Sets the LINK fee to be paid for each request */
     function setFee(uint256 _fee) public onlyOwner {
         fee = _fee;
+    }
+
+    /**
+     * Sets the address of the UTU Coin contract.
+     * @param _UTUCoin address of the UTU Coin contract.
+     */
+    function setUTUCoin(address _UTUCoin) external onlyOwner {
+        UTUCoin = _UTUCoin;
     }
 
     function endorse(
@@ -97,13 +121,9 @@ contract UTTProxy is Ownable, ChainlinkClient {
         });
     }
 
-
     function fulfill(
         bytes32 _requestId
-    )
-        external
-        recordChainlinkFulfillment(_requestId)
-    {
+    ) external recordChainlinkFulfillment(_requestId) {
         emit ProxiedEndorseFulfilled(_requestId);
     }
 
@@ -124,7 +144,7 @@ contract UTTProxy is Ownable, ChainlinkClient {
         }
     }
 
-     /**
+    /**
      * @dev Converts an address to a string "0x..." representation.
      * @param x an address
      * @return string representation of the address
@@ -132,11 +152,11 @@ contract UTTProxy is Ownable, ChainlinkClient {
     function addressToString(address x) internal pure returns (string memory) {
         bytes memory s = new bytes(40);
         for (uint i = 0; i < 20; i++) {
-            bytes1 b = bytes1(uint8(uint(uint160(x)) / (2**(8*(19 - i)))));
+            bytes1 b = bytes1(uint8(uint(uint160(x)) / (2 ** (8 * (19 - i)))));
             bytes1 hi = bytes1(uint8(b) / 16);
             bytes1 lo = bytes1(uint8(b) - 16 * uint8(hi));
-            s[2*i] = char(hi);
-            s[2*i+1] = char(lo);
+            s[2 * i] = char(hi);
+            s[2 * i + 1] = char(lo);
         }
         return string(abi.encodePacked("0x", string(s)));
     }
@@ -158,5 +178,42 @@ contract UTTProxy is Ownable, ChainlinkClient {
      */
     function startMigrationToNewContract() public onlyOwner {
         isMigrating = !isMigrating;
+    }
+
+    function claimRewards() external notMigrating {
+        require(msg.sender == tx.origin, "should be a user");
+
+        Chainlink.Request memory request = buildChainlinkRequest(
+            jobId,
+            address(this),
+            this.fullfillClaimRewards.selector
+        );
+        request.add("targetAddress", addressToString(msg.sender));
+
+        bytes32 requestId = sendOperatorRequestTo(oracle, request, fee);
+        oracleClaimRequests[requestId] = OracleClaimRequest({
+            target: msg.sender
+        });
+    }
+
+    function fullfillClaimRewards(
+        bytes32 _requestId,
+        uint256 _reward
+    ) external recordChainlinkFulfillment(_requestId) {
+        OracleClaimRequest memory claimRequest = oracleClaimRequests[
+            _requestId
+        ];
+
+        // Transfers amount UTU Coin from this contract to the user
+        uint256 total = ERC20(UTUCoin).balanceOf(address(this));
+
+        require(
+            total >= _reward,
+            "Not enough UTU Coin available to claim rewards."
+        );
+
+        ERC20(UTUCoin).safeTransfer(msg.sender, _reward);
+
+        emit ClaimUTURewards(msg.sender, amount);
     }
 }

@@ -97,6 +97,15 @@ contract Reward is Endorsement, SocialConnector {
         emit ClaimUTURewards(msg.sender, amount);
     }
 
+    function proxyClaimRewards(
+        address target
+    ) public virtual onlyRole(PROXY_ENDORSER_ROLE) {
+        uint256 amount = claimableUTUCoin[msg.sender];
+        claimableUTUCoin[msg.sender] = 0;
+        totalClaimableUTUCoin -= amount;
+        return amount;
+    }
+
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
      * variables without shifting down storage in the inheritance chain.
