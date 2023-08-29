@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "./ChainlinkClient.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract UTTProxy is Ownable, ChainlinkClient {
+contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient {
     using Chainlink for Chainlink.Request;
     using Strings for uint256;
     using SafeERC20 for ERC20;
@@ -62,12 +63,12 @@ contract UTTProxy is Ownable, ChainlinkClient {
     /** Rewarded UTU Coin were claimed */
     event ClaimUTURewards(address indexed _by, uint _value);
 
-    constructor(
+    function initialize(
         address _oracle,
         string memory _jobId,
         uint256 _fee,
         address _link
-    ) {
+    ) public initializer {
         setChainlinkToken(_link);
         oracle = _oracle;
         jobId = stringToBytes32(_jobId);
@@ -182,6 +183,7 @@ contract UTTProxy is Ownable, ChainlinkClient {
 
     function claimRewards() external notMigrating {
         require(msg.sender == tx.origin, "should be a user");
+        require(UTUCoin != address(0), "UTU Coin address not configured.");
 
         Chainlink.Request memory request = buildChainlinkRequest(
             jobId,
@@ -212,8 +214,16 @@ contract UTTProxy is Ownable, ChainlinkClient {
             "Not enough UTU Coin available to claim rewards."
         );
 
-        ERC20(UTUCoin).safeTransfer(msg.sender, _reward);
+        ERC20(UTUCoin).safeTransfer(claimRequest.target, _reward);
 
-        emit ClaimUTURewards(msg.sender, amount);
+        emit ClaimUTURewards(claimRequest.target, _reward);
     }
+
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[49] __gap;
 }

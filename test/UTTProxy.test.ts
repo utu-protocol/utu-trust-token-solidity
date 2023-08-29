@@ -1,6 +1,6 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { ethers, run } from "hardhat";
+import { ethers, run, upgrades } from "hardhat";
 
 describe("UTTProxy", function () {
   async function deployContract() {
@@ -17,12 +17,14 @@ describe("UTTProxy", function () {
     await mockOperator.setAuthorizedSenders([owner.address]);
     const UTTProxy = await ethers.getContractFactory("UTTProxy");
 
-    const uttProxy = await UTTProxy.deploy(
-      mockOperator.address,
-      "",
-      ethers.utils.parseEther("0.1"),
-      linkToken.address
-    );
+    const uttProxy = await upgrades
+      .deployProxy(UTTProxy, [
+        mockOperator.address,
+        "",
+        ethers.utils.parseEther("0.1"),
+        linkToken.address,
+      ])
+      .then((f: any) => f.deployed());
 
     await run("fund-link", {
       contract: uttProxy.address,

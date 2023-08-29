@@ -82,6 +82,11 @@ contract Reward is Endorsement, SocialConnector {
 
         uint256 amount = claimableUTUCoin[msg.sender];
 
+        require(
+            amount > 0,
+            "Insufficient claimable rewards for the target."
+        );
+
         // Transfers amount UTU Coin from this contract to the user
         uint256 total = ERC20(UTUCoin).balanceOf(address(this));
 
@@ -99,7 +104,7 @@ contract Reward is Endorsement, SocialConnector {
 
     function proxyClaimRewards(
         address target
-    ) public virtual onlyRole(PROXY_ENDORSER_ROLE) onlyIfKYCed(target) {
+    ) public virtual onlyRole(PROXY_ENDORSER_ROLE) onlyIfKYCed(target) returns (uint256) {
         uint256 amount = claimableUTUCoin[target];
 
         require(
