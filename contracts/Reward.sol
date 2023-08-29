@@ -99,7 +99,7 @@ contract Reward is Endorsement, SocialConnector {
 
     function proxyClaimRewards(
         address target
-    ) public virtual onlyRole(PROXY_ENDORSER_ROLE) {
+    ) public virtual onlyRole(PROXY_ENDORSER_ROLE) onlyIfKYCed(target){
         uint256 amount = claimableUTUCoin[msg.sender];
         claimableUTUCoin[msg.sender] = 0;
         totalClaimableUTUCoin -= amount;
