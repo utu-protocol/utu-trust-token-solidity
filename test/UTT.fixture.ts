@@ -102,7 +102,7 @@ export async function deployUTTUnmigrated() {
   return deployUTT(false);
 }
 
-async function fullfilEndorse(
+async function fulfillEndorse(
   tx: ContractTransaction,
   mockOperator: Contract,
   endorsersLevel1: string[],
@@ -131,7 +131,7 @@ export async function endorse(
   endorsersLevel2: string[]
 ) {
   const tx = await utt.connect(sender).endorse(target, amount, transactionId);
-  return fullfilEndorse(tx, mockOperator, endorsersLevel1, endorsersLevel2);
+  return fulfillEndorse(tx, mockOperator, endorsersLevel1, endorsersLevel2);
 }
 
 export async function proxyEndorse(
@@ -148,7 +148,7 @@ export async function proxyEndorse(
   const tx = await utt
     .connect(proxySender)
     .proxyEndorse(sender, target, amount, transactionId);
-  return fullfilEndorse(tx, mockOperator, endorsersLevel1, endorsersLevel2);
+  return fulfillEndorse(tx, mockOperator, endorsersLevel1, endorsersLevel2);
 }
 
 export async function addConnection(

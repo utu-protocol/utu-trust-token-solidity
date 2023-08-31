@@ -69,6 +69,8 @@ contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient {
         uint256 _fee,
         address _link
     ) public initializer {
+        __Ownable_init();
+        __ChainlinkClient_init();
         setChainlinkToken(_link);
         oracle = _oracle;
         jobId = stringToBytes32(_jobId);
@@ -188,7 +190,7 @@ contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient {
         Chainlink.Request memory request = buildChainlinkRequest(
             jobId,
             address(this),
-            this.fullfillClaimRewards.selector
+            this.fulfillClaimRewards.selector
         );
         request.add("targetAddress", addressToString(msg.sender));
 
@@ -198,7 +200,7 @@ contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient {
         });
     }
 
-    function fullfillClaimRewards(
+    function fulfillClaimRewards(
         bytes32 _requestId,
         uint256 _reward
     ) external recordChainlinkFulfillment(_requestId) {
@@ -208,7 +210,6 @@ contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient {
 
         // Transfers amount UTU Coin from this contract to the user
         uint256 total = ERC20(UTUCoin).balanceOf(address(this));
-
         require(
             total >= _reward,
             "Not enough UTU Coin available to claim rewards."
