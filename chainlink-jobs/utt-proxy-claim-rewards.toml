@@ -1,0 +1,33 @@
+type                = "directrequest"
+schemaVersion       = 1
+name                = "UTT Proxy Claim Rewards"
+evmChainID          = 1313161555
+contractAddress     = "0x08bC44B3d592f7F746F33E50Ab0433BbEf3f9071"
+# Optional externalJobID: Automatically generated if unspecified
+externalJobID = "ce9c161d576e41598b5599f7e111c808"
+observationSource   = """
+    decode_log   [type="ethabidecodelog"
+                  abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+                  data="$(jobRun.logData)"
+                  topics="$(jobRun.logTopics)"]
+
+    decode_cbor  [type="cborparse" data="$(decode_log.data)"]
+
+    encode_claimable_rewards_call  [type="ethabiencode" abi="proxyGetClaimableRewards(address target)" data="{\\"target\\": $(decode_cbor.targetAddress) }"]
+
+    claimable_rewards_call    [type="ethcall" evmChainID="80001" contract="0x7E63f0e3C1Bf9158926f7e87566195b60B684E45" data="$(encode_claimable_rewards_call)"]
+
+    claimable_rewards [type="ethabidecode" abi="uint256 amount" data="$(call)"]
+
+    encode_mwr [type="ethabiencode"
+                abi="(bytes32 requestId, uint256 _reward)"
+                data="{\\"requestId\\": $(decode_log.requestId), \\"_reward\\": $(claimable_rewards) }"]
+
+    encode_tx  [type="ethabiencode"
+                abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
+                data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\":   $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_mwr)}"]
+
+    submit_tx  [type="ethtx" to="REPLACE_WITH_ORACLE_CONTRACT_ADDRESS" data="$(encode_tx)" minConfirmations="2"]
+
+    decode_log -> decode_cbor -> encode_claimable_rewards_call -> claimable_rewards_call -> claimable_rewards -> encode_mwr -> encode_tx -> submit_tx
+"""

@@ -102,9 +102,15 @@ contract Reward is Endorsement, SocialConnector {
         emit ClaimUTURewards(msg.sender, amount);
     }
 
-    function proxyClaimRewards(
+    function proxyGetClaimableRewards(
         address target
     ) public virtual onlyRole(PROXY_ENDORSER_ROLE) onlyIfKYCed(target) returns (uint256) {
+        return claimableUTUCoin[target] || 0;
+    }
+
+    function proxyClaimRewards(
+        address target
+    ) public virtual onlyRole(PROXY_ENDORSER_ROLE) onlyIfKYCed(target) {
         uint256 amount = claimableUTUCoin[target];
 
         require(
@@ -114,7 +120,6 @@ contract Reward is Endorsement, SocialConnector {
 
         claimableUTUCoin[target] = 0;
         totalClaimableUTUCoin -= amount;
-        return amount;
     }
 
     /**
