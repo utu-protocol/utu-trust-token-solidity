@@ -15,7 +15,7 @@ observationSource   = """
 
     encode_claimable_rewards_call  [type="ethabiencode" abi="proxyGetClaimableRewards(address target)" data="{\\"target\\": $(decode_cbor.targetAddress) }"]
 
-    claimable_rewards_call    [type="ethcall" evmChainID="80001" contract="0x7E63f0e3C1Bf9158926f7e87566195b60B684E45" data="$(encode_claimable_rewards_call)"]
+    claimable_rewards_call    [type="ethcall" evmChainID="80001" contract="REPLACE_WITH_UTT_CONTRACT_ADDRESS" data="$(encode_claimable_rewards_call)"]
 
     claimable_rewards [type="ethabidecode" abi="uint256 amount" data="$(call)"]
 
@@ -28,6 +28,8 @@ observationSource   = """
                 data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\":   $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_mwr)}"]
 
     submit_tx  [type="ethtx" to="REPLACE_WITH_ORACLE_CONTRACT_ADDRESS" data="$(encode_tx)" minConfirmations="2"]
+
+    encode_claim_rewards_tx  [type="ethabiencode" abi="proxyClaimRewards(address target)" data="{\\"target\\": $(decode_cbor.targetAddress) }"]
 
     decode_log -> decode_cbor -> encode_claimable_rewards_call -> claimable_rewards_call -> claimable_rewards -> encode_mwr -> encode_tx -> submit_tx
 """
