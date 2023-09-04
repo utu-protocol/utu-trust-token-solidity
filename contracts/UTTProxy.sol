@@ -50,6 +50,9 @@ contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient {
     /** Contract migration flag; when migrating any further endorsements or social connections are disabled. */
     bool public isMigrating;
 
+    /** Id for oracle claim rewards jobs from this contract */
+    bytes32 internal claimRewardJobId;
+
     /** A new endorsement was made */
     event Endorse(
         address indexed _from,
@@ -98,13 +101,15 @@ contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient {
         UTUCoin = _UTUCoin;
     }
 
+    function setClaimRewardJobId(string memory  _claimRewardJobId) external onlyOwner {
+        claimRewardJobId = stringToBytes32(_claimRewardJobId);
+    }
+
     function endorse(
         address target,
         uint256 amount,
         string memory transactionId
     ) external notMigrating {
-        require(msg.sender == tx.origin, "should be a user");
-
         Chainlink.Request memory request = buildChainlinkRequest(
             jobId,
             address(this),
@@ -184,11 +189,10 @@ contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient {
     }
 
     function claimRewards() external notMigrating {
-        require(msg.sender == tx.origin, "should be a user");
         require(UTUCoin != address(0), "UTU Coin address not configured.");
 
         Chainlink.Request memory request = buildChainlinkRequest(
-            jobId,
+            claimRewardJobId,
             address(this),
             this.fulfillClaimRewards.selector
         );
@@ -203,11 +207,7 @@ contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient {
     function fulfillClaimRewards(
         bytes32 _requestId,
         uint256 _reward
-    ) external recordChainlinkFulfillment(_requestId) {
-        OracleClaimRequest memory claimRequest = oracleClaimRequests[
-            _requestId
-        ];
-
+    ) external {
         // Transfers amount UTU Coin from this contract to the user
         uint256 total = ERC20(UTUCoin).balanceOf(address(this));
         require(
@@ -215,16 +215,21 @@ contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient {
             "Not enough UTU Coin available to claim rewards."
         );
 
+        validateChainlinkCallback(_requestId);
+
+        OracleClaimRequest memory claimRequest = oracleClaimRequests[
+            _requestId
+        ];
+
         ERC20(UTUCoin).safeTransfer(claimRequest.target, _reward);
 
         emit ClaimUTURewards(claimRequest.target, _reward);
     }
-
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
-    uint256[49] __gap;
+    uint256[48] __gap;
 }

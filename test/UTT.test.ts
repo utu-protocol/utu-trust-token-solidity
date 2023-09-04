@@ -659,4 +659,10 @@ describe("UTT", function () {
       expect(await upgradedContract.getnewTestUpgradedSocialConnectorVar()).to.be.eq(1);
     });
   });
+  describe("Proxy claim", function () {
+    it("should be zero", async function () {
+      const { utt, service2 } = await loadFixture(deployUTT);
+      expect(await utt.proxyGetClaimableRewards(service2.address)).to.be.eq(0);
+    });
+  });
 });

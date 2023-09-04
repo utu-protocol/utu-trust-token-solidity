@@ -5,7 +5,7 @@
 // Runtime Environment's members available in the global scope.
 
 async function deployProxy() {
-  const { ethers, network } = require("hardhat");
+  const { ethers, network, upgrades } = require("hardhat");
   // Hardhat always runs the compile task when running scripts with its command
   // line interface.
   //
@@ -20,7 +20,7 @@ async function deployProxy() {
 
   await utt.deployed();
 
-  console.log("UTT proxy deployed to:", utt.address);
+  console.log("UTT proxy deployed to:", uttProxy.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

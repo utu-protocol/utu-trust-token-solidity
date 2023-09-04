@@ -104,8 +104,8 @@ contract Reward is Endorsement, SocialConnector {
 
     function proxyGetClaimableRewards(
         address target
-    ) public virtual onlyRole(PROXY_ENDORSER_ROLE) onlyIfKYCed(target) returns (uint256) {
-        return claimableUTUCoin[target] || 0;
+    ) public view virtual onlyRole(PROXY_ENDORSER_ROLE) onlyIfKYCed(target) returns (uint) {
+        return claimableUTUCoin[target];
     }
 
     function proxyClaimRewards(
