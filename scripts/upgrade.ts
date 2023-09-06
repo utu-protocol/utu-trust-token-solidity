@@ -15,7 +15,7 @@ async function upgradeUTT() {
 
   // We get the contract to deploy
   const UTT = await ethers.getContractFactory("UTT");
-  const updagradeArgs = require(`./deploy.args.${network.name}`);
+  const updagradeArgs = require(`./upgrade.args.${network.name}`);
   const contractAddress = updagradeArgs[0];
   const utt = await upgrades.upgradeProxy(contractAddress, UTT);
 

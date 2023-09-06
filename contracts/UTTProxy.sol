@@ -66,11 +66,15 @@ contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient {
     /** Rewarded UTU Coin were claimed */
     event ClaimUTURewards(address indexed _by, uint _value);
 
+        /** Rewarded UTU Coin were claimed */
+    event FulfillingClaimUTURewards(address indexed _by, uint _value);
+
     function initialize(
         address _oracle,
         string memory _jobId,
         uint256 _fee,
-        address _link
+        address _link,
+        string memory _claimRewardJobId
     ) public initializer {
         __Ownable_init();
         __ChainlinkClient_init();
@@ -78,6 +82,7 @@ contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient {
         oracle = _oracle;
         jobId = stringToBytes32(_jobId);
         fee = _fee;
+        claimRewardJobId = stringToBytes32(_claimRewardJobId);
     }
 
     /**
@@ -208,6 +213,9 @@ contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient {
         bytes32 _requestId,
         uint256 _reward
     ) external {
+
+        emit FulfillingClaimUTURewards(msg.sender, _reward);
+
         // Transfers amount UTU Coin from this contract to the user
         uint256 total = ERC20(UTUCoin).balanceOf(address(this));
         require(

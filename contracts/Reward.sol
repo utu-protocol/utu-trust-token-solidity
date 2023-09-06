@@ -102,9 +102,9 @@ contract Reward is Endorsement, SocialConnector {
         emit ClaimUTURewards(msg.sender, amount);
     }
 
-    function proxyGetClaimableRewards(
+    function getClaimableRewards(
         address target
-    ) public view virtual onlyRole(PROXY_ENDORSER_ROLE) onlyIfKYCed(target) returns (uint) {
+    ) public view virtual onlyIfKYCed(target) returns (uint) {
         return claimableUTUCoin[target];
     }
 

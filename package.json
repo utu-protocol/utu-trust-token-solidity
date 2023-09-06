@@ -7,8 +7,9 @@
     "export-logs": "npx hardhat run scripts/export-logs.ts",
     "deploy": "npx hardhat run scripts/deploy.ts",
     "deploy:proxy": "npx hardhat run scripts/deploy.proxy.ts",
-    "upgrade:proxy": "npx hardhat run scripts/upgrade.proxy.ts",
     "deploy:utu-coin-mock": "npx hardhat run scripts/deploy.utu.coin.mock.ts",
+    "upgrade:proxy": "npx hardhat run scripts/upgrade.proxy.ts",
+    "upgrade": "npx hardhat run scripts/upgrade.ts",
     "verify": "npx hardhat verify --constructor-args",
     "test": "npx hardhat test",
     "generate-upgraded-test-contracts": "ts-node scripts/generate-upgraded-test-contracts.ts"

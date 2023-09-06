@@ -1,8 +1,8 @@
 type                = "directrequest"
 schemaVersion       = 1
 name                = "UTT Proxy Claim Rewards"
-evmChainID          = 80001
-contractAddress     = "0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f"
+evmChainID          = 1313161555
+contractAddress     = "0x08bC44B3d592f7F746F33E50Ab0433BbEf3f9071"
 # Optional externalJobID: Automatically generated if unspecified
 externalJobID = "d38e785276534600ba42401e4bad0156"
 observationSource   = """
@@ -13,7 +13,7 @@ observationSource   = """
 
     decode_cbor  [type="cborparse" data="$(decode_log.data)"]
 
-    encode_claimable_rewards_call  [type="ethabiencode" abi="proxyGetClaimableRewards(address target)" data="{\\"target\\": $(decode_cbor.targetAddress) }"]
+    encode_claimable_rewards_call  [type="ethabiencode" abi="getClaimableRewards(address target)" data="{\\"target\\": $(decode_cbor.targetAddress) }"]
 
     claimable_rewards_call    [type="ethcall" evmChainID="80001" contract="0xC2404aa48D988744C6008751999111f013941d44" data="$(encode_claimable_rewards_call)"]
 
@@ -31,7 +31,7 @@ observationSource   = """
                 abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
                 data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\":   $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_fulfil_claim_mwr)}"]
 
-    fulfill_claim_tx  [type="ethtx" to="0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f" data="$(encode_fulfil_claim_tx)" minConfirmations="2"]
+    fulfill_claim_tx  [type="ethtx" evmChainID="1313161555" to="0x08bC44B3d592f7F746F33E50Ab0433BbEf3f9071" data="$(encode_fulfil_claim_tx)" minConfirmations="4" failOnRevert="true"]
 
     decode_log -> decode_cbor -> encode_claimable_rewards_call -> claimable_rewards_call -> claimable_rewards -> encode_claim_rewards_tx -> submit_claim_rewards_tx -> encode_fulfil_claim_mwr -> encode_fulfil_claim_tx -> fulfill_claim_tx
 """
