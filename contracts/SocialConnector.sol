@@ -24,7 +24,7 @@ abstract contract SocialConnector is ERC20Upgradeable, Roles {
 
     uint256 public maxConnectedTypeId;
 
-    mapping(uint256 => bool) public connectedTypeWhitelistedForKYC;
+    mapping(uint256 => bool) public connectedTypeWhitelisted;
 
     /** Social media account was connected */
     event AddConnection(
@@ -121,7 +121,7 @@ abstract contract SocialConnector is ERC20Upgradeable, Roles {
      * @param connectedTypeId id of the social media platform
      */
     function whitelistForKYC(uint256 connectedTypeId) public onlyOwner {
-        connectedTypeWhitelistedForKYC[connectedTypeId] = true;
+        connectedTypeWhitelisted[connectedTypeId] = true;
     }
 
     /**
@@ -129,7 +129,7 @@ abstract contract SocialConnector is ERC20Upgradeable, Roles {
      * @param connectedTypeId id of the social media platform
      */
     function deWhitelistForKYC(uint256 connectedTypeId) public onlyOwner {
-        delete connectedTypeWhitelistedForKYC[connectedTypeId];
+        delete connectedTypeWhitelisted[connectedTypeId];
     }
 
     function reward(address user, uint256 rewardUTT) internal virtual;

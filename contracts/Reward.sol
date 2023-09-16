@@ -30,17 +30,17 @@ contract Reward is Endorsement, SocialConnector {
     /** Rewarded UTU Coin were claimed */
     event ClaimUTURewards(address indexed _by, uint _value);
 
-    modifier onlyIfKYCed(address user) {
+    modifier onlyIfWhitelisted(address user) {
         for (uint i = 0; i <= maxConnectedTypeId; i++) {
             if (
-                connectedTypeWhitelistedForKYC[i] &&
+                connectedTypeWhitelisted[i] &&
                 socialConnections[user][i] != 0
             ) {
                 _;
                 return;
             }
         }
-        revert("User is not KYCed");
+        revert("User is not whitelisted");
     }
 
     function __Reward_init() internal virtual onlyInitializing {
@@ -77,7 +77,7 @@ contract Reward is Endorsement, SocialConnector {
      * Claims the available UTU Coin rewards by sending the corresponding amount of UTU Coin to the sender.
      * Resets the amount of claimable UTU Coin for the sender to 0.
      */
-    function claimRewards() public onlyIfKYCed(msg.sender) {
+    function claimRewards() public onlyIfWhitelisted(msg.sender) {
         require(UTUCoin != address(0), "UTU Coin address not configured.");
 
         uint256 amount = claimableUTUCoin[msg.sender];
