@@ -104,13 +104,13 @@ contract Reward is Endorsement, SocialConnector {
 
     function getClaimableRewards(
         address target
-    ) public view virtual onlyIfKYCed(target) returns (uint) {
+    ) public view virtual onlyIfWhitelisted(target) returns (uint) {
         return claimableUTUCoin[target];
     }
 
     function proxyClaimRewards(
         address target, uint256 amount
-    ) public virtual onlyRole(PROXY_ENDORSER_ROLE) onlyIfKYCed(target) {
+    ) public virtual onlyRole(PROXY_ENDORSER_ROLE) onlyIfWhitelisted(target) {
 
         require(
             claimableUTUCoin[target] >= amount,
