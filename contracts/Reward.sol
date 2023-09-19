@@ -113,7 +113,7 @@ contract Reward is Endorsement, SocialConnector {
     ) public virtual onlyRole(PROXY_ENDORSER_ROLE) onlyIfKYCed(target) {
 
         require(
-            claimableUTUCoin[target] >= 0,
+            claimableUTUCoin[target] >= amount,
             "Insufficient claimable rewards for the target."
         );
 
