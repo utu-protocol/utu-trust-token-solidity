@@ -24,7 +24,7 @@ abstract contract TestUpgradedSocialConnector is ERC20Upgradeable, TestUpgradedR
 
     uint256 public maxConnectedTypeId;
 
-    mapping(uint256 => bool) public connectedTypeWhitelistedForKYC;
+    mapping(uint256 => bool) public connectedTypeWhitelisted;
 
     /** Social media account was connected */
     event AddConnection(
@@ -120,16 +120,16 @@ abstract contract TestUpgradedSocialConnector is ERC20Upgradeable, TestUpgradedR
      * Whitelists a connectedTypeId to provide sufficient KYC for claiming UTU Coin rewards
      * @param connectedTypeId id of the social media platform
      */
-    function whitelistForKYC(uint256 connectedTypeId) public onlyOwner {
-        connectedTypeWhitelistedForKYC[connectedTypeId] = true;
+    function whitelistForClaimRewards(uint256 connectedTypeId) public onlyOwner {
+        connectedTypeWhitelisted[connectedTypeId] = true;
     }
 
     /**
      * Removes a connectedTypeId from the whitelists for providing sufficient KYC for claiming UTU Coin rewards
      * @param connectedTypeId id of the social media platform
      */
-    function deWhitelistForKYC(uint256 connectedTypeId) public onlyOwner {
-        delete connectedTypeWhitelistedForKYC[connectedTypeId];
+    function dewhitelistForClaimRewards(uint256 connectedTypeId) public onlyOwner {
+        delete connectedTypeWhitelisted[connectedTypeId];
     }
 
     function reward(address user, uint256 rewardUTT) internal virtual;

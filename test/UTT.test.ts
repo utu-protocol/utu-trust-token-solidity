@@ -276,29 +276,29 @@ describe("UTT", function () {
   });
 
   describe("User claims UTU Coin", function () {
-    it("should should revert with 'User is not KYCed'", async function () {
+    it("should should revert with 'User is not whitelisted'", async function () {
       const { utt, user1 } = await loadFixture(deployUTT);
 
       await expect(utt.connect(user1).claimRewards()).to.revertedWith(
-        "User is not KYCed"
+        "User is not whitelisted"
       );
     });
 
-    it("should should revert with 'User is not KYCed' after removing from whitelist", async function () {
+    it("should should revert with 'User is not whitelisted' after removing from whitelist", async function () {
       const { utt, admin, user1, connector } = await loadFixture(deployUTT);
       await addConnection(utt, connector, user1.address, 0);
-      await utt.connect(admin).whitelistForKYC(0);
-      await utt.connect(admin).deWhitelistForKYC(0);
+      await utt.connect(admin).whitelistForClaimRewards(0);
+      await utt.connect(admin).dewhitelistForClaimRewards(0);
 
       await expect(utt.connect(user1).claimRewards()).to.revertedWith(
-        "User is not KYCed"
+        "User is not whitelisted"
       );
     });
 
     it("should should revert with 'UTU Coin address not configured.'", async function () {
       const { utt, admin, user1, connector } = await loadFixture(deployUTT);
       await addConnection(utt, connector, user1.address, 0);
-      await utt.connect(admin).whitelistForKYC(0);
+      await utt.connect(admin).whitelistForClaimRewards(0);
 
       await expect(utt.connect(user1).claimRewards()).to.revertedWith(
         "UTU Coin address not configured."
@@ -308,7 +308,7 @@ describe("UTT", function () {
     it("should should revert with 'Not enough UTU Coin available to claim rewards.'", async function () {
       const { utt, admin, user1, connector } = await loadFixture(deployUTT);
       await addConnection(utt, connector, user1.address, 0);
-      await utt.connect(admin).whitelistForKYC(0);
+      await utt.connect(admin).whitelistForClaimRewards(0);
       const utuCoinAddress = (await deployUTUCoinMock(utt.address, 0n)).address;
       await utt.connect(admin).setUTUCoin(utuCoinAddress);
 
@@ -322,7 +322,7 @@ describe("UTT", function () {
       const { utt, mockOperator, admin, service1, user1, connector } =
         await loadFixture(deployUTT);
       await addConnection(utt, connector, user1.address, 0);
-      await utt.connect(admin).whitelistForKYC(0);
+      await utt.connect(admin).whitelistForClaimRewards(0);
       const utuCoinAddress = (await deployUTUCoinMock(utt.address, 2000n))
         .address;
       await utt.connect(admin).setUTUCoin(utuCoinAddress);

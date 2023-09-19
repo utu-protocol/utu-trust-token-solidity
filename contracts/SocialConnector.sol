@@ -120,7 +120,7 @@ abstract contract SocialConnector is ERC20Upgradeable, Roles {
      * Whitelists a connectedTypeId to provide sufficient KYC for claiming UTU Coin rewards
      * @param connectedTypeId id of the social media platform
      */
-    function whitelistForKYC(uint256 connectedTypeId) public onlyOwner {
+    function whitelistForClaimRewards(uint256 connectedTypeId) public onlyOwner {
         connectedTypeWhitelisted[connectedTypeId] = true;
     }
 
@@ -128,7 +128,7 @@ abstract contract SocialConnector is ERC20Upgradeable, Roles {
      * Removes a connectedTypeId from the whitelists for providing sufficient KYC for claiming UTU Coin rewards
      * @param connectedTypeId id of the social media platform
      */
-    function deWhitelistForKYC(uint256 connectedTypeId) public onlyOwner {
+    function dewhitelistForClaimRewards(uint256 connectedTypeId) public onlyOwner {
         delete connectedTypeWhitelisted[connectedTypeId];
     }
 
