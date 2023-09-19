@@ -19,7 +19,7 @@ observationSource   = """
 
     claimable_rewards [type="ethabidecode" abi="uint256 amount" data="$(claimable_rewards_call)"]
 
-    encode_claim_rewards_tx  [type="ethabiencode" abi="proxyClaimRewards(address target)" data="{\\"target\\": $(decode_cbor.targetAddress) }"]
+    encode_claim_rewards_tx  [type="ethabiencode" abi="proxyClaimRewards(address target, uint256 amount)" data="{\\"target\\": $(decode_cbor.targetAddress), \\"amount\\": $(claimable_rewards.amount) }"]
 
     submit_claim_rewards_tx    [type="ethtx" evmChainID="80001" to="0xC2404aa48D988744C6008751999111f013941d44" data="$(encode_claim_rewards_tx)" minConfirmations="1" failOnRevert="true"]
 
