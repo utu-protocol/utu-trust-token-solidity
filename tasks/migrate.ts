@@ -1,38 +1,53 @@
 import BigNumber from "bignumber.js";
-// import data from "../exports/mumbai-utt-data-1684153540470.json";
-import { task } from "hardhat/config";
+import { task, types } from "hardhat/config";
+import fs from "fs";
 
-const data: any[] = [];
-
-task("migrate-data", "Mints from the NFT contract")
-  .addParam("sourceaddress", "The address of the old contract")
-  .addParam("targetaddress", "The address to the new contract")
+task("migrate-data", "Migrates data from an old UTT contract to a new version")
+  .addParam("sourceaddress", "The address of the old UTT contract")
+  .addParam("targetaddress", "The address to the new UTT contract")
+  .addParam("fromFile", "input data file (as created by the export-logs task)")
+  .addOptionalParam(
+    "maxConnectedTypeId",
+    "The max connected type id to migrate (can e.g. be used to omit migration of test connections).",
+    Number.MAX_VALUE,
+    types.int
+  )
   .setAction(async function (taskArguments: any, { ethers, network }: any) {
-    const accountsWithBalance = getAccountWithBalance();
     console.log(taskArguments);
-    const UTT = await ethers.getContractAt(
-      "UTT",
-      taskArguments.targetaddress
-    );
+    const data = JSON.parse(fs.readFileSync(taskArguments.fromFile, "utf8"));
+    const accountsWithBalance = getAccountWithBalance(data);
+
+    const UTT = await ethers.getContractAt("UTT", taskArguments.targetaddress);
+
     const transactionResponse = await UTT.migrateBalance(
       accountsWithBalance,
       taskArguments.sourceaddress
     );
-    console.log(`Transaction Hash: ${transactionResponse.hash}`);
-    const addConnections = getAddConnections();
+    console.log(
+      `Migrated balances. Transaction Hash: ${transactionResponse.hash}`
+    );
+
+    const addConnections = getAddConnections(
+      data,
+      taskArguments.maxConnectedTypeId
+    );
     const addConnectionsTransactionResponse =
       await UTT.migrateSocialConnections(addConnections);
-    console.log(`Transaction Hash: ${addConnectionsTransactionResponse.hash}`);
+    console.log(
+      `Migrated ${addConnections.length} social connections. Transaction Hash: ${addConnectionsTransactionResponse.hash}`
+    );
 
-    const endorsements = getEndorsements();
+    const endorsements = getEndorsements(data);
     const endorsementsTransactionResponse = await UTT.migrateEndorsements(
       endorsements,
       taskArguments.sourceaddress
     );
-    console.log(`Transaction Hash: ${endorsementsTransactionResponse.hash}`);
+    console.log(
+      `Migrated ${endorsements.length} endorsements. Transaction Hash: ${endorsementsTransactionResponse.hash}`
+    );
   });
 
-export const getAccountWithBalance = () => {
+export const getAccountWithBalance = (data: object[]) => {
   const transferEvents = data.filter((e: any) => e.event === "Transfer");
   const accountsWithBalance = new Set();
   transferEvents.forEach((e: any) => {
@@ -45,21 +60,31 @@ export const getAccountWithBalance = () => {
   return accounts;
 };
 
-export const getAddConnections = () => {
+export const getAddConnections = (
+  data: object[],
+  maxConnectedTypeId: number
+) => {
   const events = data
     .filter((e: any) => e.event === "AddConnection")
-    .map((e: any) => {
+    .reduce((agg: Array<object>, e: any) => {
       const connectedTypeId = new BigNumber(e.args[1].hex).toNumber();
-      return {
-        user: e.args[0],
-        connectedTypeId,
-        connectedUserIdHash: e.args[2],
-      };
-    });
+      if (connectedTypeId <= maxConnectedTypeId) {
+        agg.push({
+          user: e.args[0],
+          connectedTypeId,
+          connectedUserIdHash: e.args[2],
+        });
+      } else {
+        console.log(
+          `Skipping connection with connectedTypeId ${connectedTypeId}`
+        );
+      }
+      return agg;
+    }, []);
   return events;
 };
 
-export const getEndorsements = () => {
+export const getEndorsements = (data: object[]) => {
   const events = data
     .filter((e: any) => e.event === "Endorse")
     .map((e: any) => {
