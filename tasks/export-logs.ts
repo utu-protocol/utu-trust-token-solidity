@@ -1,20 +1,27 @@
 // const { ethers, network } = require("hardhat");
-import { task } from "hardhat/config";
+import { task, types } from "hardhat/config";
 import fs from "fs";
 
-task("export-logs", "Mints from the NFT contract")
-  .addParam("address", "The address to receive a token")
+task("export-logs", "Exports logs from a contract")
+  .addParam("address", "The address of the contract")
+  .addOptionalParam("fromBlock", "The block to start from", 0, types.int)
+  .addOptionalParam(
+    "toBlock",
+    "The block to end at; if not given, up to the latest mined block at runtime",
+    null,
+    types.int
+  )
   .setAction(async function (taskArguments: any, { ethers, network }: any) {
     const { provider } = ethers;
     const UTT = await ethers.getContractAt("UTT", taskArguments.address);
-    const toBlock = await provider.getBlockNumber();
-    const blockSize = 10000 - 1;
-    const minBlock = 0;
-    console.log("min-block:", minBlock, "max-block:", toBlock);
+    const maxBlock = taskArguments.toBlock || (await provider.getBlockNumber());
+    const batchSize = 10000 - 1;
+    const minBlock = taskArguments.fromBlock;
+    console.log("min-block:", minBlock, "max-block:", maxBlock);
     const data = [];
 
-    for (let i = minBlock; i < toBlock; i += blockSize) {
-      const y = i + blockSize;
+    for (let i = minBlock; i <= maxBlock; i += batchSize) {
+      const y = i + batchSize;
       const res = await UTT.queryFilter({}, i, y);
       data.push(...res);
       console.log(
