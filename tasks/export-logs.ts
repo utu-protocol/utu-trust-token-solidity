@@ -9,7 +9,7 @@ task("export-logs", "Exports logs from a contract")
   .addOptionalParam(
     "toBlock",
     "The block to end at; if not given, up to the latest mined block at runtime",
-    null,
+    0,
     types.int
   )
   .setAction(async function (taskArguments: any, { ethers, network }: any) {
