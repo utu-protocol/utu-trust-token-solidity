@@ -6,7 +6,7 @@
 // Runtime Environment's members available in the global scope.
 const { ethers } = require("hardhat");
 
-async function deployUTUCoin() {
+async function deployLinkToken() {
   // Hardhat always runs the compile task when running scripts with its command
   // line interface.
   //
@@ -15,23 +15,18 @@ async function deployUTUCoin() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const UTUCoin = await ethers.getContractFactory("UTUCoinMock");
-  //   const deployArgs = require(`./deploy.proxy.args.${network.name}`);
-  const signer = await ethers.getSigner();
+  const LinkToken = await ethers.getContractFactory("Link");
 
-  const utuCoin = await UTUCoin.deploy.apply(UTUCoin, [
-    signer.address,
-    ethers.utils.parseEther("1000000000"),
-  ]);
+  const linkToken = await LinkToken.deploy.apply(LinkToken);
 
-  await utuCoin.deployed();
+  await linkToken.deployed();
 
-  console.log("UTU Coin deployed to:", utuCoin.address);
+  console.log("Link Token deployed to:", linkToken.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
-deployUTUCoin().catch((error) => {
+deployLinkToken().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });

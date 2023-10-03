@@ -8,6 +8,8 @@
     "deploy": "npx hardhat run scripts/deploy.ts",
     "deploy:proxy": "npx hardhat run scripts/deploy.proxy.ts",
     "deploy:utu-coin-mock": "npx hardhat run scripts/deploy.utu.coin.mock.ts",
+    "deploy:operator": "npx hardhat run scripts/deploy.operator.ts",
+    "deploy:link-token": "npx hardhat run scripts/deploy.link-token.ts",
     "upgrade:proxy": "npx hardhat run scripts/upgrade.proxy.ts",
     "upgrade": "npx hardhat run scripts/upgrade.ts",
     "verify": "npx hardhat verify --constructor-args",

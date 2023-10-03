@@ -4,9 +4,9 @@
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 
 // Runtime Environment's members available in the global scope.
-const { ethers } = require("hardhat");
+const { ethers, network } = require("hardhat");
 
-async function deployUTUCoin() {
+async function deployOperator() {
   // Hardhat always runs the compile task when running scripts with its command
   // line interface.
   //
@@ -15,23 +15,19 @@ async function deployUTUCoin() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const UTUCoin = await ethers.getContractFactory("UTUCoinMock");
-  //   const deployArgs = require(`./deploy.proxy.args.${network.name}`);
-  const signer = await ethers.getSigner();
+  const UTUOperator = await ethers.getContractFactory("UTUOperator");
+  const deployArgs = require(`./deploy.operator.args.${network.name}`);
 
-  const utuCoin = await UTUCoin.deploy.apply(UTUCoin, [
-    signer.address,
-    ethers.utils.parseEther("1000000000"),
-  ]);
+  const utuOperator = await UTUOperator.deploy.apply(UTUOperator, deployArgs);
 
-  await utuCoin.deployed();
+  await utuOperator.deployed();
 
-  console.log("UTU Coin deployed to:", utuCoin.address);
+  console.log("UTU Operator deployed to:", utuOperator.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
-deployUTUCoin().catch((error) => {
+deployOperator().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
