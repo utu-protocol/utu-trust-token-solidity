@@ -133,8 +133,13 @@ const config = {
           ? [process.env.TEST_PRIVATE_KEY]
           : [],
     },
+    aurora: {
+      url: process.env.AURORA_URL || "https://mainnet.aurora.dev",
+      accounts: [process.env.MAIN_PRIVATE_KEY ?? ""],
+      chainId: 1313161554,
+    },
     testnet_aurora: {
-      url: process.env.AURORA_URL || "https://testnet.aurora.dev",
+      url: process.env.TESTNET_AURORA_URL || "https://testnet.aurora.dev",
       accounts: [process.env.TEST_PRIVATE_KEY ?? ""],
       chainId: 1313161555,
     },
@@ -160,6 +165,14 @@ const config = {
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,
     customChains: [
+      {
+        network: "aurora",
+        chainId: 1313161554,
+        urls: {
+          apiURL: "https://explorer.mainnet.aurora.dev/api",
+          browserURL: "https://explorer.mainnet.aurora.dev",
+        },
+      },
       {
         network: "testnet_aurora",
         chainId: 1313161555,
