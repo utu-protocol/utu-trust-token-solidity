@@ -33,34 +33,43 @@ It generates upgraded test contracts for all contracts in the contracts director
 
 It also prints out the code to add to the "Should allow contract upgrading with other attributes and functions" test in UTT.test.ts. Remove lines for non-upgradable contracts (such as Operator.sol, UTTProxy.sol).
 
+## Architecture
+
+
+
 ## Deploying
 
 ### Deploy Oracle Contract
 
-1. Deploy [Chainlink Operator v0.7 Contract](https://github.com/smartcontractkit/chainlink/blob/develop/contracts/src/v0.7/Operator.sol) via [Remix](https://remix.ethereum.org/) or by cloning the [Chainlink contracts repo](https://github.com/smartcontractkit/chainlink/tree/develop/contracts) and using Hardhat
+1. `npm run deploy:operator -- --network <network>`[^1] 
 2. [Set up a Chainlink node](https://github.com/utu-protocol/utu-trust-token-solidity/main/README.md#set-up-a-chainlink-node-in-aws)
 3. Whitelist the node address by calling `setAuthorizedSenders` from the `Operator` contract
+4. Create jobs according to the job specification files in [chainlink-jobs](chainlink-jobs); each job has an external id, which is included in the job specification file. The external id is used in the `UTT` and `UTTProxy` contracts to identify the job.
+
+[^1]: One can also deploy [Chainlink Operator v0.7 Contract](https://github.com/smartcontractkit/chainlink/blob/develop/contracts/src/v0.7/Operator.sol) via [Remix](https://remix.ethereum.org/), or by cloning the [Chainlink contracts repo](https://github.com/smartcontractkit/chainlink/tree/develop/contracts) and using Hardhat
 
 ### Deploy UTT Contract
 
 The following require the `PRIVATE_KEY` and `<NETWORK>_URL`
 environment variables to be set appropriately.
 
-Create a deploy args config file in `scripts/` named `deploy.args.${network}.js` for the network you want to deploy on.
+Create a deploy args config file in `scripts/` named `deploy.args.${network}.js` for the network you want to deploy on. 
+
+Example for the Polygon Mumbai testnet deployment:
 
 ```javascript
 const { ethers } = require("hardhat");
 
 module.exports = [
-	1000000, // test value
-	"0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f", // mumbai oracle
-	"0eec7e1dd0d2476ca1a872dfb6633f48", // mumbai job id
-	ethers.utils.parseEther("0.001"), // mumbai link fee
-	"0x326C977E6efc84E512bB9C30f76E30c160eD06FB" // mumbai link token address
+	1000000, // UTT assigned to deployer for testing
+	"0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f", // Mumbai oracle contract address
+	"0eec7e1dd0d2476ca1a872dfb6633f48", // External Job ID for the "UTT Check Previous Endorsers Job"
+	ethers.utils.parseEther("0.001"), // Mumbai LINK fee
+	"0x326C977E6efc84E512bB9C30f76E30c160eD06FB" // Mumbai LINK token address
 ]
 ```
 
-E.g. for Polygon Mumbai:
+We need to provide a node URL to the deployer, e.g. for Polygon Mumbai:
 
 ```MUMBAI_URL=https://polygon-mumbai.g.alchemy.com/v2/<key>```
 
@@ -68,6 +77,10 @@ Deploy on `<network>` (e.g. mumbai):
 ```shell
 npm run deploy -- --network <network>
 ```
+
+### Deploy Proxy Contract
+
+TODO: update this section
 
 ### Upgrade UTT Contract
 
@@ -98,10 +111,23 @@ npm run upgrade -- --network <network>
 
 ### Using etherscan API
 
+#### UTT >= v2 (upgradable):
+
+```shell
+npm run verify -- --network <network> <address>
+```
+
+#### UTT v1 (non-upgradable:)
+
 Verify deployment at `<address>` on `<network>`
 (additionally requires an API key in the `ETHERSCAN_API_KEY` env variable):
 ```shell
-npm run verify --  ./scripts/deploy.args.<network>.js --network <network> <address>
+npm run verify -- --constructor-args ./scripts/deploy.args.<network>.js --network <network> <address>
+```
+
+#### Verifying the operator contract:
+```shell
+npm run verify -- --constructor-args ./scripts/deploy.operator.args.<network>.js --contract contracts/mocks/Operator.sol:UTUOperator --network <network> <address>
 ```
 
 ### Using flattened contract source
