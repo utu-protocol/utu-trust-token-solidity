@@ -190,15 +190,14 @@ abstract contract Endorsement is
                 amount
             );
 
-            // reward tokens to previous endorser
-            reward(endorsersLevel1[i], endorserReward);
+            reward(endorsersLevel1[i], endorserReward, true);
             emit RewardPreviousEndorserLevel1(
                 endorsersLevel1[i],
                 endorserReward
             );
         }
 
-        //reward first-level previous endorsers
+        //reward second-level previous endorsers
         for (uint8 i = 0; i < endorsersLevel2.length; i++) {
             uint256 endorserReward = computeReward(
                 target,
@@ -207,8 +206,7 @@ abstract contract Endorsement is
                 amount
             );
 
-            // reward tokens to previous endorser
-            reward(endorsersLevel2[i], endorserReward);
+            reward(endorsersLevel2[i], endorserReward, true);
             emit RewardPreviousEndorserLevel2(
                 endorsersLevel2[i],
                 endorserReward
@@ -356,7 +354,10 @@ abstract contract Endorsement is
         }
     }
 
-    function reward(address user, uint256 rewardUTT) internal virtual;
+    /**
+     * @dev Abstract function to reward a user with UTT and optionally UTU Coin.
+     */
+    function reward(address user, uint256 rewardUTT, bool rewardUTUCoin) internal virtual;
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new

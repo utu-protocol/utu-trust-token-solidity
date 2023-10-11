@@ -36,9 +36,10 @@ contract MigratableReward is
 
     function reward(
         address user,
-        uint256 rewardUTT
+        uint256 rewardUTT,
+        bool rewardUTUCoin
     ) internal virtual override(Endorsement, SocialConnector, Reward) {
-        super.reward(user, rewardUTT);
+        super.reward(user, rewardUTT, rewardUTUCoin);
     }
 
     function __Endorsement_init(
