@@ -15,6 +15,21 @@ contract MigratableReward is
     MigratableEndorsement,
     MigratableSocialConnector
 {
+    function migrateBalance(
+        address[] calldata addresses,
+        address oldContractAddress
+    ) public onlyOwner onlyMigratingDataFromOldContract {
+        IERC20Upgradeable oldContract = IERC20Upgradeable(oldContractAddress);
+        for (uint i = 0; i < addresses.length; i++) {
+            address addr = addresses[i];
+            uint256 balance = oldContract.balanceOf(addr);
+            uint256 currentBalance = balanceOf(addr);
+            if (balance > currentBalance) {
+                _mint(addr, balance);
+            }
+        }
+    }
+
     function migrateTotalClaimableUTUCoin(
         address oldContractAddress
     ) public onlyOwner onlyMigratingDataFromOldContract {
