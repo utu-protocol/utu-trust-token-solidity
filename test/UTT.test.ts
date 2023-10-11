@@ -19,22 +19,10 @@ import { ethers } from "hardhat";
 
 
 describe("UTT", function () {
-  const mockTransactionId = "123456";
+  // Some smart contract deployments and operations can take longer than the default 2s timeout:
+  this.timeout(10000);
 
-  beforeEach(async function () {
-    // send initial coins to first 3 addresses
-    // await utt
-    //   .connect(admin)
-    //   .transfer(user1.address, ethers.utils.parseEther("10"));
-    // await utt
-    //   .connect(admin)
-    //   .transfer(user2.address, ethers.utils.parseEther("10"));
-    // await utt
-    //   .connect(admin)
-    //   .transfer(user3.address, ethers.utils.parseEther("10"));
-    // await utt.connect(this.admin).endorse(service.address, 1, [], []);
-    // await utt.connect(this.admin).endorse(service.address, 1, [], []);
-  });
+  const mockTransactionId = "123456";
 
   describe("Endorsements", function () {
     it("should not be allowed to endorse an amount greater than the balance", async function () {
@@ -306,15 +294,60 @@ describe("UTT", function () {
     });
 
     it("should should revert with 'Not enough UTU Coin available to claim rewards.'", async function () {
+      const { utt, mockOperator, admin, service1, user1, connector } =
+        await loadFixture(deployUTT);
+
+      // whitelist user1 for claiming rewards:
+      await addConnection(utt, connector, user1.address, 0);
+      await utt.connect(admin).whitelistForClaimRewards(0);
+
+      const utuCoinAddress = (await deployUTUCoinMock(utt.address, 0n)).address;
+      await utt.connect(admin).setUTUCoin(utuCoinAddress);
+
+      // Make user1 get some UTU Coin rewards:
+      await endorse(
+        utt,
+        mockOperator,
+        user1,
+        service1.address,
+        200,
+        mockTransactionId,
+        [],
+        []
+      );
+
+      await endorse(
+        utt,
+        mockOperator,
+        admin,
+        service1.address,
+        200,
+        mockTransactionId,
+        [user1.address],
+        []
+      );
+
+      await expect(utt.connect(user1).claimRewards()).to.revertedWith(
+        // User 1 could claim the reward for addConnection but:
+        "Not enough UTU Coin available to claim rewards."
+      );
+    });
+
+    it("should should revert with 'Insufficient claimable rewards for the target.'", async function () {
       const { utt, admin, user1, connector } = await loadFixture(deployUTT);
+
+      // Adding connections earns UTT rewards but no UTU Coin rewards; so adding a whitelisted connection should
+      // whitelist a user for claiming, but make claiming UTU Coin fail due to insufficient funds:
+
       await addConnection(utt, connector, user1.address, 0);
       await utt.connect(admin).whitelistForClaimRewards(0);
       const utuCoinAddress = (await deployUTUCoinMock(utt.address, 0n)).address;
       await utt.connect(admin).setUTUCoin(utuCoinAddress);
 
+
       await expect(utt.connect(user1).claimRewards()).to.revertedWith(
         // User 1 could claim the reward for addConnection but:
-        "Not enough UTU Coin available to claim rewards."
+        "Insufficient claimable rewards for the target."
       );
     });
 
@@ -349,7 +382,7 @@ describe("UTT", function () {
         []
       );
 
-      const addConnectionReward = 1000n * UTU_DECIMALS;
+      const addConnectionReward = 0n;
       const endorsementReward = (87n * UTU_DECIMALS) / 10n;
 
       await expect(utt.connect(user1).claimRewards())
@@ -405,62 +438,90 @@ describe("UTT", function () {
   });
 
   describe("Admin Set Parameters", function () {
-    async function expectSetParameter(name: string) {
+    async function expectSetParameter(name: string, value?: any, getterName?: string) {
       const { utt, admin } = await loadFixture(deployUTT);
       const setter = `set${name}`;
-      await utt.connect(admin)[setter](20);
-      const val = await utt.connect(admin)[name]();
-      expect(val).to.equal(20);
+      const connectedUtt = await utt.connect(admin);
+      const setterFn = connectedUtt[setter];
+      await (value !== undefined ? setterFn(value) : setterFn());
+      const val = await utt.connect(admin)[getterName || name]();
+      expect(val).to.equal(value);
     }
 
+    it("should set UTUCoin", async function () {
+      await expectSetParameter("UTUCoin", "0x19bc90FfBDCaD53c48eF0b08A67B0D2563AEE2a8");
+    });
+
     it("should set O_n", async function () {
-      expectSetParameter("O_n");
+      await expectSetParameter("O_n", 20);
     });
 
     it("should set D_n", async function () {
-      expectSetParameter("D_n");
+      await expectSetParameter("D_n", 20);
     });
 
     it("should set D_lvl1", async function () {
-      expectSetParameter("D_lvl1");
+      await expectSetParameter("D_lvl1", 20);
     });
 
     it("should set D_lvl2", async function () {
-      expectSetParameter("D_lvl2");
+      await expectSetParameter("D_lvl2", 20);
     });
 
     it("should set D_o", async function () {
-      expectSetParameter("D_o");
+      await expectSetParameter("D_o", 20);
+    });
+
+    it("should set D_UTT", async function () {
+      await expectSetParameter("D_UTT", 20);
+    });
+
+    it("should set socialConnectionReward", async function () {
+      await expectSetParameter("SocialConnectionReward", 20, "socialConnectionReward");
     });
   });
 
   describe("User tries to set parameters", function () {
-    async function expectSetParameterNotAllowed(name: string) {
+    async function expectSetParameterNotAllowed(name: string, value?: any) {
       const { utt, user1 } = await loadFixture(deployUTT);
       const setter = `set${name}`;
-      expect(utt.connect(user1)[setter](20)).to.revertedWith(
+      const connectedUtt = await utt.connect(user1);
+      const setterFn = connectedUtt[setter];
+      await expect(value !== undefined ? setterFn(value) : setterFn()).to.revertedWith(
         "Ownable: caller is not the owner"
       );
     }
 
+    it("should not be allowed to set UTUCoin", async function () {
+      await expectSetParameterNotAllowed("UTUCoin", "0x19bc90FfBDCaD53c48eF0b08A67B0D2563AEE2a8");
+    });
+
     it("should not be allowed to set O_n", async function () {
-      expectSetParameterNotAllowed("O_n");
+      await expectSetParameterNotAllowed("O_n", 20);
     });
 
     it("should not be allowed to set D_n", async function () {
-      expectSetParameterNotAllowed("D_n");
+      await expectSetParameterNotAllowed("D_n", 20);
     });
 
     it("should not be allowed to set D_lvl1", async function () {
-      expectSetParameterNotAllowed("D_lvl1");
+      await expectSetParameterNotAllowed("D_lvl1", 20);
     });
 
     it("should not be allowed to set D_lvl2", async function () {
-      expectSetParameterNotAllowed("D_lvl2");
+      await expectSetParameterNotAllowed("D_lvl2", 20);
     });
 
     it("should not be allowed to set D_o", async function () {
-      expectSetParameterNotAllowed("D_o");
+      await expectSetParameterNotAllowed("D_o", 20);
+    });
+
+    it("should not be allowed to set D_UTT", async function () {
+      await expectSetParameterNotAllowed("D_UTT", 20);
+    });
+
+    it("should not be allowed to set socialConnectionReward", async function () {
+      await expectSetParameterNotAllowed("SocialConnectionReward", 20);
     });
   });
 
@@ -506,10 +567,11 @@ describe("UTT", function () {
       const { utt: oldContract, connector } = await loadFixture(deployUTT);
       const user1 = accounts[0];
       const { utt, admin } = await loadFixture(deployUTTUnmigrated);
+
       // to check if it doesn't double mint
       accounts.push(user1);
 
-      await addConnection(oldContract, connector, user1.address);
+      await addConnection(oldContract, connector, user1.address, 0);
 
       const balanceBefore = await oldContract.balanceOf(user1.address);
 
