@@ -87,7 +87,7 @@ contract TestUpgradedUTT is TestUpgradedMigratableReward,
     }
 
     /**
-     * * Always reverts on external calls on approve, since TestUpgradedUTT is not transferable.
+     * Always reverts on external calls on approve, since TestUpgradedUTT is not transferable.
      */
     function approve(
         address spender,

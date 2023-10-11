@@ -86,7 +86,7 @@ abstract contract TestUpgradedSocialConnector is ERC20Upgradeable, TestUpgradedR
                 socialConnectionReward
             );
             // reward tokens to the user
-            reward(user, socialConnectionReward);
+            reward(user, socialConnectionReward, false);
         }
     }
 
@@ -132,7 +132,7 @@ abstract contract TestUpgradedSocialConnector is ERC20Upgradeable, TestUpgradedR
         delete connectedTypeWhitelisted[connectedTypeId];
     }
 
-    function reward(address user, uint256 rewardUTT) internal virtual;
+    function reward(address user, uint256 rewardUTT, bool rewardUTUCoin) internal virtual;
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
