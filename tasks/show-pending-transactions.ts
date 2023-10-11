@@ -18,13 +18,13 @@ task("show-pending-transactions", "Show all pending transactions for the signer"
 
     for (let nonce = confirmedNonce; nonce < pendingNonce; nonce++) {
       console.log("Getting transaction with nonce", nonce);
-      const tx = await hre.ethers.provider.getTransactionByHash(ethers.utils.keccak256(ethers.utils.serializeTransaction({
+      const tx = await hre.ethers.provider.getTransaction(hre.ethers.utils.keccak256(hre.ethers.utils.serializeTransaction({
         nonce,
         gasLimit: 21000,  // Use some default values here; actual values don't matter
         gasPrice: 1,
         to: "0x0000000000000000000000000000000000000000",
         value: 0
-      }, {from: address})));
+      })));
 
       if (tx) {
         pendingTransactions.push(tx);
