@@ -8,7 +8,10 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient {
+import "./EndorsementInterface.sol";
+import "./UTURewardsInterface.sol";
+
+contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient, EndorsementInterface, UTURewardsInterface {
     using Chainlink for Chainlink.Request;
     using Strings for uint256;
     using SafeERC20 for ERC20;
@@ -53,18 +56,7 @@ contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient {
     /** Id for oracle claim rewards jobs from this contract */
     bytes32 internal claimRewardJobId;
 
-    /** A new endorsement was made */
-    event Endorse(
-        address indexed _from,
-        address indexed _to,
-        uint _value,
-        string _transactionId
-    );
-
     event ProxiedEndorseFulfilled(bytes32 indexed _requestId);
-
-    /** Rewarded UTU Coin were claimed */
-    event ClaimUTURewards(address indexed _by, uint _value);
 
         /** Rewarded UTU Coin were claimed */
     event FulfillingClaimUTURewards(address indexed _by, uint _value);
@@ -114,7 +106,7 @@ contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient {
         address target,
         uint256 amount,
         string memory transactionId
-    ) external notMigrating {
+    ) external override notMigrating {
         Chainlink.Request memory request = buildChainlinkRequest(
             jobId,
             address(this),
@@ -193,7 +185,7 @@ contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient {
         isMigrating = !isMigrating;
     }
 
-    function claimRewards() external notMigrating {
+    function claimRewards() external override notMigrating {
         require(UTUCoin != address(0), "UTU Coin address not configured.");
 
         Chainlink.Request memory request = buildChainlinkRequest(
