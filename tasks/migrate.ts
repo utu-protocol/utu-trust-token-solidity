@@ -12,7 +12,7 @@ const EXPECTED_GAS_USAGE = {
 };
 
 // Function to compute the batch size
-function computeBatchSize(arrayLength, gasEstimate, maxGas) {
+function computeBatchSize(arrayLength: number, gasEstimate: number, maxGas: number) : number {
   return Math.ceil(arrayLength / (gasEstimate / maxGas));
 }
 
@@ -163,7 +163,7 @@ task("migrate-data", "Migrates data from an old UTT contract to a new version.")
               maxFeePerGas: maxFeePerGasInWei,
               maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
           }]);
-          gasUsedPs.push(tx.wait().then(receipt => receipt.gasUsed));
+          gasUsedPs.push(tx.wait().then((receipt: any) => receipt.gasUsed));
           console.log(`Calling ${method.name} for chunk ${chunkIndex + 1} of ${chunks.length} (${chunk.length} ` +
             `entries). Transaction Hash: ${tx.hash}`);
         } else {
