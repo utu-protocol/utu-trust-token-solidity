@@ -11,7 +11,7 @@ import {ENSResolver as ENSResolver_Chainlink} from "@chainlink/contracts/src/v0.
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /**
- * @title The ChainlinkClient contract
+ * @title An upgradable version of the ChainlinkClient contract
  * @notice Contract writers can inherit this contract in order to create requests for the
  * Chainlink network
  */
