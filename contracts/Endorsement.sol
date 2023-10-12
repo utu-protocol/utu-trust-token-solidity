@@ -5,12 +5,18 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "./ChainlinkClient.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "./EndorsementInterface.sol";
 import "./Roles.sol";
 
+/**
+ * @title Endorsement
+ * This contract implements the endorsement functionality of UTU Protocol.
+ */
 abstract contract Endorsement is
     Initializable,
     ERC20Upgradeable,
     ChainlinkClient,
+    EndorsementInterface,
     Roles
 {
     using Chainlink for Chainlink.Request;
@@ -97,21 +103,6 @@ abstract contract Endorsement is
     /** LINK fee to be paid to the oracle operator contract for each request */
     uint256 internal fee;
 
-    // Events for endorsements.
-
-    /** A new endorsement was made */
-    event Endorse(
-        address indexed _from,
-        address indexed _to,
-        uint _value,
-        string _transactionId
-    );
-
-    /** A first-level previous endorser was rewarded */
-    event RewardPreviousEndorserLevel1(address endorser, uint256 reward);
-
-    /** A second-level previous endorser was rewarded */
-    event RewardPreviousEndorserLevel2(address endorser, uint256 reward);
 
     // Governance functions for setting the reward and penalty parameters
 
@@ -199,15 +190,14 @@ abstract contract Endorsement is
                 amount
             );
 
-            // reward tokens to previous endorser
-            reward(endorsersLevel1[i], endorserReward);
+            reward(endorsersLevel1[i], endorserReward, true);
             emit RewardPreviousEndorserLevel1(
                 endorsersLevel1[i],
                 endorserReward
             );
         }
 
-        //reward first-level previous endorsers
+        //reward second-level previous endorsers
         for (uint8 i = 0; i < endorsersLevel2.length; i++) {
             uint256 endorserReward = computeReward(
                 target,
@@ -216,8 +206,7 @@ abstract contract Endorsement is
                 amount
             );
 
-            // reward tokens to previous endorser
-            reward(endorsersLevel2[i], endorserReward);
+            reward(endorsersLevel2[i], endorserReward, true);
             emit RewardPreviousEndorserLevel2(
                 endorsersLevel2[i],
                 endorserReward
@@ -230,16 +219,28 @@ abstract contract Endorsement is
         emit Endorse(from, target, amount, transactionId);
     }
 
+    /**
+     * @inheritdoc EndorsementInterface
+     */
     function endorse(
         address target,
         uint256 amount,
         string memory transactionId
-    ) public virtual {
+    ) public override virtual {
         require(msg.sender == tx.origin, "should be a user");
 
         _triggerEndorse(msg.sender, target, amount, transactionId);
     }
 
+    /**
+     * @dev This is called via oracle to forward an endorse call from a proxy contract. The caller must have the
+     *      PROXY_ENDORSER_ROLE.
+     * @param source the endorser's address
+     * @param target the endorsed entity (address is just used as an id here)
+     * @param amount the stake for the new endorsement
+     * @param transactionId an id representing the "business transaction" for which the endorsement was made; this is
+     *        _not_ necessarily an Ethereum transaction id.
+     */
     function proxyEndorse(
         address source,
         address target,
@@ -250,10 +251,8 @@ abstract contract Endorsement is
     }
 
     /**
-     * @notice Creates a new staked endorsement, where the caller is the endorser. Previous endorsers, retrieved
-     *         from the UTU Trust API via an oracle, will be rewarded according to the reward formula from the
-     *         whitepaper.
-     * @dev This creates an oracle request. The actual endorsement, staking and rewarding is done on its fulfillment.
+     * @dev This creates an oracle request to retrieve previous endorsers to be rewarded. The actual endorsement,
+     *      staking and rewarding is done on its fulfillment.
      * @param source the endorser's address
      * @param target the endorsed entity (address is just used as an id here)
      * @param amount the stake for the new endorsement
@@ -355,7 +354,10 @@ abstract contract Endorsement is
         }
     }
 
-    function reward(address user, uint256 rewardUTT) internal virtual;
+    /**
+     * @dev Abstract function to reward a user with UTT and optionally UTU Coin.
+     */
+    function reward(address user, uint256 rewardUTT, bool rewardUTUCoin) internal virtual;
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new

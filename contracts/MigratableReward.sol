@@ -15,6 +15,21 @@ contract MigratableReward is
     MigratableEndorsement,
     MigratableSocialConnector
 {
+    function migrateBalance(
+        address[] calldata addresses,
+        address oldContractAddress
+    ) public onlyOwner onlyMigratingDataFromOldContract {
+        IERC20Upgradeable oldContract = IERC20Upgradeable(oldContractAddress);
+        for (uint i = 0; i < addresses.length; i++) {
+            address addr = addresses[i];
+            uint256 balance = oldContract.balanceOf(addr);
+            uint256 currentBalance = balanceOf(addr);
+            if (balance > currentBalance) {
+                _mint(addr, balance);
+            }
+        }
+    }
+
     function migrateTotalClaimableUTUCoin(
         address oldContractAddress
     ) public onlyOwner onlyMigratingDataFromOldContract {
@@ -36,9 +51,10 @@ contract MigratableReward is
 
     function reward(
         address user,
-        uint256 rewardUTT
+        uint256 rewardUTT,
+        bool rewardUTUCoin
     ) internal virtual override(Endorsement, SocialConnector, Reward) {
-        super.reward(user, rewardUTT);
+        super.reward(user, rewardUTT, rewardUTUCoin);
     }
 
     function __Endorsement_init(

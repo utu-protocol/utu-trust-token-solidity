@@ -2,10 +2,11 @@
 // but useful for running the script in a standalone fashion through `node <script>`.
 //
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
-const { ethers, network, upgrades } = require("hardhat");
 
-async function upgradeUTT() {
+// Runtime Environment's members available in the global scope.
+const { ethers, network } = require("hardhat");
+
+async function deployOperator() {
   // Hardhat always runs the compile task when running scripts with its command
   // line interface.
   //
@@ -14,19 +15,19 @@ async function upgradeUTT() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const UTT = await ethers.getContractFactory("UTT");
-  const updagradeArgs = require(`./upgrade.args.${network.name}`);
-  const contractAddress = updagradeArgs[0];
-  const utt = await upgrades.upgradeProxy(contractAddress, UTT);
+  const UTUOperator = await ethers.getContractFactory("UTUOperator");
+  const deployArgs = require(`./deploy.operator.args.${network.name}`);
 
-  await utt.deployed();
+  const utuOperator = await UTUOperator.deploy.apply(UTUOperator, deployArgs);
 
-  console.log("UTT upgraded to:", utt.address);
+  await utuOperator.deployed();
+
+  console.log("UTU Operator deployed to:", utuOperator.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
-upgradeUTT().catch((error) => {
+deployOperator().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });

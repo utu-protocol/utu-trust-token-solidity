@@ -16,8 +16,9 @@ async function deployUTT() {
   // We get the contract to deploy
   const UTT = await ethers.getContractFactory("UTT");
   const deployArgs = require(`./deploy.args.${network.name}`);
-  const utt = await upgrades.deployProxy(UTT, deployArgs);
-
+  const options = { timeout: 0 };
+  const utt = await upgrades.deployProxy(UTT, deployArgs, options);
+  console.log("waiting for utt to deploy");
   await utt.deployed();
 
   console.log("UTT deployed to:", utt.address);

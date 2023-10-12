@@ -24,7 +24,7 @@ abstract contract SocialConnector is ERC20Upgradeable, Roles {
 
     uint256 public maxConnectedTypeId;
 
-    mapping(uint256 => bool) public connectedTypeWhitelistedForKYC;
+    mapping(uint256 => bool) public connectedTypeWhitelisted;
 
     /** Social media account was connected */
     event AddConnection(
@@ -86,7 +86,7 @@ abstract contract SocialConnector is ERC20Upgradeable, Roles {
                 socialConnectionReward
             );
             // reward tokens to the user
-            reward(user, socialConnectionReward);
+            reward(user, socialConnectionReward, false);
         }
     }
 
@@ -120,19 +120,19 @@ abstract contract SocialConnector is ERC20Upgradeable, Roles {
      * Whitelists a connectedTypeId to provide sufficient KYC for claiming UTU Coin rewards
      * @param connectedTypeId id of the social media platform
      */
-    function whitelistForKYC(uint256 connectedTypeId) public onlyOwner {
-        connectedTypeWhitelistedForKYC[connectedTypeId] = true;
+    function whitelistForClaimRewards(uint256 connectedTypeId) public onlyOwner {
+        connectedTypeWhitelisted[connectedTypeId] = true;
     }
 
     /**
      * Removes a connectedTypeId from the whitelists for providing sufficient KYC for claiming UTU Coin rewards
      * @param connectedTypeId id of the social media platform
      */
-    function deWhitelistForKYC(uint256 connectedTypeId) public onlyOwner {
-        delete connectedTypeWhitelistedForKYC[connectedTypeId];
+    function dewhitelistForClaimRewards(uint256 connectedTypeId) public onlyOwner {
+        delete connectedTypeWhitelisted[connectedTypeId];
     }
 
-    function reward(address user, uint256 rewardUTT) internal virtual;
+    function reward(address user, uint256 rewardUTT, bool rewardUTUCoin) internal virtual;
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new

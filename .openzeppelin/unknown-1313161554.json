@@ -1,0 +1,298 @@
+{
+  "manifestVersion": "3.2",
+  "admin": {
+    "address": "0x32c52b96f47FE92bA53BCa6e35e772B444987CC0",
+    "txHash": "0xfff3aa7807cc4d9ea9068da54745e471c40ecc1cb6894d40662a48a2de50a5ba"
+  },
+  "proxies": [
+    {
+      "address": "0xb2e9dB661F992d2F3013e4AFcE01C72d52f58A37",
+      "txHash": "0x922dd51a7471953dfa3661dbe7fb7bb0d572f88f3075a49051ebb02a7df233de",
+      "kind": "transparent"
+    }
+  ],
+  "impls": {
+    "c020beb96743b0e704181ce68cc1e5bf5517b42674574458cac291cf576ea62d": {
+      "address": "0x5dc70C31cc67867c1DB8E697E3D9a680f77f0924",
+      "txHash": "0x8c251b34b26410c332001d9d346c1a0273646fa4c874d306a5c25def04abd0ce",
+      "layout": {
+        "solcVersion": "0.8.7",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "s_ens",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_contract(ENSInterface)381",
+            "contract": "ChainlinkClient",
+            "src": "contracts/ChainlinkClient.sol:31"
+          },
+          {
+            "label": "s_ensNode",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_bytes32",
+            "contract": "ChainlinkClient",
+            "src": "contracts/ChainlinkClient.sol:32"
+          },
+          {
+            "label": "s_link",
+            "offset": 0,
+            "slot": "103",
+            "type": "t_contract(LinkTokenInterface)476",
+            "contract": "ChainlinkClient",
+            "src": "contracts/ChainlinkClient.sol:33"
+          },
+          {
+            "label": "s_oracle",
+            "offset": 0,
+            "slot": "104",
+            "type": "t_contract(OperatorInterface)556",
+            "contract": "ChainlinkClient",
+            "src": "contracts/ChainlinkClient.sol:34"
+          },
+          {
+            "label": "s_requestCount",
+            "offset": 0,
+            "slot": "105",
+            "type": "t_uint256",
+            "contract": "ChainlinkClient",
+            "src": "contracts/ChainlinkClient.sol:35"
+          },
+          {
+            "label": "s_pendingRequests",
+            "offset": 0,
+            "slot": "106",
+            "type": "t_mapping(t_bytes32,t_address)",
+            "contract": "ChainlinkClient",
+            "src": "contracts/ChainlinkClient.sol:36"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "107",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "ChainlinkClient",
+            "src": "contracts/ChainlinkClient.sol:365"
+          },
+          {
+            "label": "UTUCoin",
+            "offset": 0,
+            "slot": "156",
+            "type": "t_address",
+            "contract": "UTTProxy",
+            "src": "contracts/UTTProxy.sol:17"
+          },
+          {
+            "label": "oracleRequests",
+            "offset": 0,
+            "slot": "157",
+            "type": "t_mapping(t_bytes32,t_struct(OracleRequest)5565_storage)",
+            "contract": "UTTProxy",
+            "src": "contracts/UTTProxy.sol:37"
+          },
+          {
+            "label": "oracleClaimRequests",
+            "offset": 0,
+            "slot": "158",
+            "type": "t_mapping(t_bytes32,t_struct(OracleClaimRequest)5568_storage)",
+            "contract": "UTTProxy",
+            "src": "contracts/UTTProxy.sol:40"
+          },
+          {
+            "label": "oracle",
+            "offset": 0,
+            "slot": "159",
+            "type": "t_address",
+            "contract": "UTTProxy",
+            "src": "contracts/UTTProxy.sol:42"
+          },
+          {
+            "label": "jobId",
+            "offset": 0,
+            "slot": "160",
+            "type": "t_bytes32",
+            "contract": "UTTProxy",
+            "src": "contracts/UTTProxy.sol:45"
+          },
+          {
+            "label": "fee",
+            "offset": 0,
+            "slot": "161",
+            "type": "t_uint256",
+            "contract": "UTTProxy",
+            "src": "contracts/UTTProxy.sol:48"
+          },
+          {
+            "label": "isMigrating",
+            "offset": 0,
+            "slot": "162",
+            "type": "t_bool",
+            "contract": "UTTProxy",
+            "src": "contracts/UTTProxy.sol:51"
+          },
+          {
+            "label": "claimRewardJobId",
+            "offset": 0,
+            "slot": "163",
+            "type": "t_bytes32",
+            "contract": "UTTProxy",
+            "src": "contracts/UTTProxy.sol:54"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "164",
+            "type": "t_array(t_uint256)48_storage",
+            "contract": "UTTProxy",
+            "src": "contracts/UTTProxy.sol:242"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)48_storage": {
+            "label": "uint256[48]",
+            "numberOfBytes": "1536"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(ENSInterface)381": {
+            "label": "contract ENSInterface",
+            "numberOfBytes": "20"
+          },
+          "t_contract(LinkTokenInterface)476": {
+            "label": "contract LinkTokenInterface",
+            "numberOfBytes": "20"
+          },
+          "t_contract(OperatorInterface)556": {
+            "label": "contract OperatorInterface",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_bytes32,t_address)": {
+            "label": "mapping(bytes32 => address)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(OracleClaimRequest)5568_storage)": {
+            "label": "mapping(bytes32 => struct UTTProxy.OracleClaimRequest)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(OracleRequest)5565_storage)": {
+            "label": "mapping(bytes32 => struct UTTProxy.OracleRequest)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(OracleClaimRequest)5568_storage": {
+            "label": "struct UTTProxy.OracleClaimRequest",
+            "members": [
+              {
+                "label": "target",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OracleRequest)5565_storage": {
+            "label": "struct UTTProxy.OracleRequest",
+            "members": [
+              {
+                "label": "from",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "target",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "transactionId",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    }
+  }
+}

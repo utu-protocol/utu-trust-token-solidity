@@ -1,0 +1,81 @@
+type                = "directrequest"
+schemaVersion       = 1
+name                = "UTT Proxy Claim Rewards"
+
+# NEAR Aurora testnet
+# evmChainID          = 1313161555
+# NEAR Aurora mainnet
+evmChainID          = 1313161554
+
+# Oracle operator contract address
+# NEAR Aurora testnet
+# contractAddress     = "0xbeF02f42F30b1233977DF88986DbB4D27D9c5b09"
+# NEAR Aurora mainnet
+contractAddress     = "0x53b6B5477193cCEdF9457F42a1591759cE75A095"
+
+# Optional externalJobID: Automatically generated if unspecified
+externalJobID = "d38e785276534600ba42401e4bad0156"
+
+observationSource   = """
+    decode_log   [type="ethabidecodelog"
+                  abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+                  data="$(jobRun.logData)"
+                  topics="$(jobRun.logTopics)"]
+
+    decode_cbor  [type="cborparse" data="$(decode_log.data)"]
+
+    encode_claimable_rewards_call  [type="ethabiencode" abi="getClaimableRewards(address target)" data="{\\"target\\": $(decode_cbor.targetAddress) }"]
+
+    claimable_rewards_call    [type="ethcall"
+        // Main UTT contract network ID and address:
+        /* Polygon Mumbai testnet
+        evmChainID="80001"
+        to="0xD559E16b1250c1fa22BAAc79C7CA5432835e1129"
+        */
+        /* Polygon mainnet
+        */
+        evmChainID="137"
+        to="0xE62dc4c82a9749Bf2E40F73138B3CFee0a2EC89F"
+
+        data="$(encode_claimable_rewards_call)"]
+
+    claimable_rewards [type="ethabidecode" abi="uint256 amount" data="$(claimable_rewards_call)"]
+
+    encode_claim_rewards_tx  [type="ethabiencode" abi="proxyClaimRewards(address target, uint256 amount)" data="{\\"target\\": $(decode_cbor.targetAddress), \\"amount\\": $(claimable_rewards.amount) }"]
+
+    submit_claim_rewards_tx    [type="ethtx"
+        // Main UTT contract network ID and address:
+        /* Polygon Mumbai testnet
+        evmChainID="80001"
+        to="0xD559E16b1250c1fa22BAAc79C7CA5432835e1129"
+        */
+        /* Polygon mainnet
+        */
+        evmChainID="137"
+        to="0xE62dc4c82a9749Bf2E40F73138B3CFee0a2EC89F"
+
+        data="$(encode_claim_rewards_tx)" minConfirmations="1" failOnRevert="true"]
+
+    encode_fulfil_claim_mwr [type="ethabiencode"
+                abi="(bytes32 requestId, uint256 _reward)"
+                data="{\\"requestId\\": $(decode_log.requestId), \\"_reward\\": $(claimable_rewards.amount) }"]
+
+    encode_fulfil_claim_tx  [type="ethabiencode"
+                abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
+                data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\":   $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_fulfil_claim_mwr)}"]
+
+    fulfill_claim_tx  [type="ethtx"
+        // Oracle operator contract network ID and address on the proxying chain
+        /* NEAR Aurora testnet
+        evmChainID="1313161555"
+        to="0xbeF02f42F30b1233977DF88986DbB4D27D9c5b09"
+        */
+        /* NEAR Aurora mainnet
+        */
+        evmChainID="1313161554"
+        to="0x53b6B5477193cCEdF9457F42a1591759cE75A095"
+
+        data="$(encode_fulfil_claim_tx)" minConfirmations="4" failOnRevert="true"]
+
+    decode_log -> decode_cbor -> encode_claimable_rewards_call -> claimable_rewards_call -> claimable_rewards -> encode_claim_rewards_tx -> submit_claim_rewards_tx -> encode_fulfil_claim_mwr -> encode_fulfil_claim_tx -> fulfill_claim_tx
+"""

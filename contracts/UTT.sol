@@ -87,7 +87,7 @@ contract UTT is MigratableReward,
     }
 
     /**
-     * * Always reverts on external calls on approve, since UTT is not transferable.
+     * Always reverts on external calls on approve, since UTT is not transferable.
      */
     function approve(
         address spender,
