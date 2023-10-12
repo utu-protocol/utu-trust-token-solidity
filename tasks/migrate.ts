@@ -78,7 +78,6 @@ task("migrate-data", "Migrates data from an old UTT contract to a new version.")
     const accountsWithBalance = getAccountWithBalance(data);
     const addConnections = getAddConnections(BigNumber, data, taskArguments.maxConnectedTypeId);
     const endorsements = getEndorsements(BigNumber, data);
-    const endorsementRewards = getEndorsementRewards(BigNumber, data);
 
     const UTT = await ethers.getContractAt("UTT", taskArguments.targetaddress);
 
@@ -86,7 +85,6 @@ task("migrate-data", "Migrates data from an old UTT contract to a new version.")
       migrateBalanceGasEstimate,
       addConnectionsGasEstimate,
       migrateEndorsementsGasEstimate,
-      endorsementRewardsGasEstimate,
     ] = await Promise.all([
       UTT.estimateGas.migrateBalance(accountsWithBalance, taskArguments.sourceaddress)
         .catch((e: Error) => {
@@ -112,7 +110,6 @@ task("migrate-data", "Migrates data from an old UTT contract to a new version.")
     console.log(`Estimated gas (with margin) for migrateBalance: ${migrateBalanceGasEstimate}`);
     console.log(`Estimated gas (with margin) for migrateSocialConnections: ${addConnectionsGasEstimate}`);
     console.log(`Estimated gas (with margin) for migrateEndorsements: ${migrateEndorsementsGasEstimate}`);
-    console.log(`Estimated gas (with margin) for endorsementRewards: ${endorsementRewardsGasEstimate}`);
 
     const totalGas = migrateBalanceGasEstimate.add(addConnectionsGasEstimate).add(migrateEndorsementsGasEstimate);
     console.log(`Total estimated gas: ${totalGas}`);
@@ -132,15 +129,14 @@ task("migrate-data", "Migrates data from an old UTT contract to a new version.")
     const accountsWithBalanceBatchSize = computeBatchSize(accountsWithBalance.length, migrateBalanceGasEstimate, taskArguments.maxGas);
     const addConnectionsBatchSize = computeBatchSize(addConnections.length, addConnectionsGasEstimate, taskArguments.maxGas);
     const endorsementsBatchSize = computeBatchSize(endorsements.length, migrateEndorsementsGasEstimate, taskArguments.maxGas);
-    const endorsementRewardsBatchSize = computeBatchSize(endorsementRewards.length, endorsementRewardsGasEstimate, taskArguments.maxGas);
 
     // Use lodash to chunk arrays
     const accountsWithBalanceChunks = _.chunk(accountsWithBalance, accountsWithBalanceBatchSize);
     const addConnectionsChunks = _.chunk(addConnections, addConnectionsBatchSize);
     const endorsementsChunks = _.chunk(endorsements, endorsementsBatchSize);
-    const endorsementRewardsChunks = _.chunk(endorsementRewards, endorsementRewardsBatchSize);
 
-    const startNonce = taskArguments.startNonce - taskArguments.skip || await ethers.provider.getTransactionCount(signer.address, 'latest');
+    const startNonce = taskArguments.startNonce || await ethers.provider.getTransactionCount(signer.address, 'latest');
+
     // Convert gas price to Wei, if given
     const maxFeePerGasInWei = taskArguments.maxFeePerGas
       ? ethers.utils.parseUnits(taskArguments.maxFeePerGas, "gwei")
@@ -151,15 +147,16 @@ task("migrate-data", "Migrates data from an old UTT contract to a new version.")
       : undefined;
 
     let totalTxNumber = 0;
+    let totalChunkNumber = 0;
     async function migrate(UTT: any, method: Function, chunks: any[], restArgs: any[]): Promise<(typeof BigNumber)[]> {
       let chunkIndex = 0;
       const gasUsedPs = [];
       for (const chunk of chunks) {
         //if(totalTxNumber > 0) break;
 
-        if(totalTxNumber >= taskArguments.skip) {
+        if(totalChunkNumber >= taskArguments.skip) {
           const tx = await method.apply(UTT, [chunk, ...restArgs, {
-              nonce: startNonce + totalTxNumber,
+              nonce: startNonce + totalTxNumber++,
               maxFeePerGas: maxFeePerGasInWei,
               maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
           }]);
@@ -170,7 +167,7 @@ task("migrate-data", "Migrates data from an old UTT contract to a new version.")
           console.log(`Skipping ${method.name} for chunk ${chunkIndex + 1} of ${chunks.length}.`);
         }
         chunkIndex++;
-        totalTxNumber++;
+        totalChunkNumber++;
       }
       return gasUsedPs;
     }
@@ -178,11 +175,9 @@ task("migrate-data", "Migrates data from an old UTT contract to a new version.")
     // Execute transactions in sequence
     let totalGasUsedPs: Promise<(typeof BigNumber)[]>[] = [];
 
-    //totalGasUsedPs = totalGasUsedPs.concat(await migrate(UTT, UTT.migrateBalance, accountsWithBalanceChunks, [taskArguments.sourceaddress]));
-    //totalGasUsedPs = totalGasUsedPs.concat(await migrate(UTT, UTT.migrateSocialConnections, addConnectionsChunks, []));
-    //totalGasUsedPs = totalGasUsedPs.concat(await migrate(UTT, UTT.migrateEndorsements, endorsementsChunks, [taskArguments.sourceaddress]));
-    //totalGasUsedPs = totalGasUsedPs.concat(await migrate(UTT, UTT.migrateEndorsementRewards, endorsementRewardsChunks, []));
-    console.log("EndorsementRewardsChunks", endorsementRewardsChunks);
+    totalGasUsedPs = totalGasUsedPs.concat(await migrate(UTT, UTT.migrateBalance, accountsWithBalanceChunks, [taskArguments.sourceaddress]));
+    totalGasUsedPs = totalGasUsedPs.concat(await migrate(UTT, UTT.migrateSocialConnections, addConnectionsChunks, []));
+    totalGasUsedPs = totalGasUsedPs.concat(await migrate(UTT, UTT.migrateEndorsements, endorsementsChunks, [taskArguments.sourceaddress]));
 
     const totalGasUsed = await Promise.all(totalGasUsedPs)
       .then((totalGasUsed) => totalGasUsed.reduce((a, b) => a.add(b), BigNumber.from(0)));
