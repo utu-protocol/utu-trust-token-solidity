@@ -4,12 +4,13 @@ pragma solidity ^0.8.7;
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+
 import "./MigratableEndorsement.sol";
 import "./MigratableSocialConnector.sol";
+import "./MigratableReward.sol";
 
-contract UTT is
-    MigratableEndorsement,
-    MigratableSocialConnector,
+contract UTT is MigratableReward,
     ERC20BurnableUpgradeable,
     ERC20PausableUpgradeable
 {
@@ -32,6 +33,7 @@ contract UTT is
     ) external initializer {
         __Roles_init();
         __Endorsement_init("UTU Trust Token", "UTT", _oracle, _jobId, _fee, _link);
+        __Reward_init();
         __SocialConnector_init();
         _mint(msg.sender, _mintAmount);
     }
@@ -85,7 +87,7 @@ contract UTT is
     }
 
     /**
-     * * Always reverts on external calls on approve, since UTT is not transferable.
+     * Always reverts on external calls on approve, since UTT is not transferable.
      */
     function approve(
         address spender,
@@ -94,11 +96,4 @@ contract UTT is
         revert("Not allowed.");
     }
 
-
-    /**
-     * @dev This empty reserved space is put in place to allow future versions to add new
-     * variables without shifting down storage in the inheritance chain.
-     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
-     */
-    uint256[49] private __gap;
 }

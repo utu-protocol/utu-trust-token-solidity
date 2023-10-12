@@ -1,38 +1,190 @@
-import BigNumber from "bignumber.js";
-// import data from "../exports/mumbai-utt-data-1684153540470.json";
-import { task } from "hardhat/config";
+import { task, types } from "hardhat/config";
+import fs from "fs";
+import _ from "lodash";
 
-const data: any[] = [];
+/**
+ * The expected gas usages for each of the migration, per entry. This is taken from an execution on testnet.
+ */
+const EXPECTED_GAS_USAGE = {
+  migrateBalance: 29376,
+  migrateSocialConnections: 8133,
+  migrateEndorsements: 2930,
+};
 
-task("migrate-data", "Mints from the NFT contract")
-  .addParam("sourceaddress", "The address of the old contract")
-  .addParam("targetaddress", "The address to the new contract")
+// Function to compute the batch size
+function computeBatchSize(arrayLength: number, gasEstimate: number, maxGas: number) : number {
+  return Math.ceil(arrayLength / (gasEstimate / maxGas));
+}
+
+task("migrate-data", "Migrates data from an old UTT contract to a new version.")
+  .addParam("sourceaddress", "The address of the old UTT contract.")
+  .addParam("targetaddress", "The address to the new UTT contract.")
+  .addParam("fromFile", "input data file (as created by the export-logs task.)")
+  .addOptionalParam(
+    "maxGas",
+    "The max gas to use per transaction.",
+    5000000,
+    types.int
+  )
+  .addOptionalParam(
+    "gasMargin",
+    "Multiply the estimated gas usage by this factor to add a margin for safety.",
+    1.1,
+    types.float
+  )
+  .addOptionalParam(
+    "maxFeePerGas",
+    "Manually set a max. gas price in GWEI for all transactions. Empty string means to automatically " +
+      "determine gas price. If given, --maxPriorityFeePerGas should also be given.",
+    "",
+    types.string
+  )
+  .addOptionalParam(
+    "maxPriorityFeePerGas",
+    "Manually set a max. priority fee in GWEI for all transactions. Empty string means to automatically " +
+      "determine priority fee. If given, --maxFeePerGas should also be given.",
+    "",
+    types.string
+  )
+  .addOptionalParam(
+    "startNonce",
+    "Manually set a nonce for the first transaction; useful for speeding up stuck migration transactions " +
+      "because of too low gas price, possibly together with --gas-price and --skip. 0 means use the current next " +
+      "nonce of the signer.",
+    0,
+    types.int
+  )
+  .addOptionalParam(
+    "skip",
+    "Skip the first N transactions. Useful for resuming an aborted migration, or, together with " +
+      "--gas-price and --start-nonce for speeding up stuck migration transactions because of too low gas price.",
+    0,
+    types.int
+  )
+  .addOptionalParam(
+    "maxConnectedTypeId",
+    "The max connected type id to migrate (can e.g. be used to limit costs)",
+    Number.MAX_VALUE,
+    types.int
+  )
   .setAction(async function (taskArguments: any, { ethers, network }: any) {
-    const accountsWithBalance = getAccountWithBalance();
-    console.log(taskArguments);
-    const UTT = await ethers.getContractAt(
-      "UTT",
-      taskArguments.targetaddress
-    );
-    const transactionResponse = await UTT.migrateBalance(
-      accountsWithBalance,
-      taskArguments.sourceaddress
-    );
-    console.log(`Transaction Hash: ${transactionResponse.hash}`);
-    const addConnections = getAddConnections();
-    const addConnectionsTransactionResponse =
-      await UTT.migrateSocialConnections(addConnections);
-    console.log(`Transaction Hash: ${addConnectionsTransactionResponse.hash}`);
+    const BigNumber = ethers.BigNumber;
 
-    const endorsements = getEndorsements();
-    const endorsementsTransactionResponse = await UTT.migrateEndorsements(
-      endorsements,
-      taskArguments.sourceaddress
-    );
-    console.log(`Transaction Hash: ${endorsementsTransactionResponse.hash}`);
+    function addMargin(gasEstimate: typeof BigNumber): typeof BigNumber {
+      return gasEstimate.mul(Math.floor(taskArguments.gasMargin * 100)).div(100);
+    }
+
+    const data = JSON.parse(fs.readFileSync(taskArguments.fromFile, "utf8"));
+    const accountsWithBalance = getAccountWithBalance(data);
+    const addConnections = getAddConnections(BigNumber, data, taskArguments.maxConnectedTypeId);
+    const endorsements = getEndorsements(BigNumber, data);
+
+    const UTT = await ethers.getContractAt("UTT", taskArguments.targetaddress);
+
+    const [
+      migrateBalanceGasEstimate,
+      addConnectionsGasEstimate,
+      migrateEndorsementsGasEstimate,
+    ] = await Promise.all([
+      UTT.estimateGas.migrateBalance(accountsWithBalance, taskArguments.sourceaddress)
+        .catch((e: Error) => {
+          console.log("Error estimating gas for migrateBalance; using fallback");
+          return BigNumber.from(EXPECTED_GAS_USAGE.migrateBalance).mul(accountsWithBalance.length);
+        })
+        .then(addMargin),
+      UTT.estimateGas.migrateSocialConnections(addConnections)
+        .catch((e: Error) => {
+          console.log("Error estimating gas for migrateSocialConnections; using fallback");
+          return BigNumber.from(EXPECTED_GAS_USAGE.migrateSocialConnections).mul(addConnections.length);
+        })
+        .then(addMargin),
+      UTT.estimateGas.migrateEndorsements(endorsements, taskArguments.sourceaddress)
+        .catch((e: Error) => {
+          console.log("Error estimating gas for migrateEndorsements; using fallback");
+          return BigNumber.from(EXPECTED_GAS_USAGE.migrateEndorsements).mul(endorsements.length);
+        })
+        .then(addMargin),
+      1
+    ]);
+
+    console.log(`Estimated gas (with margin) for migrateBalance: ${migrateBalanceGasEstimate}`);
+    console.log(`Estimated gas (with margin) for migrateSocialConnections: ${addConnectionsGasEstimate}`);
+    console.log(`Estimated gas (with margin) for migrateEndorsements: ${migrateEndorsementsGasEstimate}`);
+
+    const totalGas = migrateBalanceGasEstimate.add(addConnectionsGasEstimate).add(migrateEndorsementsGasEstimate);
+    console.log(`Total estimated gas: ${totalGas}`);
+
+    const gasPrice = await ethers.provider.getGasPrice();
+    const totalCost = totalGas.mul(gasPrice);
+    console.log(`Total estimated gas price: ${ethers.utils.formatUnits(totalCost, "ether")}`);
+
+    const signer = (await ethers.getSigners())[0];
+    const balance = await signer.getBalance();
+
+    if (false && balance.lt(totalCost)) {
+      const missingCost = totalCost.sub(balance);
+      throw new Error(`Insufficient funds. Balance of ${signer.address} on ${network.name} (${network.chainId}) is ${ethers.utils.formatEther(balance)}. Missing ${ethers.utils.formatEther(missingCost)} ETH/MATIC/....`);
+    }
+
+    const accountsWithBalanceBatchSize = computeBatchSize(accountsWithBalance.length, migrateBalanceGasEstimate, taskArguments.maxGas);
+    const addConnectionsBatchSize = computeBatchSize(addConnections.length, addConnectionsGasEstimate, taskArguments.maxGas);
+    const endorsementsBatchSize = computeBatchSize(endorsements.length, migrateEndorsementsGasEstimate, taskArguments.maxGas);
+
+    // Use lodash to chunk arrays
+    const accountsWithBalanceChunks = _.chunk(accountsWithBalance, accountsWithBalanceBatchSize);
+    const addConnectionsChunks = _.chunk(addConnections, addConnectionsBatchSize);
+    const endorsementsChunks = _.chunk(endorsements, endorsementsBatchSize);
+
+    const startNonce = taskArguments.startNonce || await ethers.provider.getTransactionCount(signer.address, 'latest');
+
+    // Convert gas price to Wei, if given
+    const maxFeePerGasInWei = taskArguments.maxFeePerGas
+      ? ethers.utils.parseUnits(taskArguments.maxFeePerGas, "gwei")
+      : undefined;
+
+    const maxPriorityFeePerGasInWei = taskArguments.maxPriorityFeePerGas
+      ? ethers.utils.parseUnits(taskArguments.maxPriorityFeePerGas, "gwei")
+      : undefined;
+
+    let totalTxNumber = 0;
+    let totalChunkNumber = 0;
+    async function migrate(UTT: any, method: Function, chunks: any[], restArgs: any[]): Promise<(typeof BigNumber)[]> {
+      let chunkIndex = 0;
+      const gasUsedPs = [];
+      for (const chunk of chunks) {
+        //if(totalTxNumber > 0) break;
+
+        if(totalChunkNumber >= taskArguments.skip) {
+          const tx = await method.apply(UTT, [chunk, ...restArgs, {
+              nonce: startNonce + totalTxNumber++,
+              maxFeePerGas: maxFeePerGasInWei,
+              maxPriorityFeePerGas: maxPriorityFeePerGasInWei,
+          }]);
+          gasUsedPs.push(tx.wait().then((receipt: any) => receipt.gasUsed));
+          console.log(`Calling ${method.name} for chunk ${chunkIndex + 1} of ${chunks.length} (${chunk.length} ` +
+            `entries). Transaction Hash: ${tx.hash}`);
+        } else {
+          console.log(`Skipping ${method.name} for chunk ${chunkIndex + 1} of ${chunks.length}.`);
+        }
+        chunkIndex++;
+        totalChunkNumber++;
+      }
+      return gasUsedPs;
+    }
+
+    // Execute transactions in sequence
+    let totalGasUsedPs: Promise<(typeof BigNumber)[]>[] = [];
+
+    totalGasUsedPs = totalGasUsedPs.concat(await migrate(UTT, UTT.migrateBalance, accountsWithBalanceChunks, [taskArguments.sourceaddress]));
+    totalGasUsedPs = totalGasUsedPs.concat(await migrate(UTT, UTT.migrateSocialConnections, addConnectionsChunks, []));
+    totalGasUsedPs = totalGasUsedPs.concat(await migrate(UTT, UTT.migrateEndorsements, endorsementsChunks, [taskArguments.sourceaddress]));
+
+    const totalGasUsed = await Promise.all(totalGasUsedPs)
+      .then((totalGasUsed) => totalGasUsed.reduce((a, b) => a.add(b), BigNumber.from(0)));
+    console.log("Total gas used:", totalGasUsed.toString());
   });
 
-export const getAccountWithBalance = () => {
+export const getAccountWithBalance = (data: object[]) => {
   const transferEvents = data.filter((e: any) => e.event === "Transfer");
   const accountsWithBalance = new Set();
   transferEvents.forEach((e: any) => {
@@ -45,30 +197,54 @@ export const getAccountWithBalance = () => {
   return accounts;
 };
 
-export const getAddConnections = () => {
+export const getAddConnections = (
+  BigNumber: any,
+  data: object[],
+  maxConnectedTypeId: number
+) => {
   const events = data
     .filter((e: any) => e.event === "AddConnection")
-    .map((e: any) => {
-      const connectedTypeId = new BigNumber(e.args[1].hex).toNumber();
-      return {
-        user: e.args[0],
-        connectedTypeId,
-        connectedUserIdHash: e.args[2],
-      };
-    });
+    .reduce((agg: Array<object>, e: any) => {
+      const connectedTypeId = BigNumber.from(e.args[1].hex).toNumber();
+      if (connectedTypeId <= maxConnectedTypeId) {
+        agg.push({
+          user: e.args[0],
+          connectedTypeId,
+          connectedUserIdHash: e.args[2],
+        });
+      } else {
+        console.log(
+          `Skipping connection with connectedTypeId ${connectedTypeId}`
+        );
+      }
+      return agg;
+    }, []);
   return events;
 };
 
-export const getEndorsements = () => {
+export const getEndorsements = (BigNumber: any, data: object[]) => {
   const events = data
     .filter((e: any) => e.event === "Endorse")
     .map((e: any) => {
-      const amount = new BigNumber(e.args[2].hex).toNumber();
+      const amount = BigNumber.from(e.args[2].hex).toNumber();
       return {
         from: e.args[0],
         target: e.args[1],
         amount: amount,
         transactionId: e.args[3],
+      };
+    });
+  return events;
+};
+
+export const getEndorsementRewards = (BigNumber: any, data: object[]) => {
+  const events = data
+    .filter((e: any) => e.event.startsWith("RewardPreviousEndorserLevel"))
+    .map((e: any) => {
+      const amount = BigNumber.from(e.args[1].hex).toNumber();
+      return {
+        user: e.args[0],
+        target: amount
       };
     });
   return events;
