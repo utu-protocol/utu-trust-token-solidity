@@ -49,6 +49,16 @@
       "address": "0x53a8d08EDF7FE40e457ca4e36BD30CD62BD296b0",
       "txHash": "0x75142c3430ce8ecc4e49aa40999558c53a869981f46216ace1a864abddab04dc",
       "kind": "transparent"
+    },
+    {
+      "address": "0x7DE0f6FbD6759173bA3A3e93D2e1Ea5Db77209C2",
+      "txHash": "0x58703d35185529080f6b602ae4b7610d46d9d27ffed626eca32860ba0d752df3",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xD559E16b1250c1fa22BAAc79C7CA5432835e1129",
+      "txHash": "0x85228f3912b97b55d2b4f1738ccbce44732ccc51fa5156bdba42c1661d438718",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -3108,6 +3118,582 @@
             "numberOfBytes": "32"
           },
           "t_struct(OracleRequest)8729_storage": {
+            "label": "struct Endorsement.OracleRequest",
+            "members": [
+              {
+                "label": "from",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "target",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "transactionId",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_struct(RoleData)1617_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "781d9b6c676e6260d370019a1b10bc3b081e7c9cc0467da01a9c6b83f6e6a3f9": {
+      "address": "0x7e46d672302de60a1250edd1e8c9a07659FC36b7",
+      "txHash": "0x6073f80bfda9a4d9e8e4f5fce6e2fecf70468b7ef1325f53e15af5d95d4f2105",
+      "layout": {
+        "solcVersion": "0.8.7",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:63",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:68"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_balances",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "ERC20Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol:40"
+          },
+          {
+            "label": "_allowances",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_uint256))",
+            "contract": "ERC20Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol:42"
+          },
+          {
+            "label": "_totalSupply",
+            "offset": 0,
+            "slot": "53",
+            "type": "t_uint256",
+            "contract": "ERC20Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol:44"
+          },
+          {
+            "label": "_name",
+            "offset": 0,
+            "slot": "54",
+            "type": "t_string_storage",
+            "contract": "ERC20Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol:46"
+          },
+          {
+            "label": "_symbol",
+            "offset": 0,
+            "slot": "55",
+            "type": "t_string_storage",
+            "contract": "ERC20Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol:47"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "56",
+            "type": "t_array(t_uint256)45_storage",
+            "contract": "ERC20Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol:376"
+          },
+          {
+            "label": "s_ens",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_contract(ENSInterface)381",
+            "contract": "ChainlinkClient",
+            "src": "contracts/ChainlinkClient.sol:31"
+          },
+          {
+            "label": "s_ensNode",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_bytes32",
+            "contract": "ChainlinkClient",
+            "src": "contracts/ChainlinkClient.sol:32"
+          },
+          {
+            "label": "s_link",
+            "offset": 0,
+            "slot": "103",
+            "type": "t_contract(LinkTokenInterface)476",
+            "contract": "ChainlinkClient",
+            "src": "contracts/ChainlinkClient.sol:33"
+          },
+          {
+            "label": "s_oracle",
+            "offset": 0,
+            "slot": "104",
+            "type": "t_contract(OperatorInterface)556",
+            "contract": "ChainlinkClient",
+            "src": "contracts/ChainlinkClient.sol:34"
+          },
+          {
+            "label": "s_requestCount",
+            "offset": 0,
+            "slot": "105",
+            "type": "t_uint256",
+            "contract": "ChainlinkClient",
+            "src": "contracts/ChainlinkClient.sol:35"
+          },
+          {
+            "label": "s_pendingRequests",
+            "offset": 0,
+            "slot": "106",
+            "type": "t_mapping(t_bytes32,t_address)",
+            "contract": "ChainlinkClient",
+            "src": "contracts/ChainlinkClient.sol:36"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "107",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "ChainlinkClient",
+            "src": "contracts/ChainlinkClient.sol:365"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "156",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "157",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "206",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC165Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
+          },
+          {
+            "label": "_roles",
+            "offset": 0,
+            "slot": "256",
+            "type": "t_mapping(t_bytes32,t_struct(RoleData)1617_storage)",
+            "contract": "AccessControlUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:62"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "257",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "AccessControlUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:260"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "306",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "Roles",
+            "src": "contracts/Roles.sol:26"
+          },
+          {
+            "label": "isMigratingDataFromOldContract",
+            "offset": 0,
+            "slot": "355",
+            "type": "t_bool",
+            "contract": "Migratable",
+            "src": "contracts/Migratable.sol:8"
+          },
+          {
+            "label": "isMigratingToNewContract",
+            "offset": 1,
+            "slot": "355",
+            "type": "t_bool",
+            "contract": "Migratable",
+            "src": "contracts/Migratable.sol:11"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "356",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "Migratable",
+            "src": "contracts/Migratable.sol:64"
+          },
+          {
+            "label": "O_n",
+            "offset": 0,
+            "slot": "405",
+            "type": "t_uint256",
+            "contract": "Endorsement",
+            "src": "contracts/Endorsement.sol:26"
+          },
+          {
+            "label": "D_n",
+            "offset": 0,
+            "slot": "406",
+            "type": "t_uint256",
+            "contract": "Endorsement",
+            "src": "contracts/Endorsement.sol:29"
+          },
+          {
+            "label": "D_lvl1",
+            "offset": 0,
+            "slot": "407",
+            "type": "t_uint256",
+            "contract": "Endorsement",
+            "src": "contracts/Endorsement.sol:32"
+          },
+          {
+            "label": "D_lvl2",
+            "offset": 0,
+            "slot": "408",
+            "type": "t_uint256",
+            "contract": "Endorsement",
+            "src": "contracts/Endorsement.sol:35"
+          },
+          {
+            "label": "D_o",
+            "offset": 0,
+            "slot": "409",
+            "type": "t_uint256",
+            "contract": "Endorsement",
+            "src": "contracts/Endorsement.sol:38"
+          },
+          {
+            "label": "previousEndorserStakes",
+            "offset": 0,
+            "slot": "410",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_uint256))",
+            "contract": "Endorsement",
+            "src": "contracts/Endorsement.sol:76"
+          },
+          {
+            "label": "totalStake",
+            "offset": 0,
+            "slot": "411",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "Endorsement",
+            "src": "contracts/Endorsement.sol:80"
+          },
+          {
+            "label": "oracleRequests",
+            "offset": 0,
+            "slot": "412",
+            "type": "t_mapping(t_bytes32,t_struct(OracleRequest)8733_storage)",
+            "contract": "Endorsement",
+            "src": "contracts/Endorsement.sol:95"
+          },
+          {
+            "label": "oracle",
+            "offset": 0,
+            "slot": "413",
+            "type": "t_address",
+            "contract": "Endorsement",
+            "src": "contracts/Endorsement.sol:98"
+          },
+          {
+            "label": "jobId",
+            "offset": 0,
+            "slot": "414",
+            "type": "t_bytes32",
+            "contract": "Endorsement",
+            "src": "contracts/Endorsement.sol:101"
+          },
+          {
+            "label": "fee",
+            "offset": 0,
+            "slot": "415",
+            "type": "t_uint256",
+            "contract": "Endorsement",
+            "src": "contracts/Endorsement.sol:104"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "416",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "Endorsement",
+            "src": "contracts/Endorsement.sol:367"
+          },
+          {
+            "label": "socialConnections",
+            "offset": 0,
+            "slot": "465",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_bytes32))",
+            "contract": "SocialConnector",
+            "src": "contracts/SocialConnector.sol:13"
+          },
+          {
+            "label": "socialConnectionReward",
+            "offset": 0,
+            "slot": "466",
+            "type": "t_uint256",
+            "contract": "SocialConnector",
+            "src": "contracts/SocialConnector.sol:22"
+          },
+          {
+            "label": "maxConnectedTypeId",
+            "offset": 0,
+            "slot": "467",
+            "type": "t_uint256",
+            "contract": "SocialConnector",
+            "src": "contracts/SocialConnector.sol:25"
+          },
+          {
+            "label": "connectedTypeWhitelisted",
+            "offset": 0,
+            "slot": "468",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "contract": "SocialConnector",
+            "src": "contracts/SocialConnector.sol:27"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "469",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "SocialConnector",
+            "src": "contracts/SocialConnector.sol:142"
+          },
+          {
+            "label": "D_UTT",
+            "offset": 0,
+            "slot": "518",
+            "type": "t_uint256",
+            "contract": "Reward",
+            "src": "contracts/Reward.sol:17"
+          },
+          {
+            "label": "claimableUTUCoin",
+            "offset": 0,
+            "slot": "519",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "Reward",
+            "src": "contracts/Reward.sol:20"
+          },
+          {
+            "label": "totalClaimableUTUCoin",
+            "offset": 0,
+            "slot": "520",
+            "type": "t_uint256",
+            "contract": "Reward",
+            "src": "contracts/Reward.sol:23"
+          },
+          {
+            "label": "UTUCoin",
+            "offset": 0,
+            "slot": "521",
+            "type": "t_address",
+            "contract": "Reward",
+            "src": "contracts/Reward.sol:26"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "522",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "Reward",
+            "src": "contracts/Reward.sol:157"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "571",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "MigratableEndorsement",
+            "src": "contracts/MigratableEndorsement.sol:69"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "620",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "MigratableSocialConnector",
+            "src": "contracts/MigratableSocialConnector.sol:52"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "669",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "MigratableReward",
+            "src": "contracts/MigratableReward.sol:140"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "718",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC20BurnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol:51"
+          },
+          {
+            "label": "_paused",
+            "offset": 0,
+            "slot": "768",
+            "type": "t_bool",
+            "contract": "PausableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol:29"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "769",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "PausableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol:116"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "818",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC20PausableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol:48"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)45_storage": {
+            "label": "uint256[45]",
+            "numberOfBytes": "1440"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(ENSInterface)381": {
+            "label": "contract ENSInterface",
+            "numberOfBytes": "20"
+          },
+          "t_contract(LinkTokenInterface)476": {
+            "label": "contract LinkTokenInterface",
+            "numberOfBytes": "20"
+          },
+          "t_contract(OperatorInterface)556": {
+            "label": "contract OperatorInterface",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_uint256))": {
+            "label": "mapping(address => mapping(address => uint256))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_bytes32))": {
+            "label": "mapping(address => mapping(uint256 => bytes32))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_address)": {
+            "label": "mapping(bytes32 => address)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(OracleRequest)8733_storage)": {
+            "label": "mapping(bytes32 => struct Endorsement.OracleRequest)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)1617_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_bool)": {
+            "label": "mapping(uint256 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_bytes32)": {
+            "label": "mapping(uint256 => bytes32)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(OracleRequest)8733_storage": {
             "label": "struct Endorsement.OracleRequest",
             "members": [
               {

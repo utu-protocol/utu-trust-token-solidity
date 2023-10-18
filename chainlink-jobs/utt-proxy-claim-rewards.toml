@@ -11,7 +11,7 @@ evmChainID          = 1313161554
 # NEAR Aurora testnet
 # contractAddress     = "0xbeF02f42F30b1233977DF88986DbB4D27D9c5b09"
 # NEAR Aurora mainnet
-contractAddress     = "0x53b6B5477193cCEdF9457F42a1591759cE75A095"
+contractAddress     = "0xC17985dfBF775aB5DAA9F9328423481d3Bb76f37"
 
 # Optional externalJobID: Automatically generated if unspecified
 externalJobID = "d38e785276534600ba42401e4bad0156"
@@ -73,7 +73,7 @@ observationSource   = """
         /* NEAR Aurora mainnet
         */
         evmChainID="1313161554"
-        to="0x53b6B5477193cCEdF9457F42a1591759cE75A095"
+        to="0xC17985dfBF775aB5DAA9F9328423481d3Bb76f37"
 
         data="$(encode_fulfil_claim_tx)" minConfirmations="4" failOnRevert="true"]
 
