@@ -2,5 +2,5 @@ const { ethers } = require("hardhat");
 
 module.exports = [
   // aurora mainnet link token address from https://aurora.dev/tokens/link
-  "0x94190d8ef039c670c6d6b9990142e0ce2a1e3178",
+  "0x638D13D9a1c8854a3f5F94C705000B887208dF1f",
 ];
