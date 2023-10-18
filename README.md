@@ -2,6 +2,42 @@
 
 This project implements the UTU Trust Token (UTT) smart contract.
 
+## Existing Deployments
+
+## Main Nets
+
+- UTT main contract on Polygon
+  - Upgradable proxy: [0xE62dc4c82a9749Bf2E40F73138B3CFee0a2EC89F](https://polygonscan.com/address/0xe62dc4c82a9749bf2e40f73138b3cfee0a2ec89f)
+  - Current implementation: [0x9147E7DD575926239E4b5Ac96B4663847A07c0b1](https://polygonscan.com/address/0x9147e7dd575926239e4b5ac96b4663847a07c0b1#code)
+  - Oracle operator contract: [0x73ac0B4ba4Fc1c42B8DFFA39f3E4E0e95eb9b8Fd](https://polygonscan.com/address/0x73ac0B4ba4Fc1c42B8DFFA39f3E4E0e95eb9b8Fd)
+- UTT proxy contract on Aurora:
+  - Upgradable proxy: [0xaE53DcC63d7895600e2510A986Dc2b65c953E26c](https://explorer.mainnet.aurora.dev/address/0xaE53DcC63d7895600e2510A986Dc2b65c953E26c)
+  - Current implementation: [0x90C6B69383695b4Dc4125ca010C61f78dff93fb0](https://explorer.mainnet.aurora.dev/address/0x90C6B69383695b4Dc4125ca010C61f78dff93fb0)
+  - Oracle operator contract: [0xC17985dfBF775aB5DAA9F9328423481d3Bb76f37](https://explorer.mainnet.aurora.dev/address/0xC17985dfBF775aB5DAA9F9328423481d3Bb76f37)
+  - UTU Coin: [0x7aa1a72f744Cdcd4c89918AEBFbe4F1d1D1156E6](https://explorer.mainnet.aurora.dev/address/0x7aa1a72f744Cdcd4c89918AEBFbe4F1d1D1156E6)
+- UTT proxy contract on Optimism:
+  - Upgradable proxy: [0x5dc70C31cc67867c1DB8E697E3D9a680f77f0924](https://optimistic.etherscan.io/address/0x5dc70C31cc67867c1DB8E697E3D9a680f77f0924)
+  - Current implementation: [0x53b6B5477193cCEdF9457F42a1591759cE75A095](https://optimistic.etherscan.io/address/0x53b6b5477193ccedf9457f42a1591759ce75a095)
+  - Oracle operator contract: [0x6934c1F62a6d28a573E2b4071a754DDd29B81E54](https://goerli-optimism.etherscan.io/address/0x6934c1f62a6d28a573e2b4071a754ddd29b81e54)
+
+  
+## Test Nets
+
+- UTT contract on Polygon Mumbai
+  - Upgradable proxy: [0xD559E16b1250c1fa22BAAc79C7CA5432835e1129](https://mumbai.polygonscan.com/address/0xd559e16b1250c1fa22baac79c7ca5432835e1129)
+  - Current implementation: [0x7e46d672302de60a1250edd1e8c9a07659FC36b7](https://mumbai.polygonscan.com/address/0x7e46d672302de60a1250edd1e8c9a07659fc36b7#code)
+  - Oracle operator contract: [0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f](https://mumbai.polygonscan.com/address/0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f)
+- UTT proxy contract on Aurora Testnet:
+  - Upgradable proxy: [0x2ac7F081f8eB51ce393bA298e4C020b0DeF420E1](https://explorer.testnet.aurora.dev/address/0x2ac7F081f8eB51ce393bA298e4C020b0DeF420E1/transactions#address-tabs)
+  - Current implementation: [0xd6A3423cCAB82efDC507EBefFEcEd576577d17E2](https://explorer.testnet.aurora.dev/address/0xd6A3423cCAB82efDC507EBefFEcEd576577d17E2)
+  - Oracle operator contract: [0xbeF02f42F30b1233977DF88986DbB4D27D9c5b09](https://explorer.testnet.aurora.dev/address/0xbeF02f42F30b1233977DF88986DbB4D27D9c5b09)
+  - UTU Coin (mock): [0xb0fc0bA00acDF415de3b66047E9CEE562C569bA1](https://explorer.testnet.aurora.dev/address/0xb0fc0bA00acDF415de3b66047E9CEE562C569bA1)
+    (this version is mocked, not bridged)
+- UTT proxy contract on Optimism Goerli Testnet:
+  - Upgradable proxy: [0x1380FD912C44F3860D17EB6221F861F9c4611D97](https://goerli-optimism.etherscan.io/address/0x1380fd912c44f3860d17eb6221f861f9c4611d97)
+  - Current implementation: [0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF](https://goerli-optimism.etherscan.io/address/0xbdf3b87b410c50ba9620d8ac416a81e6bf7296ef)
+  - Oracle operator contract: [0xbeF02f42F30b1233977DF88986DbB4D27D9c5b09](https://explorer.testnet.aurora.dev/address/0xbeF02f42F30b1233977DF88986DbB4D27D9c5b09)
+
 
 ## Building, Testing
 
