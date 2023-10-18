@@ -145,7 +145,7 @@ const config = {
     },
     optimism: {
       url: process.env.OPTIMISM_URL,
-      accounts: [process.env.TEST_PRIVATE_KEY ?? ""],
+      accounts: [process.env.MAIN_PRIVATE_KEY ?? ""],
     },
     testnet_optimism: {
       url: process.env.TESTNET_OPTIMISM_URL,
