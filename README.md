@@ -16,7 +16,7 @@ This project implements the UTU Trust Token (UTT) smart contract.
   - Oracle operator contract: [0xC17985dfBF775aB5DAA9F9328423481d3Bb76f37](https://explorer.mainnet.aurora.dev/address/0xC17985dfBF775aB5DAA9F9328423481d3Bb76f37)
   - UTU Coin: [0x7aa1a72f744Cdcd4c89918AEBFbe4F1d1D1156E6](https://explorer.mainnet.aurora.dev/address/0x7aa1a72f744Cdcd4c89918AEBFbe4F1d1D1156E6)
 - UTT proxy contract on Optimism:
-  - Upgradable proxy: [0x5dc70C31cc67867c1DB8E697E3D9a680f77f0924](https://optimistic.etherscan.io/address/0x5dc70C31cc67867c1DB8E697E3D9a680f77f0924)
+  - Upgradable proxy: [0xb2e9dB661F992d2F3013e4AFcE01C72d52f58A37](https://optimistic.etherscan.io/address/0xb2e9dB661F992d2F3013e4AFcE01C72d52f58A37)
   - Current implementation: [0x53b6B5477193cCEdF9457F42a1591759cE75A095](https://optimistic.etherscan.io/address/0x53b6b5477193ccedf9457f42a1591759ce75a095)
   - Oracle operator contract: [0x6934c1F62a6d28a573E2b4071a754DDd29B81E54](https://goerli-optimism.etherscan.io/address/0x6934c1f62a6d28a573e2b4071a754ddd29b81e54)
 
@@ -34,7 +34,7 @@ This project implements the UTU Trust Token (UTT) smart contract.
   - UTU Coin (mock): [0xb0fc0bA00acDF415de3b66047E9CEE562C569bA1](https://explorer.testnet.aurora.dev/address/0xb0fc0bA00acDF415de3b66047E9CEE562C569bA1)
     (this version is mocked, not bridged)
 - UTT proxy contract on Optimism Goerli Testnet:
-  - Upgradable proxy: [0x1380FD912C44F3860D17EB6221F861F9c4611D97](https://goerli-optimism.etherscan.io/address/0x1380fd912c44f3860d17eb6221f861f9c4611d97)
+  - Upgradable proxy: [0xfD458e4fb718eFAAEf0e28597b9cF6D5C240E8f7](https://goerli-optimism.etherscan.io/address/0xfd458e4fb718efaaef0e28597b9cf6d5c240e8f7)
   - Current implementation: [0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF](https://goerli-optimism.etherscan.io/address/0xbdf3b87b410c50ba9620d8ac416a81e6bf7296ef)
   - Oracle operator contract: [0xbeF02f42F30b1233977DF88986DbB4D27D9c5b09](https://explorer.testnet.aurora.dev/address/0xbeF02f42F30b1233977DF88986DbB4D27D9c5b09)
 
