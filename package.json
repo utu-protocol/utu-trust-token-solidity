@@ -58,6 +58,7 @@
     "@chainlink/test-helpers": "0.0.7-alpha",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.8",
     "bignumber.js": "^9.1.1",
+    "handlebars": "^4.7.8",
     "hardhat-tracer": "^2.3.2",
     "lodash": "^4.17.21"
   }

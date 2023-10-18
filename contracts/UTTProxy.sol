@@ -42,19 +42,19 @@ contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient, Endorse
     /** Sent oracle claim requests by id  */
     mapping(bytes32 => OracleClaimRequest) private oracleClaimRequests;
     /** Address of the Chainlink oracle operator contract */
-    address private oracle;
+    address public oracle;
 
     /** Id for oracle jobs from this contract */
-    bytes32 private jobId;
+    bytes32 public jobId;
 
     /** LINK fee to be paid to the oracle operator contract for each request */
-    uint256 private fee;
+    uint256 public fee;
 
     /** Contract migration flag; when migrating any further endorsements or social connections are disabled. */
     bool public isMigrating;
 
     /** Id for oracle claim rewards jobs from this contract */
-    bytes32 internal claimRewardJobId;
+    bytes32 public claimRewardJobId;
 
     event ProxiedEndorseFulfilled(bytes32 indexed _requestId);
 
