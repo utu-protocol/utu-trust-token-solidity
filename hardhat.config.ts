@@ -119,15 +119,15 @@ const config = {
     ],
   },
   networks: {
-    matic: {
-      url: process.env.MATIC_URL || "",
+    polygon: {
+      url: process.env.POLYGON_URL || "",
       accounts:
         process.env.MAIN_PRIVATE_KEY !== undefined
           ? [process.env.MAIN_PRIVATE_KEY]
           : [],
     },
-    mumbai: {
-      url: process.env.MUMBAI_URL || "",
+    testnet_polygon: {
+      url: process.env.TESTNET_POLYGON_URL || "",
       accounts:
         process.env.TEST_PRIVATE_KEY !== undefined
           ? [process.env.TEST_PRIVATE_KEY]

@@ -19,11 +19,12 @@ This project implements the UTU Trust Token (UTT) smart contract.
   - Upgradable proxy: [0xb2e9dB661F992d2F3013e4AFcE01C72d52f58A37](https://optimistic.etherscan.io/address/0xb2e9dB661F992d2F3013e4AFcE01C72d52f58A37)
   - Current implementation: [0x53b6B5477193cCEdF9457F42a1591759cE75A095](https://optimistic.etherscan.io/address/0x53b6b5477193ccedf9457f42a1591759ce75a095)
   - Oracle operator contract: [0x6934c1F62a6d28a573E2b4071a754DDd29B81E54](https://goerli-optimism.etherscan.io/address/0x6934c1f62a6d28a573e2b4071a754ddd29b81e54)
+  - UTU Coin (bridged from Ethereum): [0xf7dC37493e2e375dFDEbec75E71D555af68648Bf](https://optimistic.etherscan.io/token/0xf7dC37493e2e375dFDEbec75E71D555af68648Bf)
 
   
 ## Test Nets
 
-- UTT contract on Polygon Mumbai
+- UTT contract on Polygon testnet
   - Upgradable proxy: [0xD559E16b1250c1fa22BAAc79C7CA5432835e1129](https://mumbai.polygonscan.com/address/0xd559e16b1250c1fa22baac79c7ca5432835e1129)
   - Current implementation: [0x7e46d672302de60a1250edd1e8c9a07659FC36b7](https://mumbai.polygonscan.com/address/0x7e46d672302de60a1250edd1e8c9a07659fc36b7#code)
   - Oracle operator contract: [0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f](https://mumbai.polygonscan.com/address/0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f)
@@ -37,6 +38,7 @@ This project implements the UTU Trust Token (UTT) smart contract.
   - Upgradable proxy: [0xfD458e4fb718eFAAEf0e28597b9cF6D5C240E8f7](https://goerli-optimism.etherscan.io/address/0xfd458e4fb718efaaef0e28597b9cf6d5c240e8f7)
   - Current implementation: [0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF](https://goerli-optimism.etherscan.io/address/0xbdf3b87b410c50ba9620d8ac416a81e6bf7296ef)
   - Oracle operator contract: [0xbeF02f42F30b1233977DF88986DbB4D27D9c5b09](https://explorer.testnet.aurora.dev/address/0xbeF02f42F30b1233977DF88986DbB4D27D9c5b09)
+  - UTU Coin (bridged from Ethereum Görli testnet): [0xd40530105E196B3ad21fA94b6D4ce5f9DcB50b1a](https://goerli-optimism.etherscan.io/token/0xd40530105E196B3ad21fA94b6D4ce5f9DcB50b1a#balances)
 
 
 ## Building, Testing
@@ -91,25 +93,25 @@ environment variables to be set appropriately.
 
 Create a deploy args config file in `scripts/` named `deploy.args.${network}.js` for the network you want to deploy on. 
 
-Example for the Polygon Mumbai testnet deployment:
+Example for the Polygon testnet testnet deployment:
 
 ```javascript
 const { ethers } = require("hardhat");
 
 module.exports = [
 	1000000, // UTT assigned to deployer for testing
-	"0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f", // Mumbai oracle contract address
+	"0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f", // Polygon testnet oracle contract address
 	"0eec7e1dd0d2476ca1a872dfb6633f48", // External Job ID for the "UTT Check Previous Endorsers Job"
-	ethers.utils.parseEther("0.001"), // Mumbai LINK fee
-	"0x326C977E6efc84E512bB9C30f76E30c160eD06FB" // Mumbai LINK token address
+	ethers.utils.parseEther("0.001"), // Polygon testnet LINK fee
+	"0x326C977E6efc84E512bB9C30f76E30c160eD06FB" // Polygon testnet LINK token address
 ]
 ```
 
-We need to provide a node URL to the deployer, e.g. for Polygon Mumbai:
+We need to provide a node URL to the deployer, e.g. for Polygon testnet:
 
-```MUMBAI_URL=https://polygon-mumbai.g.alchemy.com/v2/<key>```
+```TESTNET_POLYGON_URL=https://polygon-mumbai.g.alchemy.com/v2/<key>```
 
-Deploy on `<network>` (e.g. mumbai):
+Deploy on `<network>` (e.g. `polygon_testnet`):
 ```shell
 npm run deploy -- --network <network>
 ```
@@ -133,11 +135,11 @@ module.exports = [
 
 The address provided must be the deployed UTT contract that needs to be updated.
 
-E.g. for Polygon Mumbai:
+E.g. for Polygon testnet:
 
-`MUMBAI_URL=https://polygon-mumbai.g.alchemy.com/v2/<key>`
+`TESTNET_POLYGON_URL=https://polygon-mumbai.g.alchemy.com/v2/<key>`
 
-Deploy on `<network>` (e.g. mumbai):
+Deploy on `<network>` (e.g. polygon_testnet):
 
 ```bash
 npm run upgrade -- --network <network>
@@ -168,7 +170,7 @@ npm run verify -- --constructor-args ./scripts/deploy.operator.args.<network>.js
 
 ### Using flattened contract source
 
-Note that the etherscan API isn't available on Polygon Mumbai. One can
+Note that the etherscan API isn't available on Polygon testnet. One can
 verify manually using the UI and single-file verification. A
 flattened source file for this purpose can be created like so:
 
