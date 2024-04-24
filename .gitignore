@@ -8,7 +8,15 @@ typechain
 cache
 artifacts
 
+# OpenZeppelin according to 
+# https://docs.openzeppelin.com/cli/2.8/configuration#configuration-files-in-version-control
+.openzeppelin/dev-*.json
+.openzeppelin/.session
+
+# Project-specific
 UTT.flattened.sol
 exports
 typechain-types
 tasks/chainlink-jobs/generated/*.toml
+env.toml
+
