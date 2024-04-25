@@ -14,11 +14,15 @@ async function deployUTT() {
   // await hre.run('compile');
 
   // We get the contract to deploy
+  console.log("Getting UTT contract factory.");
   const UTT = await ethers.getContractFactory("UTT");
   const deployArgs = require(`./deploy.args.${network.name}`);
   const options = { timeout: 0 };
+
+  console.log("Deploying upgradable proxy for UTT.");
   const utt = await upgrades.deployProxy(UTT, deployArgs, options);
-  console.log("waiting for utt to deploy");
+
+  console.log("Waiting for utt to finish deploying.");
   await utt.deployed();
 
   console.log("UTT deployed to:", utt.address);
