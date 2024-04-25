@@ -111,7 +111,7 @@ We need to provide a node URL to the deployer, e.g. for Polygon testnet:
 
 ```TESTNET_POLYGON_URL=https://polygon-mumbai.g.alchemy.com/v2/<key>```
 
-Deploy on `<network>` (e.g. `polygon_testnet`):
+Deploy on `<network>` (e.g. `testnet_polygon`):
 ```shell
 npm run deploy -- --network <network>
 ```
@@ -139,7 +139,7 @@ E.g. for Polygon testnet:
 
 `TESTNET_POLYGON_URL=https://polygon-mumbai.g.alchemy.com/v2/<key>`
 
-Deploy on `<network>` (e.g. polygon_testnet):
+Deploy on `<network>` (e.g. testnet_polygon):
 
 ```bash
 npm run upgrade -- --network <network>
