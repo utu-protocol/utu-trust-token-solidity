@@ -27,7 +27,7 @@ This project implements the UTU Trust Token (UTT) smart contract.
 - UTT contract on Polygon testnet
   - Upgradable proxy: [0xD559E16b1250c1fa22BAAc79C7CA5432835e1129](https://mumbai.polygonscan.com/address/0xd559e16b1250c1fa22baac79c7ca5432835e1129)
   - Current implementation: [0x7e46d672302de60a1250edd1e8c9a07659FC36b7](https://mumbai.polygonscan.com/address/0x7e46d672302de60a1250edd1e8c9a07659fc36b7#code)
-  - Oracle operator contract: [0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f](https://mumbai.polygonscan.com/address/0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f)
+  - Oracle operator contract: [0x6934c1F62a6d28a573E2b4071a754DDd29B81E54](https://amoy.polygonscan.com/address/0x6934c1F62a6d28a573E2b4071a754DDd29B81E54)
 - UTT proxy contract on Aurora Testnet:
   - Upgradable proxy: [0x2ac7F081f8eB51ce393bA298e4C020b0DeF420E1](https://explorer.testnet.aurora.dev/address/0x2ac7F081f8eB51ce393bA298e4C020b0DeF420E1/transactions#address-tabs)
   - Current implementation: [0xd6A3423cCAB82efDC507EBefFEcEd576577d17E2](https://explorer.testnet.aurora.dev/address/0xd6A3423cCAB82efDC507EBefFEcEd576577d17E2)
