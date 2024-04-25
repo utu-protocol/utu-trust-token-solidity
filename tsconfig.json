@@ -8,8 +8,9 @@
     "strict": true,
     "esModuleInterop": true,
     "outDir": "dist",
+    "sourceMap": true,
     "declaration": true,
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
   },
   "include": ["./scripts", "./test", "./typechain", "./tasks"],
   "files": ["./hardhat.config.ts"]

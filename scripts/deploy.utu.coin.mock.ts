@@ -1,10 +1,5 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `npx hardhat run <script>` you'll find the Hardhat
-
-// Runtime Environment's members available in the global scope.
 const { ethers } = require("hardhat");
+
 
 async function deployUTUCoin() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -21,12 +16,13 @@ async function deployUTUCoin() {
 
   const utuCoin = await UTUCoin.deploy.apply(UTUCoin, [
     signer.address,
-    ethers.utils.parseEther("1000000000"),
+    ethers.("1000000000"),
   ]);
 
-  await utuCoin.deployed();
+  await utuCoin.waitForDeployment();
+  const utuCoinAddress = await utuCoin.getAddress();
 
-  console.log("UTU Coin deployed to:", utuCoin.address);
+  console.log("UTU Coin deployed to:", utuCoinAddress);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

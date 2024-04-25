@@ -20,9 +20,10 @@ async function deployOperator() {
 
   const utuOperator = await UTUOperator.deploy.apply(UTUOperator, deployArgs);
 
-  await utuOperator.deployed();
+  await utuOperator.waitForDeployment();
+  const utuOperatorAddress = await utuOperator.getAddress();
 
-  console.log("UTU Operator deployed to:", utuOperator.address);
+  console.log("UTU Operator deployed to:", utuOperatorAddress);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

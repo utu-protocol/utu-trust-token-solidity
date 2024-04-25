@@ -58,7 +58,7 @@ contract TestUpgradedReward is TestUpgradedUTURewardsInterface, TestUpgradedEndo
     }
 
     /** Sets the discounting component D_UTT. */
-    function setUTT(uint256 val) public onlyOwner {
+    function setD_UTT(uint256 val) public onlyOwner {
         D_UTT = val;
     }
 

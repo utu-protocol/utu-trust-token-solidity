@@ -3,7 +3,7 @@
 //
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
-const { ethers, network, upgrades } = require("hardhat");
+import { ethers, network, upgrades } from "hardhat";
 
 async function deployUTT() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -23,9 +23,13 @@ async function deployUTT() {
   const utt = await upgrades.deployProxy(UTT, deployArgs, options);
 
   console.log("Waiting for utt to finish deploying.");
-  await utt.deployed();
+  await utt.waitForDeployment();
+  const uttAddress = await utt.getAddress();
 
-  console.log("UTT deployed to:", utt.address);
+  const implementationAddress = await upgrades.erc1967.getImplementationAddress(uttAddress);
+
+  console.log("UTT deployed to:", uttAddress);
+  console.log("Implementation at:", implementationAddress);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -8,24 +8,27 @@ import {
   ContractFactory,
   ContractTransaction,
   Signer,
+  parseEther,
+  AbiCoder,
+  encodeBytes32String
 } from "ethers";
 import { ethers, run, upgrades } from "hardhat";
 
 export async function baseDeploy(
-  mockOperator: Contract,
-  linkToken: Contract,
+  mockOperatorAddress: String,
+  linkTokenAddress: String,
   mintAmount: BigNumber
 ) {
   const UTT = await ethers.getContractFactory("UTT");
   const utt: Contract = await upgrades
     .deployProxy(UTT, [
       mintAmount,
-      mockOperator.address,
+      mockOperatorAddress,
       "",
-      ethers.utils.parseEther("0.1"),
-      linkToken.address,
-    ])
-    .then((f: any) => f.deployed());
+      parseEther("0.1"),
+      linkTokenAddress,
+    ]);
+  await utt.waitForDeployment();
   return utt;
 }
 
@@ -37,65 +40,77 @@ export async function upgradeUTT(
   if (!UTT) {
     UTT = await ethers.getContractFactory("UTT");
   }
-  const utt: Contract = await upgrades
-    .upgradeProxy(proxyAddress, UTT)
-    .then((f: any) => f.deployed());
+  const utt: Contract = await upgrades.upgradeProxy(proxyAddress, UTT);
+  await utt.waitForDeployment();
+  
   return utt;
 }
 
 export async function deployUTT(migrated: boolean = true) {
-  const mintAmount = ethers.utils.parseEther("10000000");
-  const [
-    admin,
-    user1,
-    user2,
-    user3,
-    service1,
-    service2,
-    connector,
-    proxyOracle,
-  ] = await ethers.getSigners();
-  const LinkToken = await ethers.getContractFactory("LinkToken");
-  const linkToken = await LinkToken.deploy().then((f) => f.deployed());
-  const MockOperator = await ethers.getContractFactory("Operator");
-  const mockOperator = await MockOperator.deploy(
-    linkToken.address,
-    admin.address
-  ).then((f) => f.deployed());
-  await mockOperator.setAuthorizedSenders([admin.address]);
-
-  const utt = await baseDeploy(mockOperator, linkToken, mintAmount);
-
-  await run("fund-link", {
-    contract: utt.address,
-    linkaddress: linkToken.address,
-  });
-
-  await utt
-    .connect(admin)
-    .grantRole(await utt.SOCIAL_CONNECTOR_ROLE(), connector.address);
-
-  await utt
-    .connect(admin)
-    .grantRole(await utt.PROXY_ENDORSER_ROLE(), proxyOracle.address);
-
-  if (migrated) {
-    await utt.connect(admin).setDataMigrationCompleted();
+  try {
+    const mintAmount = parseEther("10000000");
+    const [
+      admin,
+      user1,
+      user2,
+      user3,
+      service1,
+      service2,
+      connector,
+      proxyOracle,
+    ] = await ethers.getSigners();
+    const LinkToken = await ethers.getContractFactory("LinkToken");
+    const linkToken = await LinkToken.deploy();
+    await linkToken.waitForDeployment();
+      
+    const linkTokenAddress = await linkToken.getAddress();  
+    const MockOperator = await ethers.getContractFactory("Operator");
+    const mockOperator = await MockOperator.deploy(
+      linkTokenAddress,
+      admin.address
+    );
+    await mockOperator.waitForDeployment();
+  
+    const mockOperatorAddress = await mockOperator.getAddress();
+    await mockOperator.setAuthorizedSenders([admin.address]);
+  
+    const utt = await baseDeploy(mockOperatorAddress, linkTokenAddress, mintAmount);
+    const uttAddress = await utt.getAddress();
+  
+    await linkToken.grantMintAndBurnRoles(admin);
+    await linkToken.mint(uttAddress, parseEther("1"));
+  
+    await utt
+      .connect(admin)
+      .grantRole(await utt.SOCIAL_CONNECTOR_ROLE(), connector.address);
+  
+    await utt
+      .connect(admin)
+      .grantRole(await utt.PROXY_ENDORSER_ROLE(), proxyOracle.address);
+  
+    if (migrated) {
+      await utt.connect(admin).setDataMigrationCompleted();
+    }
+    return {
+      admin,
+      user1,
+      user2,
+      user3,
+      service1,
+      service2,
+      connector,
+      proxyOracle,
+      utt,
+      uttAddress,
+      mockOperator,
+      linkToken,
+      mintAmount,
+    };
+  } catch(e) {
+    console.error(e);
+    process.exit(1);
   }
-  return {
-    admin,
-    user1,
-    user2,
-    user3,
-    service1,
-    service2,
-    connector,
-    proxyOracle,
-    utt,
-    mockOperator,
-    linkToken,
-    mintAmount,
-  };
+
 }
 
 export async function deployUTTUnmigrated() {
@@ -109,10 +124,10 @@ async function fulfillEndorse(
   endorsersLevel2: string[]
 ) {
   const receipt = await tx.wait(1);
-  if (!receipt.events) throw new Error("No events found");
-  const requestId = receipt.events[0].topics[1];
+  if (!receipt.logs) throw new Error("No events found");
+  const requestId = receipt.logs[0].topics[1];
   const request = decodeRunRequest(receipt.logs[3]);
-  const abiCoder = new ethers.utils.AbiCoder();
+  const abiCoder = new AbiCoder();
   const data = abiCoder.encode(
     ["bytes32", "address[]", "address[]"],
     [requestId, [...endorsersLevel1], [...endorsersLevel2]]
@@ -163,7 +178,7 @@ export async function addConnection(
 }
 
 export function getHash(address: string) {
-  return ethers.utils.formatBytes32String(address.slice(0, 31));
+  return encodeBytes32String(address.slice(0, 31));
 }
 
 export async function generateRandomAccounts(numAccounts: number) {
@@ -196,7 +211,8 @@ export async function deployUTUCoinMock(
   const utuCoinMock = await UTUCoinMock.deploy(
     initialHolder,
     initialAmount * UTU_DECIMALS
-  ).then((f) => f.deployed());
+  );
+  await utuCoinMock.waitForDeployment();
 
   return utuCoinMock;
 }

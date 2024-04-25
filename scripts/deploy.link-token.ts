@@ -19,9 +19,10 @@ async function deployLinkToken() {
 
   const linkToken = await LinkToken.deploy.apply(LinkToken);
 
-  await linkToken.deployed();
+  await linkToken.waitForDeployment();
+  const linkTokenAddress = await linkToken.getAddress();
 
-  console.log("Link Token deployed to:", linkToken.address);
+  console.log("Link Token deployed to:", linkTokenAddress);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -19,9 +19,10 @@ async function upgradeUTTProxy() {
   const contractAddress = updagradeArgs[0];
   const uttProxy = await upgrades.upgradeProxy(contractAddress, UTTProxy);
 
-  await uttProxy.deployed();
+  await uttProxy.waitForDeployment();
+  const uttProxyAddress = await uttProxy.getAddress();
 
-  console.log("UTTProxy upgraded to:", uttProxy.address);
+  console.log("UTTProxy upgraded to:", uttProxyAddress);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
