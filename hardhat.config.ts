@@ -132,6 +132,7 @@ const config = {
         process.env.TEST_PRIVATE_KEY !== undefined
           ? [process.env.TEST_PRIVATE_KEY]
           : [],
+      chainId: 80002,
     },
     aurora: {
       url: process.env.AURORA_URL || "https://mainnet.aurora.dev",
@@ -173,6 +174,14 @@ const config = {
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,
     customChains: [
+      {
+        network: "aurora",
+        chainId: 1313161554,
+        urls: {
+          apiURL: "https://api-amoy.polygonscan.com/api",
+          browserURL: "https://api-amoy.polygonscan.com",
+        },
+      },
       {
         network: "aurora",
         chainId: 1313161554,
