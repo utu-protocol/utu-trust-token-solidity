@@ -25,9 +25,9 @@ This project implements the UTU Trust Token (UTT) smart contract.
 ## Test Nets
 
 - UTT contract on Polygon testnet
-  - Upgradable proxy: [0x2b4F9c644b0C8010bB26Fc572001A156F9371C48](https://amoy.polygonscan.com/address/0x2b4F9c644b0C8010bB26Fc572001A156F9371C48)
-  - Current implementation: [(unknown)](https://amoy.polygonscan.com/address/?#code)
-  - Oracle operator contract: [0x6934c1F62a6d28a573E2b4071a754DDd29B81E54](https://amoy.polygonscan.com/address/0x6934c1F62a6d28a573E2b4071a754DDd29B81E54)
+  - Upgradable proxy: [0xCa5cD80157334dAc231B65d886467B036CDf0024](https://amoy.polygonscan.com/address/0xCa5cD80157334dAc231B65d886467B036CDf0024)
+  - Current implementation: [0xC72b7A6146d3D53B614A4769A1A1459882ED4B1A](https://amoy.polygonscan.com/address/0xC72b7A6146d3D53B614A4769A1A1459882ED4B1A#code)
+  - Oracle operator contract: [0x0880633c47A2cba76Ef082e2bCD2103Af14c68EE](https://amoy.polygonscan.com/address/0x0880633c47A2cba76Ef082e2bCD2103Af14c68EE)
 - UTT proxy contract on Aurora Testnet:
   - Upgradable proxy: [0x2ac7F081f8eB51ce393bA298e4C020b0DeF420E1](https://explorer.testnet.aurora.dev/address/0x2ac7F081f8eB51ce393bA298e4C020b0DeF420E1/transactions#address-tabs)
   - Current implementation: [0xd6A3423cCAB82efDC507EBefFEcEd576577d17E2](https://explorer.testnet.aurora.dev/address/0xd6A3423cCAB82efDC507EBefFEcEd576577d17E2)
@@ -102,7 +102,7 @@ module.exports = [
 	1000000, // UTT assigned to deployer for testing
 	"0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f", // Polygon testnet oracle contract address
 	"0eec7e1dd0d2476ca1a872dfb6633f48", // External Job ID for the "UTT Check Previous Endorsers Job"
-	ethers.utils.parseEther("0.001"), // Polygon testnet LINK fee
+	parseEther("0.001"), // Polygon testnet LINK fee
 	"0x326C977E6efc84E512bB9C30f76E30c160eD06FB" // Polygon testnet LINK token address
 ]
 ```
@@ -152,7 +152,11 @@ npm run upgrade -- --network <network>
 #### UTT >= v2 (upgradable):
 
 ```shell
-npm run verify -- --network <network> <address>
+npm run verify -- --network <network> <implementation-address>
+```
+and then
+```shell
+npm run verify -- --constructor-args ./scripts/deploy.args.<network>.js  --network <network> <upgradable-proxy-address>
 ```
 
 #### UTT v1 (non-upgradable:)
