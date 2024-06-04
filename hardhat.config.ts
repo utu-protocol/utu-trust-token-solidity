@@ -91,6 +91,13 @@ const config = {
     ],
   },
   networks: {
+    testnet_ethereum: {
+      url: process.env.TESTNET_ETHEREUM_URL || "",
+      accounts:
+        process.env.TEST_PRIVATE_KEY !== undefined
+          ? [process.env.TEST_PRIVATE_KEY]
+          : [],
+    },
     polygon: {
       url: process.env.POLYGON_URL || "",
       accounts:
