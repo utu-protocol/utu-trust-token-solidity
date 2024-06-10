@@ -12,12 +12,9 @@ async function deployUTUCoin() {
   // We get the contract to deploy
   const UTUCoin = await ethers.getContractFactory("UTUCoinMock");
   //   const deployArgs = require(`./deploy.proxy.args.${network.name}`);
-  const signer = await ethers.getSigner();
 
-  const utuCoin = await UTUCoin.deploy.apply(UTUCoin, [
-    signer.address,
-    ethers.("1000000000"),
-  ]);
+  const deployArgs = require(`./deploy.utu.coin.mock.args`);  
+  const utuCoin = await UTUCoin.deploy.apply(UTUCoin, deployArgs);
 
   await utuCoin.waitForDeployment();
   const utuCoinAddress = await utuCoin.getAddress();
