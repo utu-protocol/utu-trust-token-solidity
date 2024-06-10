@@ -1,5 +1,6 @@
 {
   "name": "utu-trust-token-solidity",
+  "version": "1.2",
   "scripts": {
     "build": "npx hardhat compile",
     "clean": "npx hardhat clean",
