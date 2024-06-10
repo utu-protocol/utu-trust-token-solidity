@@ -1,0 +1,33 @@
+RootDir = "/chainlink"
+Log.Level = '${CHAINLINK_LOG_LEVEL}'
+
+[WebServer]
+AllowOrigins = '\*'
+SecureCookies = false
+
+[WebServer.TLS]
+HTTPSPort = 0
+
+[[EVM]]
+ChainID = ${UTT_NETWORK_ID}
+
+[[EVM.Nodes]]
+Name = '${UTT_NETWORK_NAME}'
+HTTPURL = "${UTT_NETWORK_HTTP_URL}"
+WSURL = "${UTT_NETWORK_WS_URL}"
+
+[[EVM]]
+ChainID = ${AURORA_ID}
+
+[[EVM.Nodes]]
+Name = '${AURORA_NAME}'
+HTTPURL = "${AURORA_HTTP_URL}"
+WSURL = "${AURORA_WS_URL}"
+
+[[EVM]]
+ChainID = ${OPTIMISM_ID}
+
+[[EVM.Nodes]]
+Name = '${OPTIMISM_NAME}'
+HTTPURL = "${OPTIMISM_HTTP_URL}"
+WSURL = "${OPTIMISM_WS_URL}"
