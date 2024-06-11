@@ -28,7 +28,7 @@ This project implements the UTU Trust Token (UTT) smart contract.
     - Upgradable proxy: [0x537BE61c5EFB865Df53CA55eeA07ceEe5d5fB162](https://sepolia.etherscan.io/address/0x537BE61c5EFB865Df53CA55eeA07ceEe5d5fB162)
     - Current implementation: [0x89fA6ee038f3b4D8C050c6E1709Fa3d19d9be49E](https://sepolia.etherscan.io/address/0x8408F3D9E02E3965b4396d1abD395a0e7E5DE162)
     - Oracle operator contract: [0x9F0E25966DdCEa17524CED8bC8Fe2C78a29B5cAA](https://sepolia.etherscan.io/address/0x9F0E25966DdCEa17524CED8bC8Fe2C78a29B5cAA)
-    - UTU Coin (mock): [tbd](tbd)
+    - UTU Coin (mock): [0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d](https://sepolia.etherscan.io/address/0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d)
 
 - UTT contract on Polygon Testnet (Amoy):
   - Upgradable proxy: [0xCa5cD80157334dAc231B65d886467B036CDf0024](https://amoy.polygonscan.com/address/0xCa5cD80157334dAc231B65d886467B036CDf0024)
