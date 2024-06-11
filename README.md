@@ -24,6 +24,12 @@ This project implements the UTU Trust Token (UTT) smart contract.
   
 ## Test Nets
 
+- UTT contract on Ethereum Testnet (Sepolia):
+    - Upgradable proxy: [0x8408F3D9E02E3965b4396d1abD395a0e7E5DE162](https://sepolia.etherscan.io/address/0x8408F3D9E02E3965b4396d1abD395a0e7E5DE162)
+    - Current implementation: [0x89fA6ee038f3b4D8C050c6E1709Fa3d19d9be49E](https://sepolia.etherscan.io/address/0x8408F3D9E02E3965b4396d1abD395a0e7E5DE162)
+    - Oracle operator contract: - confirm [0x779877A7B0D9E8603169DdbD7836e478b4624789](https://etherscan.io/address/0x779877A7B0D9E8603169DdbD7836e478b4624789)
+    - UTU Coin (mock): -confirm [0xfD458e4fb718eFAAEf0e28597b9cF6D5C240E8f7](https://amoy.polygonscan.com/address/0xfD458e4fb718eFAAEf0e28597b9cF6D5C240E8f7)
+
 - UTT contract on Polygon Testnet (Amoy):
   - Upgradable proxy: [0xCa5cD80157334dAc231B65d886467B036CDf0024](https://amoy.polygonscan.com/address/0xCa5cD80157334dAc231B65d886467B036CDf0024)
   - Current implementation: [0xC72b7A6146d3D53B614A4769A1A1459882ED4B1A](https://amoy.polygonscan.com/address/0xC72b7A6146d3D53B614A4769A1A1459882ED4B1A#code)
