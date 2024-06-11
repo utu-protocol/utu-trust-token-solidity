@@ -4,6 +4,12 @@ This project implements the UTU Trust Token (UTT) smart contract.
 
 ## Existing Deployments
 
+There are two types of UTT deployments:
+1. The main UTT contract on Polygon main net and on Ethereum Sepolia test net.
+2. UTTProxy deployments on other chains (main and test nets) to allow users of those chains to interact with UTT directly on their chain; calls are forwareded to the main UTT contract via oracle.
+
+Additionally, we have `Lock` deployments from [Unlock Protocol](https://unlock-protocol.com/) to facilitate charging fees for accessing feedback details.
+
 ## Main Nets
 
 - UTT main contract on Polygon
@@ -29,7 +35,7 @@ This project implements the UTU Trust Token (UTT) smart contract.
     - Current implementation: [0x89fA6ee038f3b4D8C050c6E1709Fa3d19d9be49E](https://sepolia.etherscan.io/address/0x8408F3D9E02E3965b4396d1abD395a0e7E5DE162)
     - Oracle operator contract: [0x9F0E25966DdCEa17524CED8bC8Fe2C78a29B5cAA](https://sepolia.etherscan.io/address/0x9F0E25966DdCEa17524CED8bC8Fe2C78a29B5cAA)
     - UTU Coin (mock): [0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d](https://sepolia.etherscan.io/address/0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d)
-
+  - Unlock Protocol UTU Lock: [0x833601B71Ee6Bc5f62416DCc54a5e329BD04b9A5](https://app.unlock-protocol.com/locks/lock?address=0x833601B71Ee6Bc5f62416DCc54a5e329BD04b9A5&network=11155111)
 - UTT contract on Polygon Testnet (Amoy):
   - Upgradable proxy: [0xCa5cD80157334dAc231B65d886467B036CDf0024](https://amoy.polygonscan.com/address/0xCa5cD80157334dAc231B65d886467B036CDf0024)
   - Current implementation: [0xC72b7A6146d3D53B614A4769A1A1459882ED4B1A](https://amoy.polygonscan.com/address/0xC72b7A6146d3D53B614A4769A1A1459882ED4B1A#code)
