@@ -21,7 +21,7 @@ for job_template in /etc/chainlink/jobs/*.toml.template; do
   envsubst < "$job_template" > "$job_file"
 done
 
-export CL_DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+export CL_DATABASE_URL=${POSTGRES_HOST}://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
 
 # Switch to the chainlink user while preserving the environment
 su -p chainlink -c "chainlink --config /chainlink/config/runtime-config.toml node start --api .api &"
