@@ -12,7 +12,7 @@ HTTPSPort = 0
 ChainID = ${UTT_NETWORK_ID}
 MinContractPayment = '${MIN_CONTRACT_PAYMENT_ENDORSEMENT}'
 
-[GasEstimator]
+[EVM.GasEstimator]
 PriceMin = '1 wei'
 
 [[EVM.Nodes]]
@@ -24,7 +24,7 @@ WSURL = "${UTT_NETWORK_WS_URL}"
 ChainID = ${AURORA_ID}
 MinContractPayment = '${MIN_CONTRACT_PAYMENT_PROXY}'
 
-[GasEstimator]
+[EVM.GasEstimator]
 PriceMin = '1 wei'
 
 [[EVM.Nodes]]
