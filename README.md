@@ -6,7 +6,7 @@ This project implements the UTU Trust Token (UTT) smart contract.
 
 There are two types of UTT deployments:
 1. The main UTT contract on Polygon main net and on Ethereum Sepolia test net.
-2. UTTProxy deployments on other chains (main and test nets) to allow users of those chains to interact with UTT directly on their chain; calls are forwareded to the main UTT contract via oracle.
+2. UTTProxy deployments on other chains (main and test nets) to allow users of those chains to interact with UTT directly on their chain; calls are forwarded to the main UTT contract via oracle.
 
 Additionally, we have `Lock` deployments from [Unlock Protocol](https://unlock-protocol.com/) to facilitate charging fees for accessing feedback details.
 
@@ -72,7 +72,7 @@ npm start
 ```
 
 ### Generate upgraded test contracts
-To test upradability of contracts, particularly that all base contracts have a `__gap` for future storage variables, there's  [scripts/generate-upgraded-test-contracts.ts](scripts/generate-upgraded-test-contracts.ts) 
+To test upgradeability of contracts, particularly that all base contracts have a `__gap` for future storage variables, there's  [scripts/generate-upgraded-test-contracts.ts](scripts/generate-upgraded-test-contracts.ts) 
 
 To run it:
 ```shell
@@ -106,25 +106,25 @@ environment variables to be set appropriately.
 
 Create a deploy args config file in `scripts/` named `deploy.args.${network}.js` for the network you want to deploy on. 
 
-Example for the Polygon testnet testnet deployment:
+Example for the Ethereum testnet deployment:
 
 ```javascript
 const { ethers } = require("hardhat");
 
 module.exports = [
 	1000000, // UTT assigned to deployer for testing
-	"0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f", // Polygon testnet oracle contract address
+	"0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f", // Ethereum testnet oracle contract address
 	"0eec7e1dd0d2476ca1a872dfb6633f48", // External Job ID for the "UTT Check Previous Endorsers Job"
-	parseEther("0.001"), // Polygon testnet LINK fee
-	"0x326C977E6efc84E512bB9C30f76E30c160eD06FB" // Polygon testnet LINK token address
+	parseEther("0.0001"), // Ethereum testnet LINK fee
+	"0x779877A7B0D9E8603169DdbD7836e478b4624789" // Ethereum testnet LINK token address
 ]
 ```
 
-We need to provide a node URL to the deployer, e.g. for Polygon testnet:
+We need to provide a node URL to the deployer, e.g. for Ethereum testnet:
 
-```TESTNET_POLYGON_URL=https://polygon-mumbai.g.alchemy.com/v2/<key>```
+```TESTNET_ETHEREUM_URL=https://eth-sepolia.g.alchemy.com/v2/<key>```
 
-Deploy on `<network>` (e.g. `testnet_polygon`):
+Deploy on `<network>` (e.g. `testnet_ethereum`):
 ```shell
 npm run deploy -- --network <network>
 ```
@@ -148,11 +148,11 @@ module.exports = [
 
 The address provided must be the deployed UTT contract that needs to be updated.
 
-E.g. for Polygon testnet:
+E.g. for Ethereum testnet:
 
-`TESTNET_POLYGON_URL=https://polygon-mumbai.g.alchemy.com/v2/<key>`
+`TESTNET_ETHEREUM_URL=0xb0897686c545045afc77cf20ec7a532e3120e0f1/v2/<key>`
 
-Deploy on `<network>` (e.g. testnet_polygon):
+Deploy on `<network>` (e.g. testnet_ethereum):
 
 ```bash
 npm run upgrade -- --network <network>
@@ -187,7 +187,7 @@ npm run verify -- --constructor-args ./scripts/deploy.operator.args.<network>.js
 
 ### Using flattened contract source
 
-Note that the etherscan API isn't available on Polygon testnet. One can
+Note that the etherscan API isn't available on Ethereum testnet. One can
 verify manually using the UI and single-file verification. A
 flattened source file for this purpose can be created like so:
 
@@ -284,7 +284,7 @@ RDS instance:
    * 3.8\. Set master password and write it down somewhere safe.
    * 3.9\. Disable storage autoscaling by deselecting `Enable storage autoscaling`.
    * 3.10\. Click on `Additional configuration`.
-   * 3.11\. Set your initial database name, e.g. `chainlink-polygon-db`.
+   * 3.11\. Set your initial database name, e.g. `chainlink-ethereum-db`.
    * 3.12\. Disable automatic backups by deselecting `Enable automatic backups`.
    * 3.13\. Go ahead and hit `Create database`.
 * 4\. Set up database credentials.
