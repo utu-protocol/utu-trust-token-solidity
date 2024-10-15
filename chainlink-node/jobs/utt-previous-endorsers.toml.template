@@ -17,7 +17,7 @@ observationSource = """
     http [type="http"
           method=POST
           url="http://trust-api-core-service/previousEndorsersRequest"
-          headers="[\\"UTU-Trust-Api-Client-Id\\", \\"${UTU_TRUST_API_CLIENT_ID}\\"]"
+          headers="[\\"UTU-Trust-Api-Client-Id\\", \\"utu${UTU_TRUST_API_CLIENT_ID}\\"]"
           requestData="{\\"sourceAddress\\": $(decode_cbor.sourceAddress), \\"targetAddress\\": $(decode_cbor.targetAddress), \\"transactionId\\":  $(decode_cbor.transactionId)}"
           allowUnrestrictedNetworkAccess=true]
 
