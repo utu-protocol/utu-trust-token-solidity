@@ -273,9 +273,10 @@ abstract contract TestUpgradedEndorsement is
             address(this),
             this.fulfillEndorse.selector
         );
-        request.add("targetAddress", addressToString(target));
-        request.add("sourceAddress", addressToString(source));
-        request.add("transactionId", transactionId);
+        request._add("targetAddress", addressToString(target));
+        request._add("sourceAddress", addressToString(source));
+        request._add("transactionId", transactionId);
+
         bytes32 requestId = sendOperatorRequestTo(oracle, request, fee);
         oracleRequests[requestId] = OracleRequest({
             from: source,

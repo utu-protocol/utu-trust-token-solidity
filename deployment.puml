@@ -1,0 +1,49 @@
+@startuml
+
+title UTU Trust Token Architecture
+
+cloud Polygon {
+    [UTT Contract] as UTT
+    [Chainlink Operator Contract for UTT] as UTTOperator
+}
+
+cloud "Other EVM Chain" as OtherChain {
+    [UTTProxy Contract] as UTTProxy
+    [Chainlink Operator Contract for UTTProxy] as ProxyOperator
+}
+
+cloud "Centralised Backend" as CB {
+    package "Social Media Connector" {
+        [Social Media Connector] as SMC
+        [Social Media Connector Wallet] as SMCW
+    } 
+
+    package "Chainlink Oracle Node" {
+        [Chainlink Node] as Node
+        [Chainlink Node Wallet] as NodeW
+    }
+}
+
+'Polygon -down[hidden]-> CB
+'OtherChain -down[hidden]-> CB
+
+'User makes an endorsement by calling endorse():
+UTT --> UTTOperator : "enqueue endorsement job" 
+Node --> UTTOperator : "pick enqueued endorsement job"
+Node --> UTTOperator : "fulfill endorsement job (fulfillOracleRequest2)"
+UTTOperator --> UTT : "fulfillEndorse"
+
+'User makes an endorsement by calling endorse() on UTTProxy on another chain:
+UTTProxy --> ProxyOperator : "enqueue proxy call" 
+Node --> ProxyOperator : "pick enqueued proxy call job"
+Node --> ProxyOperator : "fulfill proxy call job (fulfillOracleRequest2)"
+ProxyOperator --> UTT : "call respective fulfill method"
+
+'Required role for the Node to call proxyEndorse() on UTT:
+NodeW --> UTT : has PROXY_ENDORSER_ROLE
+
+'User adds their social media (for the first time):
+SMC --> UTT : addConnection()
+SMCW --> UTT : has SOCIAL_CONNECTOR_ROLE
+
+@enduml

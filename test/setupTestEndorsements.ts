@@ -34,17 +34,17 @@ async function setupTestEndorsements() {
   const endorsementResults = [];
   endorsementResults[0] = await utt.endorse(
     "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
-    ethers.utils.parseEther("0.01"),
+    parseEther("0.01"),
     "000001"
   );
   endorsementResults[1] = await utt.endorse(
     "0x70997970c51812dc3a010c7d01b50e0d17dc79c8",
-    ethers.utils.parseEther("0.02"),
+    parseEther("0.02"),
     "000002"
   );
   endorsementResults[2] = await utt.endorse(
     "0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc",
-    ethers.utils.parseEther(lastValue),
+    parseEther(lastValue),
     "000003"
   );
   return endorsementResults;

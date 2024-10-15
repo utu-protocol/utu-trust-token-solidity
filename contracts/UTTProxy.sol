@@ -112,10 +112,10 @@ contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient, Endorse
             address(this),
             this.fulfill.selector
         );
-        request.add("targetAddress", addressToString(target));
-        request.add("sourceAddress", addressToString(msg.sender));
-        request.add("transactionId", transactionId);
-        request.add("amount", amount.toString());
+        request._add("targetAddress", addressToString(target));
+        request._add("sourceAddress", addressToString(msg.sender));
+        request._add("transactionId", transactionId);
+        request._add("amount", amount.toString());
 
         bytes32 requestId = sendOperatorRequestTo(oracle, request, fee);
         oracleRequests[requestId] = OracleRequest({
@@ -193,7 +193,7 @@ contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient, Endorse
             address(this),
             this.fulfillClaimRewards.selector
         );
-        request.add("targetAddress", addressToString(msg.sender));
+        request._add("targetAddress", addressToString(msg.sender));
 
         bytes32 requestId = sendOperatorRequestTo(oracle, request, fee);
         oracleClaimRequests[requestId] = OracleClaimRequest({
