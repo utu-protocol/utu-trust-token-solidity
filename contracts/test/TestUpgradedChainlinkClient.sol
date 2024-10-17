@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.24;
 
 import "@chainlink/contracts/src/v0.8/Chainlink.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/ENSInterface.sol";
-import "@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol";
+import "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/ChainlinkRequestInterface.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/OperatorInterface.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/PointerInterface.sol";
@@ -60,7 +60,10 @@ abstract contract TestUpgradedChainlinkClient is Initializable {
         bytes4 callbackFunctionSignature
     ) internal pure returns (Chainlink.Request memory) {
         Chainlink.Request memory req;
-        return req.initialize(specId, callbackAddr, callbackFunctionSignature);
+        req.id = specId;
+        req.callbackAddress = callbackAddr;
+        req.callbackFunctionId = callbackFunctionSignature;
+        return req;    
     }
 
     /**
@@ -74,7 +77,10 @@ abstract contract TestUpgradedChainlinkClient is Initializable {
         bytes4 callbackFunctionSignature
     ) internal view returns (Chainlink.Request memory) {
         Chainlink.Request memory req;
-        return req.initialize(specId, address(this), callbackFunctionSignature);
+        req.id = specId;
+        req.callbackAddress = address(this);
+        req.callbackFunctionId = callbackFunctionSignature;
+        return req;    
     }
 
     /**

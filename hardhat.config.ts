@@ -1,15 +1,16 @@
 import * as dotenv from "dotenv";
 
-import "@appliedblockchain/chainlink-plugins-fund-link";
-import "@nomiclabs/hardhat-etherscan";
-import "@nomiclabs/hardhat-waffle";
+//import "@nomiclabs/hardhat-etherscan";
+//import "@nomiclabs/hardhat-waffle";
+import "@nomicfoundation/hardhat-toolbox"
 import "@openzeppelin/hardhat-upgrades";
-import "@typechain/hardhat";
+import '@typechain/hardhat'
 import "hardhat-abi-exporter";
-import "hardhat-gas-reporter";
-import "hardhat-tracer";
+
+// Not available for current hardhat version:
+// import "hardhat-tracer"; 
+
 import { task } from "hardhat/config";
-import "solidity-coverage";
 
 dotenv.config();
 require("./tasks");
@@ -30,6 +31,20 @@ const config = {
   solidity: {
     compilers: [
       {
+        version: "0.8.24",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+        contractSizer: {
+          alphaSort: true,
+          runOnCompile: true,
+          disambiguatePaths: false,
+        },
+      },
+      {
         version: "0.8.7",
         settings: {
           optimizer: {
@@ -44,23 +59,8 @@ const config = {
         },
       },
       // Operator
-      // Operator
       {
-        version: "0.7.6",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-        },
-        contractSizer: {
-          alphaSort: true,
-          runOnCompile: true,
-          disambiguatePaths: false,
-        },
-      },
-      {
-        version: "0.7.0",
+        version: "0.8.19",
         settings: {
           optimizer: {
             enabled: true,
@@ -75,7 +75,7 @@ const config = {
       },
       // LinkToken
       {
-        version: "0.4.24",
+        version: "0.8.0",
         settings: {
           optimizer: {
             enabled: true,
@@ -87,51 +87,31 @@ const config = {
           runOnCompile: true,
           disambiguatePaths: false,
         },
-      },
-      {
-        version: "0.4.23",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-        },
-        contractSizer: {
-          alphaSort: true,
-          runOnCompile: true,
-          disambiguatePaths: false,
-        },
-      },
-      {
-        version: "0.4.11",
-        settings: {
-          optimizer: {
-            enabled: true,
-            runs: 200,
-          },
-        },
-        contractSizer: {
-          alphaSort: true,
-          runOnCompile: true,
-          disambiguatePaths: false,
-        },
-      },
+      }
     ],
   },
   networks: {
-    matic: {
-      url: process.env.MATIC_URL || "",
+    testnet_ethereum: {
+      url: process.env.TESTNET_ETHEREUM_URL || "",
+      accounts:
+        process.env.TEST_PRIVATE_KEY !== undefined
+          ? [process.env.TEST_PRIVATE_KEY]
+          : [],
+    },
+    polygon: {
+      url: process.env.POLYGON_URL || "",
       accounts:
         process.env.MAIN_PRIVATE_KEY !== undefined
           ? [process.env.MAIN_PRIVATE_KEY]
           : [],
     },
-    mumbai: {
-      url: process.env.MUMBAI_URL || "",
+    testnet_polygon: {
+      url: process.env.TESTNET_POLYGON_URL || "",
       accounts:
         process.env.TEST_PRIVATE_KEY !== undefined
           ? [process.env.TEST_PRIVATE_KEY]
           : [],
+      chainId: 80002,
     },
     aurora: {
       url: process.env.AURORA_URL || "https://mainnet.aurora.dev",
@@ -170,9 +150,20 @@ const config = {
     enabled: process.env.REPORT_GAS !== undefined,
     currency: "USD",
   },
+  sourcify: {
+    enabled: true
+  },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,
     customChains: [
+      {
+        network: "testnet_polygon",
+        chainId: 80002,
+        urls: {
+          apiURL: "https://api-amoy.polygonscan.com/api",
+          browserURL: "https://api-amoy.polygonscan.com",
+        },
+      },
       {
         network: "aurora",
         chainId: 1313161554,

@@ -4,6 +4,12 @@ This project implements the UTU Trust Token (UTT) smart contract.
 
 ## Existing Deployments
 
+There are two types of UTT deployments:
+1. The main UTT contract on Polygon main net and on Ethereum Sepolia test net.
+2. UTTProxy deployments on other chains (main and test nets) to allow users of those chains to interact with UTT directly on their chain; calls are forwarded to the main UTT contract via oracle.
+
+Additionally, we have `Lock` deployments from [Unlock Protocol](https://unlock-protocol.com/) to facilitate charging fees for accessing feedback details.
+
 ## Main Nets
 
 - UTT main contract on Polygon
@@ -19,14 +25,22 @@ This project implements the UTU Trust Token (UTT) smart contract.
   - Upgradable proxy: [0xb2e9dB661F992d2F3013e4AFcE01C72d52f58A37](https://optimistic.etherscan.io/address/0xb2e9dB661F992d2F3013e4AFcE01C72d52f58A37)
   - Current implementation: [0x53b6B5477193cCEdF9457F42a1591759cE75A095](https://optimistic.etherscan.io/address/0x53b6b5477193ccedf9457f42a1591759ce75a095)
   - Oracle operator contract: [0x6934c1F62a6d28a573E2b4071a754DDd29B81E54](https://goerli-optimism.etherscan.io/address/0x6934c1f62a6d28a573e2b4071a754ddd29b81e54)
+  - UTU Coin (bridged from Ethereum): [0xf7dC37493e2e375dFDEbec75E71D555af68648Bf](https://optimistic.etherscan.io/token/0xf7dC37493e2e375dFDEbec75E71D555af68648Bf)
 
   
 ## Test Nets
 
-- UTT contract on Polygon Mumbai
-  - Upgradable proxy: [0xD559E16b1250c1fa22BAAc79C7CA5432835e1129](https://mumbai.polygonscan.com/address/0xd559e16b1250c1fa22baac79c7ca5432835e1129)
-  - Current implementation: [0x7e46d672302de60a1250edd1e8c9a07659FC36b7](https://mumbai.polygonscan.com/address/0x7e46d672302de60a1250edd1e8c9a07659fc36b7#code)
-  - Oracle operator contract: [0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f](https://mumbai.polygonscan.com/address/0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f)
+- UTT contract on Ethereum Testnet (Sepolia):
+    - Upgradable proxy: [0x537BE61c5EFB865Df53CA55eeA07ceEe5d5fB162](https://sepolia.etherscan.io/address/0x537BE61c5EFB865Df53CA55eeA07ceEe5d5fB162)
+    - Current implementation: [0x89fA6ee038f3b4D8C050c6E1709Fa3d19d9be49E](https://sepolia.etherscan.io/address/0x8408F3D9E02E3965b4396d1abD395a0e7E5DE162)
+    - Oracle operator contract: [0x9F0E25966DdCEa17524CED8bC8Fe2C78a29B5cAA](https://sepolia.etherscan.io/address/0x9F0E25966DdCEa17524CED8bC8Fe2C78a29B5cAA)
+    - UTU Coin (mock): [0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d](https://sepolia.etherscan.io/address/0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d)
+  - Unlock Protocol UTU Lock: [0x833601B71Ee6Bc5f62416DCc54a5e329BD04b9A5](https://app.unlock-protocol.com/locks/lock?address=0x833601B71Ee6Bc5f62416DCc54a5e329BD04b9A5&network=11155111)
+- UTT contract on Polygon Testnet (Amoy):
+  - Upgradable proxy: [0xCa5cD80157334dAc231B65d886467B036CDf0024](https://amoy.polygonscan.com/address/0xCa5cD80157334dAc231B65d886467B036CDf0024)
+  - Current implementation: [0xC72b7A6146d3D53B614A4769A1A1459882ED4B1A](https://amoy.polygonscan.com/address/0xC72b7A6146d3D53B614A4769A1A1459882ED4B1A#code)
+  - Oracle operator contract: [0x0880633c47A2cba76Ef082e2bCD2103Af14c68EE](https://amoy.polygonscan.com/address/0x0880633c47A2cba76Ef082e2bCD2103Af14c68EE)
+  - UTU Coin (mock): [0xfD458e4fb718eFAAEf0e28597b9cF6D5C240E8f7](https://amoy.polygonscan.com/address/0xfD458e4fb718eFAAEf0e28597b9cF6D5C240E8f7)
 - UTT proxy contract on Aurora Testnet:
   - Upgradable proxy: [0x2ac7F081f8eB51ce393bA298e4C020b0DeF420E1](https://explorer.testnet.aurora.dev/address/0x2ac7F081f8eB51ce393bA298e4C020b0DeF420E1/transactions#address-tabs)
   - Current implementation: [0xd6A3423cCAB82efDC507EBefFEcEd576577d17E2](https://explorer.testnet.aurora.dev/address/0xd6A3423cCAB82efDC507EBefFEcEd576577d17E2)
@@ -37,6 +51,7 @@ This project implements the UTU Trust Token (UTT) smart contract.
   - Upgradable proxy: [0xfD458e4fb718eFAAEf0e28597b9cF6D5C240E8f7](https://goerli-optimism.etherscan.io/address/0xfd458e4fb718efaaef0e28597b9cf6d5c240e8f7)
   - Current implementation: [0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF](https://goerli-optimism.etherscan.io/address/0xbdf3b87b410c50ba9620d8ac416a81e6bf7296ef)
   - Oracle operator contract: [0xbeF02f42F30b1233977DF88986DbB4D27D9c5b09](https://explorer.testnet.aurora.dev/address/0xbeF02f42F30b1233977DF88986DbB4D27D9c5b09)
+  - UTU Coin (bridged from Ethereum Görli testnet): [0xd40530105E196B3ad21fA94b6D4ce5f9DcB50b1a](https://goerli-optimism.etherscan.io/token/0xd40530105E196B3ad21fA94b6D4ce5f9DcB50b1a#balances)
 
 
 ## Building, Testing
@@ -57,7 +72,7 @@ npm start
 ```
 
 ### Generate upgraded test contracts
-To test upradability of contracts, particularly that all base contracts have a `__gap` for future storage variables, there's  [scripts/generate-upgraded-test-contracts.ts](scripts/generate-upgraded-test-contracts.ts) 
+To test upgradeability of contracts, particularly that all base contracts have a `__gap` for future storage variables, there's  [scripts/generate-upgraded-test-contracts.ts](scripts/generate-upgraded-test-contracts.ts) 
 
 To run it:
 ```shell
@@ -91,25 +106,25 @@ environment variables to be set appropriately.
 
 Create a deploy args config file in `scripts/` named `deploy.args.${network}.js` for the network you want to deploy on. 
 
-Example for the Polygon Mumbai testnet deployment:
+Example for the Ethereum testnet deployment:
 
 ```javascript
 const { ethers } = require("hardhat");
 
 module.exports = [
 	1000000, // UTT assigned to deployer for testing
-	"0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f", // Mumbai oracle contract address
+	"0xf64991a3C1C448df967e5DC8e8Cc1D3b3BD0034f", // Ethereum testnet oracle contract address
 	"0eec7e1dd0d2476ca1a872dfb6633f48", // External Job ID for the "UTT Check Previous Endorsers Job"
-	ethers.utils.parseEther("0.001"), // Mumbai LINK fee
-	"0x326C977E6efc84E512bB9C30f76E30c160eD06FB" // Mumbai LINK token address
+	parseEther("0.0001"), // Ethereum testnet LINK fee
+	"0x779877A7B0D9E8603169DdbD7836e478b4624789" // Ethereum testnet LINK token address
 ]
 ```
 
-We need to provide a node URL to the deployer, e.g. for Polygon Mumbai:
+We need to provide a node URL to the deployer, e.g. for Ethereum testnet:
 
-```MUMBAI_URL=https://polygon-mumbai.g.alchemy.com/v2/<key>```
+```TESTNET_ETHEREUM_URL=https://eth-sepolia.g.alchemy.com/v2/<key>```
 
-Deploy on `<network>` (e.g. mumbai):
+Deploy on `<network>` (e.g. `testnet_ethereum`):
 ```shell
 npm run deploy -- --network <network>
 ```
@@ -133,11 +148,11 @@ module.exports = [
 
 The address provided must be the deployed UTT contract that needs to be updated.
 
-E.g. for Polygon Mumbai:
+E.g. for Ethereum testnet:
 
-`MUMBAI_URL=https://polygon-mumbai.g.alchemy.com/v2/<key>`
+`TESTNET_ETHEREUM_URL=0xb0897686c545045afc77cf20ec7a532e3120e0f1/v2/<key>`
 
-Deploy on `<network>` (e.g. mumbai):
+Deploy on `<network>` (e.g. testnet_ethereum):
 
 ```bash
 npm run upgrade -- --network <network>
@@ -150,7 +165,11 @@ npm run upgrade -- --network <network>
 #### UTT >= v2 (upgradable):
 
 ```shell
-npm run verify -- --network <network> <address>
+npm run verify -- --network <network> <implementation-address>
+```
+and then
+```shell
+npm run verify -- --constructor-args ./scripts/deploy.args.<network>.js  --network <network> <upgradable-proxy-address>
 ```
 
 #### UTT v1 (non-upgradable:)
@@ -168,7 +187,7 @@ npm run verify -- --constructor-args ./scripts/deploy.operator.args.<network>.js
 
 ### Using flattened contract source
 
-Note that the etherscan API isn't available on Polygon Mumbai. One can
+Note that the etherscan API isn't available on Ethereum testnet. One can
 verify manually using the UI and single-file verification. A
 flattened source file for this purpose can be created like so:
 
@@ -265,7 +284,7 @@ RDS instance:
    * 3.8\. Set master password and write it down somewhere safe.
    * 3.9\. Disable storage autoscaling by deselecting `Enable storage autoscaling`.
    * 3.10\. Click on `Additional configuration`.
-   * 3.11\. Set your initial database name, e.g. `chainlink-polygon-db`.
+   * 3.11\. Set your initial database name, e.g. `chainlink-ethereum-db`.
    * 3.12\. Disable automatic backups by deselecting `Enable automatic backups`.
    * 3.13\. Go ahead and hit `Create database`.
 * 4\. Set up database credentials.

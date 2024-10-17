@@ -6,9 +6,7 @@ name                = "UTT Proxy Claim Rewards {{network}}"
 evmChainID          = "{{proxyNetworkID}}"
 contractAddress     = "{{proxyOracleOperatorAddress}}"
 
-{{#if uttProxyClaimRewardExternalJobID}}
 externalJobID       = "{{uttProxyClaimRewardExternalJobID}}"
-{{/if}}
 
 observationSource   = """
   decode_log   [type="ethabidecodelog"

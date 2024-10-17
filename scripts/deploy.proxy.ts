@@ -17,10 +17,13 @@ async function deployProxy() {
   const UTTProxy = await ethers.getContractFactory("UTTProxy");
   const deployArgs = require(`./deploy.proxy.args.${network.name}`);
   const uttProxy = await upgrades.deployProxy(UTTProxy, deployArgs);
+  
   console.log("waiting for uttProxy to deploy");
-  await uttProxy.deployed();
+  
+  await uttProxy.waitForDeployment();
+  const uttProxyAddress = await uttProxy.getAddress();
 
-  console.log("UTTProxy deployed to:", uttProxy.address);
+  console.log("UTTProxy deployed to:", uttProxyAddress);
 }
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.

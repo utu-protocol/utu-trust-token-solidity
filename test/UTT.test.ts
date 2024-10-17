@@ -1,5 +1,8 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+
+import { parseEther } from "ethers";
+
 import {
   accessControlRevertError,
   addConnection,
@@ -294,14 +297,14 @@ describe("UTT", function () {
     });
 
     it("should should revert with 'Not enough UTU Coin available to claim rewards.'", async function () {
-      const { utt, mockOperator, admin, service1, user1, connector } =
+      const { utt, uttAddress, mockOperator, admin, service1, user1, connector } =
         await loadFixture(deployUTT);
 
       // whitelist user1 for claiming rewards:
       await addConnection(utt, connector, user1.address, 0);
       await utt.connect(admin).whitelistForClaimRewards(0);
-
-      const utuCoinAddress = (await deployUTUCoinMock(utt.address, 0n)).address;
+      
+      const utuCoinAddress = (await (await deployUTUCoinMock(uttAddress, 0n)).getAddress());
       await utt.connect(admin).setUTUCoin(utuCoinAddress);
 
       // Make user1 get some UTU Coin rewards:
@@ -334,16 +337,15 @@ describe("UTT", function () {
     });
 
     it("should should revert with 'Insufficient claimable rewards for the target.'", async function () {
-      const { utt, admin, user1, connector } = await loadFixture(deployUTT);
+      const { utt, uttAddress, admin, user1, connector } = await loadFixture(deployUTT);
 
       // Adding connections earns UTT rewards but no UTU Coin rewards; so adding a whitelisted connection should
       // whitelist a user for claiming, but make claiming UTU Coin fail due to insufficient funds:
 
       await addConnection(utt, connector, user1.address, 0);
       await utt.connect(admin).whitelistForClaimRewards(0);
-      const utuCoinAddress = (await deployUTUCoinMock(utt.address, 0n)).address;
+      const utuCoinAddress = await (await deployUTUCoinMock(uttAddress, 0n)).getAddress();
       await utt.connect(admin).setUTUCoin(utuCoinAddress);
-
 
       await expect(utt.connect(user1).claimRewards()).to.revertedWith(
         // User 1 could claim the reward for addConnection but:
@@ -352,12 +354,11 @@ describe("UTT", function () {
     });
 
     it("should allow a user to claim UTU Coin", async function () {
-      const { utt, mockOperator, admin, service1, user1, connector } =
-        await loadFixture(deployUTT);
+      const { utt, uttAddress, mockOperator, admin, service1, user1, connector } = await loadFixture(deployUTT);
+      
       await addConnection(utt, connector, user1.address, 0);
       await utt.connect(admin).whitelistForClaimRewards(0);
-      const utuCoinAddress = (await deployUTUCoinMock(utt.address, 2000n))
-        .address;
+      const utuCoinAddress = await (await deployUTUCoinMock(uttAddress, parseEther("1000"))).getAddress();
       await utt.connect(admin).setUTUCoin(utuCoinAddress);
 
       await endorse(
@@ -564,7 +565,7 @@ describe("UTT", function () {
   describe("Migration", function () {
     it("should allow balance migration", async function () {
       const accounts = await generateRandomAccounts(200);
-      const { utt: oldContract, connector } = await loadFixture(deployUTT);
+      const { utt: oldContract, uttAddress: oldContractAddress, connector } = await loadFixture(deployUTT);
       const user1 = accounts[0];
       const { utt, admin } = await loadFixture(deployUTTUnmigrated);
 
@@ -578,7 +579,7 @@ describe("UTT", function () {
       const addresses = accounts.map((account) => account.address);
 
       await expect(
-        utt.connect(admin).migrateBalance(addresses, oldContract.address)
+        utt.connect(admin).migrateBalance(addresses, oldContractAddress)
       ).to.emit(utt, "Transfer");
 
       const balanceAfter = await utt.balanceOf(user1.address);
@@ -604,6 +605,7 @@ describe("UTT", function () {
     it("should allow endorsements migration", async function () {
       const {
         utt: oldContract,
+        uttAddress: oldContractAddress,
         connector,
         mockOperator,
         service1,
@@ -648,7 +650,7 @@ describe("UTT", function () {
       await expect(
         utt
           .connect(admin)
-          .migrateEndorsements(endorsementsData, oldContract.address)
+          .migrateEndorsements(endorsementsData, oldContractAddress)
       ).to.not.emit(utt, "Endorse");
 
       expect(previousEndorserStakes).to.be.eq(
@@ -662,6 +664,7 @@ describe("UTT", function () {
     it("Should allow upgrading the contract", async function () {
       const {
         utt: originalContract,
+        uttAddress: originalContractAddress,
         admin,
         user1,
         connector,
@@ -673,7 +676,7 @@ describe("UTT", function () {
 
       expect(originalBalance).to.be.eq(10000);
 
-      const upgradedContract = await upgradeUTT(originalContract.address);
+      const upgradedContract = await upgradeUTT(originalContractAddress);
 
       const balance = await upgradedContract.balanceOf(user1.address);
 
@@ -684,40 +687,40 @@ describe("UTT", function () {
     });
 
     it("Should allow contract upgrading with other attributes and functions", async function () {
-      const { utt: originalContract } = await loadFixture(deployUTT);
+      const { utt: originalContract, uttAddress: originalContractAddress } = await loadFixture(deployUTT);
 
       const UTT = await ethers.getContractFactory("TestUpgradedUTT");
 
-      const upgradedContract = await upgradeUTT(originalContract.address, UTT);
+      const upgradedContract = await upgradeUTT(originalContractAddress, UTT);
 
       // Test mutating new variables in each upgraded contract. If we'd miss any __gap anywhere, some of these
       // statements will refer to undefined methods or fail
 
-      upgradedContract.incrementnewTestUpgradedChainlinkClientVar();
+      await upgradedContract.incrementnewTestUpgradedChainlinkClientVar();
       expect(await upgradedContract.getnewTestUpgradedChainlinkClientVar()).to.be.eq(1);
 
-      upgradedContract.incrementnewTestUpgradedEndorsementVar();
+      await upgradedContract.incrementnewTestUpgradedEndorsementVar();
       expect(await upgradedContract.getnewTestUpgradedEndorsementVar()).to.be.eq(1);
 
-      upgradedContract.incrementnewTestUpgradedMigratableVar();
+      await upgradedContract.incrementnewTestUpgradedMigratableVar();
       expect(await upgradedContract.getnewTestUpgradedMigratableVar()).to.be.eq(1);
 
-      upgradedContract.incrementnewTestUpgradedMigratableEndorsementVar();
+      await upgradedContract.incrementnewTestUpgradedMigratableEndorsementVar();
       expect(await upgradedContract.getnewTestUpgradedMigratableEndorsementVar()).to.be.eq(1);
 
-      upgradedContract.incrementnewTestUpgradedMigratableRewardVar();
+      await upgradedContract.incrementnewTestUpgradedMigratableRewardVar();
       expect(await upgradedContract.getnewTestUpgradedMigratableRewardVar()).to.be.eq(1);
 
-      upgradedContract.incrementnewTestUpgradedMigratableSocialConnectorVar();
+      await upgradedContract.incrementnewTestUpgradedMigratableSocialConnectorVar();
       expect(await upgradedContract.getnewTestUpgradedMigratableSocialConnectorVar()).to.be.eq(1);
 
-      upgradedContract.incrementnewTestUpgradedRewardVar();
+      await upgradedContract.incrementnewTestUpgradedRewardVar();
       expect(await upgradedContract.getnewTestUpgradedRewardVar()).to.be.eq(1);
 
-      upgradedContract.incrementnewTestUpgradedRolesVar();
+      await upgradedContract.incrementnewTestUpgradedRolesVar();
       expect(await upgradedContract.getnewTestUpgradedRolesVar()).to.be.eq(1);
 
-      upgradedContract.incrementnewTestUpgradedSocialConnectorVar();
+      await upgradedContract.incrementnewTestUpgradedSocialConnectorVar();
       expect(await upgradedContract.getnewTestUpgradedSocialConnectorVar()).to.be.eq(1);
     });
   });
