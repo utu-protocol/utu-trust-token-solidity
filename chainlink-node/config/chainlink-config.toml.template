@@ -48,13 +48,11 @@ WSURL = "${OPTIMISM_WS_URL}"
 ChainID = ${LISK_ID}
 MinContractPayment = '${MIN_CONTRACT_PAYMENT_PROXY}'
 
+LinkContractAddress = "0x6934c1F62a6d28a573E2b4071a754DDd29B81E54"
+
 FinalityDepth = 15        # Need to confirm this
 GasLimitMultiplier = 1.3  # Adjust to ensure transactions are mined
 DefaultGasLimit = 6000000 # Fallback gas limit in case of RPC delays
-
-[[EVM.Assets]]
-symbol = "LINK"
-contractAddress = "0x6934c1F62a6d28a573E2b4071a754DDd29B81E54"
 
 [[EVM.Nodes]]
 Name = '${LISK_NODE_NAME}'
