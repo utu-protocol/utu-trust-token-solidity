@@ -20,6 +20,7 @@ Name = '${UTT_NETWORK_NODE_NAME}'
 HTTPURL = "${UTT_NETWORK_HTTP_URL}"
 WSURL = "${UTT_NETWORK_WS_URL}"
 
+
 [[EVM]]
 ChainID = ${AURORA_ID}
 MinContractPayment = '${MIN_CONTRACT_PAYMENT_PROXY}'
@@ -32,6 +33,7 @@ Name = '${AURORA_NODE_NAME}'
 HTTPURL = "${AURORA_HTTP_URL}"
 WSURL = "${AURORA_WS_URL}"
 
+
 [[EVM]]
 ChainID = ${OPTIMISM_ID}
 MinContractPayment = '${MIN_CONTRACT_PAYMENT_PROXY}'
@@ -40,3 +42,21 @@ MinContractPayment = '${MIN_CONTRACT_PAYMENT_PROXY}'
 Name = '${OPTIMISM_NODE_NAME}'
 HTTPURL = "${OPTIMISM_HTTP_URL}"
 WSURL = "${OPTIMISM_WS_URL}"
+
+
+[[EVM]]
+ChainID = ${LISK_ID}
+MinContractPayment = '${MIN_CONTRACT_PAYMENT_PROXY}'
+
+FinalityDepth = 15        # Need to confirm this
+GasLimitMultiplier = 1.3  # Adjust to ensure transactions are mined
+DefaultGasLimit = 6000000 # Fallback gas limit in case of RPC delays
+
+[[EVM.Assets]]
+symbol = "LINK"
+contractAddress = "0x...your_link_token_contract_address..."
+
+[[EVM.Nodes]]
+Name = '${LISK_NODE_NAME}'
+HTTPURL = "${LISK_HTTP_URL}"
+WSURL = "${LISK_WS_URL}"
