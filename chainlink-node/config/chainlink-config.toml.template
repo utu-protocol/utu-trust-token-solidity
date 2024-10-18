@@ -2,7 +2,7 @@ RootDir = "/chainlink"
 Log.Level = '${CHAINLINK_LOG_LEVEL}'
 
 [WebServer]
-AllowOrigins = '\*'
+AllowOrigins = "*"
 SecureCookies = false
 
 [WebServer.TLS]
@@ -12,49 +12,46 @@ HTTPSPort = 0
 ChainID = ${UTT_NETWORK_ID}
 MinContractPayment = '${MIN_CONTRACT_PAYMENT_ENDORSEMENT}'
 
-[EVM.GasEstimator]
-PriceMin = '1 wei'
+  [EVM.GasEstimator]
+  PriceMin = '1 wei'
 
-[[EVM.Nodes]]
-Name = '${UTT_NETWORK_NODE_NAME}'
-HTTPURL = "${UTT_NETWORK_HTTP_URL}"
-WSURL = "${UTT_NETWORK_WS_URL}"
-
+  [[EVM.Nodes]]
+  Name = '${UTT_NETWORK_NODE_NAME}'
+  HTTPURL = "${UTT_NETWORK_HTTP_URL}"
+  WSURL = "${UTT_NETWORK_WS_URL}"
 
 [[EVM]]
 ChainID = ${AURORA_ID}
 MinContractPayment = '${MIN_CONTRACT_PAYMENT_PROXY}'
 
-[EVM.GasEstimator]
-PriceMin = '1 wei'
+  [EVM.GasEstimator]
+  PriceMin = '1 wei'
 
-[[EVM.Nodes]]
-Name = '${AURORA_NODE_NAME}'
-HTTPURL = "${AURORA_HTTP_URL}"
-WSURL = "${AURORA_WS_URL}"
-
+  [[EVM.Nodes]]
+  Name = '${AURORA_NODE_NAME}'
+  HTTPURL = "${AURORA_HTTP_URL}"
+  WSURL = "${AURORA_WS_URL}"
 
 [[EVM]]
 ChainID = ${OPTIMISM_ID}
 MinContractPayment = '${MIN_CONTRACT_PAYMENT_PROXY}'
 
-[[EVM.Nodes]]
-Name = '${OPTIMISM_NODE_NAME}'
-HTTPURL = "${OPTIMISM_HTTP_URL}"
-WSURL = "${OPTIMISM_WS_URL}"
-
+  [[EVM.Nodes]]
+  Name = '${OPTIMISM_NODE_NAME}'
+  HTTPURL = "${OPTIMISM_HTTP_URL}"
+  WSURL = "${OPTIMISM_WS_URL}"
 
 [[EVM]]
 ChainID = ${LISK_ID}
 MinContractPayment = '${MIN_CONTRACT_PAYMENT_PROXY}'
 
-LinkContractAddress = "0x6934c1F62a6d28a573E2b4071a754DDd29B81E54"
+#LinkContractAddress = "0x6934c1F62a6d28a573E2b4071a754DDd29B81E54"
 
-FinalityDepth = 15        # Need to confirm this
-GasLimitMultiplier = 1.3  # Adjust to ensure transactions are mined
-DefaultGasLimit = 6000000 # Fallback gas limit in case of RPC delays
+#FinalityDepth = 15        # Need to confirm this
+#GasLimitMultiplier = 1.3  # Adjust to ensure transactions are mined
+#DefaultGasLimit = 6000000 # Fallback gas limit in case of RPC delays
 
-[[EVM.Nodes]]
-Name = '${LISK_NODE_NAME}'
-HTTPURL = "${LISK_HTTP_URL}"
-WSURL = "${LISK_WS_URL}"
+  [[EVM.Nodes]]
+  Name = '${LISK_NODE_NAME}'
+  HTTPURL = "${LISK_HTTP_URL}"
+  WSURL = "${LISK_WS_URL}"
