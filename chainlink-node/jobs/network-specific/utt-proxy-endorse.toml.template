@@ -1,12 +1,12 @@
 type                = "directrequest"
 schemaVersion       = 1
 
-name                = "UTT Proxy Endorse {{network}}"
+name                = "UTT Proxy Endorse ${__PROXY_JOB_VALUE_NETWORK}"
 
-evmChainID          = "{{proxyNetworkID}}"
-contractAddress     = "{{proxyOracleOperatorAddress}}"
+evmChainID          = "${__PROXY_JOB_VALUE_PROXY_NETWORK_ID}"
+contractAddress     = "${__PROXY_JOB_VALUE_PROXY_ORACLE_OPERATOR_ADDRESS}"
 
-externalJobID       = "{{uttProxyEndorseExternalJobID}}"
+externalJobID       = "${__PROXY_JOB_VALUE_UTT_PROXY_ENDORSE_EXTERNAL_JOB_ID}"
 
 observationSource   = """
   decode_log   [type="ethabidecodelog"
@@ -18,9 +18,9 @@ observationSource   = """
 
   endorse_tx  [type="ethabiencode" abi="proxyEndorse(address source, address target, uint256 amount, string transactionId)" data="{\\"source\\": $(decode_cbor.sourceAddress), \\"target\\": $(decode_cbor.targetAddress),  \\"amount\\": $(decode_cbor.amount),  \\"transactionId\\": $(decode_cbor.transactionId) }"]
 
-  submit_endorse_tx    [type="ethtx"
-      evmChainID="{{mainUTTContractNetworkID}}"
-      to="{{mainUTTContractAddress}}"
+  submit_endorse_tx [type="ethtx"
+      evmChainID="${UTT_NETWORK_ID}"
+      to="${UTT_MAIN_CONTRACT_ADDRESS}"
       data="$(endorse_tx)" minConfirmations="1" failOnRevert="true"]
 
   decode_log -> decode_cbor -> endorse_tx -> submit_endorse_tx

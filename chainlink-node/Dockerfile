@@ -12,11 +12,8 @@ RUN mkdir -p /etc/chainlink/config
 # Copy configuration file template
 COPY config/chainlink-config.toml.template /etc/chainlink/config/
 
-# Create a directory for job specs
-RUN mkdir -p /etc/chainlink/jobs
-
-# Copy job spec templates into the container
-COPY jobs/*.toml.template /etc/chainlink/jobs/
+# Copy job spec templates and value files into the container
+COPY jobs /etc/chainlink/jobs
 
 # Copy the entrypoint script
 COPY entrypoint.sh /entrypoint.sh
