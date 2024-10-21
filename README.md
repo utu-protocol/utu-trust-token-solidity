@@ -24,7 +24,7 @@ Additionally, we have `Lock` deployments from [Unlock Protocol](https://unlock-p
 - UTT proxy contract on Optimism:
   - Upgradable proxy: [0xb2e9dB661F992d2F3013e4AFcE01C72d52f58A37](https://optimistic.etherscan.io/address/0xb2e9dB661F992d2F3013e4AFcE01C72d52f58A37)
   - Current implementation: [0x53b6B5477193cCEdF9457F42a1591759cE75A095](https://optimistic.etherscan.io/address/0x53b6b5477193ccedf9457f42a1591759ce75a095)
-  - Oracle operator contract: [0x6934c1F62a6d28a573E2b4071a754DDd29B81E54](https://goerli-optimism.etherscan.io/address/0x6934c1f62a6d28a573e2b4071a754ddd29b81e54)
+  - Oracle operator contract: [0x68d806F671dcBdaF0bB7f4E836EE2dFe30Ba131C](https://optimistic.etherscan.io/address/0x68d806F671dcBdaF0bB7f4E836EE2dFe30Ba131C)
   - UTU Coin (bridged from Ethereum): [0xf7dC37493e2e375dFDEbec75E71D555af68648Bf](https://optimistic.etherscan.io/token/0xf7dC37493e2e375dFDEbec75E71D555af68648Bf)
 
   
