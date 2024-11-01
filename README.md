@@ -26,6 +26,11 @@ Additionally, we have `Lock` deployments from [Unlock Protocol](https://unlock-p
   - Current implementation: [0x53b6B5477193cCEdF9457F42a1591759cE75A095](https://optimistic.etherscan.io/address/0x53b6b5477193ccedf9457f42a1591759ce75a095)
   - Oracle operator contract: [0x68d806F671dcBdaF0bB7f4E836EE2dFe30Ba131C](https://optimistic.etherscan.io/address/0x68d806F671dcBdaF0bB7f4E836EE2dFe30Ba131C)
   - UTU Coin (bridged from Ethereum): [0xf7dC37493e2e375dFDEbec75E71D555af68648Bf](https://optimistic.etherscan.io/token/0xf7dC37493e2e375dFDEbec75E71D555af68648Bf)
+- UTT proxy contract on LISK:
+  - Upgradable proxy: [0x6aeb4210F87dC1fC22979C286258f26EcF7a1247](https://blockscout.lisk.com/address/0x6aeb4210F87dC1fC22979C286258f26EcF7a1247)
+  - Current implementation: [0x53b6B5477193cCEdF9457F42a1591759cE75A095](https://blockscout.lisk.com/address/0x53b6B5477193cCEdF9457F42a1591759cE75A095)
+  - Oracle operator contract: [0x68d806F671dcBdaF0bB7f4E836EE2dFe30Ba131C](https://blockscout.lisk.com/address/0x68d806F671dcBdaF0bB7f4E836EE2dFe30Ba131C)
+  - UTU Coin (bridged from Ethereum): [tbd]()
 
   
 ## Test Nets

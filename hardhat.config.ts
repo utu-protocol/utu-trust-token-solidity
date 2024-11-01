@@ -186,6 +186,7 @@ const config = {
       testnet_aurora: process.env.AURORA_ETHERSCAN_API_KEY,
       optimism: process.env.OPTIMISM_ETHERSCAN_API_KEY,
       testnet_optimism: process.env.OPTIMISM_ETHERSCAN_API_KEY,
+      lisk: null, // lisk's blockscout currently doesn't require one 
       testnet_lisk: null // lisk's blockscout currently doesn't require one
     },
     customChains: [
@@ -221,6 +222,14 @@ const config = {
           browserURL: "https://api-sepolia-optimistic.etherscan.io",
         },
       },
+      {
+        network: "lisk",
+        chainId: 1135,
+        urls: {
+          apiURL: "https://blockscout.lisk.com/api",
+          browserURL: "https://blockscout.lisk.com"
+        }
+      },      
       {
         network: "testnet_lisk",
         chainId: 4202,
