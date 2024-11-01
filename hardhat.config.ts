@@ -45,6 +45,20 @@ const config = {
         },
       },
       {
+        version: "0.8.20",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+        contractSizer: {
+          alphaSort: true,
+          runOnCompile: true,
+          disambiguatePaths: false,
+        },
+      },
+      {
         version: "0.8.7",
         settings: {
           optimizer: {
@@ -163,7 +177,17 @@ const config = {
     enabled: true
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
+    apiKey: {
+      mainnet: process.env.ETHERSCAN_API_KEY,
+      testnet_ethereum: process.env.ETHERSCAN_API_KEY,
+      polygon: process.env.POLYGONSCAN_API_KEY,
+      testnet_polygon: process.env.POLYGONSCAN_API_KEY,
+      aurora: process.env.AURORA_ETHERSCAN_API_KEY,
+      testnet_aurora: process.env.AURORA_ETHERSCAN_API_KEY,
+      optimism: process.env.OPTIMISM_ETHERSCAN_API_KEY,
+      testnet_optimism: process.env.OPTIMISM_ETHERSCAN_API_KEY,
+      testnet_lisk: null // lisk's blockscout currently doesn't require one
+    },
     customChains: [
       {
         network: "testnet_polygon",
@@ -189,6 +213,22 @@ const config = {
           browserURL: "https://explorer.testnet.aurora.dev",
         },
       },
+      {
+        network: "testnet_optimism",
+        chainId: 11155420,
+        urls: {
+          apiURL: "https://api-sepolia-optimistic.etherscan.io/api",
+          browserURL: "https://api-sepolia-optimistic.etherscan.io",
+        },
+      },
+      {
+        network: "testnet_lisk",
+        chainId: 4202,
+        urls: {
+          apiURL: "https://sepolia-blockscout.lisk.com/api",
+          browserURL: "https://sepolia-blockscout.lisk.com"
+        }
+      }      
     ],
   },
 };
