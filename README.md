@@ -47,11 +47,16 @@ Additionally, we have `Lock` deployments from [Unlock Protocol](https://unlock-p
   - Oracle operator contract: [0xbeF02f42F30b1233977DF88986DbB4D27D9c5b09](https://explorer.testnet.aurora.dev/address/0xbeF02f42F30b1233977DF88986DbB4D27D9c5b09)
   - UTU Coin (mock): [0xb0fc0bA00acDF415de3b66047E9CEE562C569bA1](https://explorer.testnet.aurora.dev/address/0xb0fc0bA00acDF415de3b66047E9CEE562C569bA1)
     (this version is mocked, not bridged)
-- UTT proxy contract on Optimism Goerli Testnet:
-  - Upgradable proxy: [0xfD458e4fb718eFAAEf0e28597b9cF6D5C240E8f7](https://goerli-optimism.etherscan.io/address/0xfd458e4fb718efaaef0e28597b9cf6d5c240e8f7)
-  - Current implementation: [0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF](https://goerli-optimism.etherscan.io/address/0xbdf3b87b410c50ba9620d8ac416a81e6bf7296ef)
-  - Oracle operator contract: [0xbeF02f42F30b1233977DF88986DbB4D27D9c5b09](https://explorer.testnet.aurora.dev/address/0xbeF02f42F30b1233977DF88986DbB4D27D9c5b09)
-  - UTU Coin (bridged from Ethereum Görli testnet): [0xd40530105E196B3ad21fA94b6D4ce5f9DcB50b1a](https://goerli-optimism.etherscan.io/token/0xd40530105E196B3ad21fA94b6D4ce5f9DcB50b1a#balances)
+- UTT proxy contract on Optimism Sepolia Testnet:
+  - Upgradable proxy: [0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF](https://sepolia-optimistic.etherscan.io/address/0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF)
+  - Current implementation: [0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d](https://sepolia-optimistic.etherscan.io/address/0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d)
+  - Oracle operator contract: [0x6934c1F62a6d28a573E2b4071a754DDd29B81E54](https://sepolia-optimistic.etherscan.io/address/0x6934c1F62a6d28a573E2b4071a754DDd29B81E54)
+  - UTU Coin (bridged from Ethereum Sepolia testnet): [tbd](tbd)
+- UTT proxy contract on LISK Sepolia Testnet:
+  - Upgradable proxy: [0x2b4F9c644b0C8010bB26Fc572001A156F9371C48](https://sepolia-blockscout.lisk.com/address/0x2b4F9c644b0C8010bB26Fc572001A156F9371C48)
+  - Current implementation: [0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF](https://sepolia-blockscout.lisk.com/address/0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF)
+  - Oracle operator contract: [0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d](https://sepolia-blockscout.lisk.com/address/0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d)
+  - UTU Coin (bridged from Ethereum Sepolia testnet): [tbd](tbd)
 
 
 ## Building, Testing
@@ -172,13 +177,16 @@ and then
 npm run verify -- --constructor-args ./scripts/deploy.args.<network>.js  --network <network> <upgradable-proxy-address>
 ```
 
-#### UTT v1 (non-upgradable:)
+#### UTTProxy (upgradable):
 
-Verify deployment at `<address>` on `<network>`
-(additionally requires an API key in the `ETHERSCAN_API_KEY` env variable):
 ```shell
-npm run verify -- --constructor-args ./scripts/deploy.args.<network>.js --network <network> <address>
+npm run verify -- --network <network> <implementation-address>
 ```
+and then
+```shell
+npm run verify -- --constructor-args ./scripts/deploy.proxy.args.<network>.js  --network <network> <upgradable-proxy-address>
+```
+
 
 #### Verifying the operator contract:
 ```shell
