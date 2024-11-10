@@ -30,7 +30,7 @@ Additionally, we have `Lock` deployments from [Unlock Protocol](https://unlock-p
   - Upgradable proxy: [0x6aeb4210F87dC1fC22979C286258f26EcF7a1247](https://blockscout.lisk.com/address/0x6aeb4210F87dC1fC22979C286258f26EcF7a1247)
   - Current implementation: [0x53b6B5477193cCEdF9457F42a1591759cE75A095](https://blockscout.lisk.com/address/0x53b6B5477193cCEdF9457F42a1591759cE75A095)
   - Oracle operator contract: [0x68d806F671dcBdaF0bB7f4E836EE2dFe30Ba131C](https://blockscout.lisk.com/address/0x68d806F671dcBdaF0bB7f4E836EE2dFe30Ba131C)
-  - UTU Coin (bridged from Ethereum): [tbd]()
+  - UTU Coin (bridged from Ethereum): [0x5dc70C31cc67867c1DB8E697E3D9a680f77f0924](https://blockscout.lisk.com/address/0x5dc70C31cc67867c1DB8E697E3D9a680f77f0924)
 
   
 ## Test Nets
@@ -61,7 +61,7 @@ Additionally, we have `Lock` deployments from [Unlock Protocol](https://unlock-p
   - Upgradable proxy: [0x2b4F9c644b0C8010bB26Fc572001A156F9371C48](https://sepolia-blockscout.lisk.com/address/0x2b4F9c644b0C8010bB26Fc572001A156F9371C48)
   - Current implementation: [0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF](https://sepolia-blockscout.lisk.com/address/0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF)
   - Oracle operator contract: [0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d](https://sepolia-blockscout.lisk.com/address/0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d)
-  - UTU Coin (bridged from Ethereum Sepolia testnet): [tbd](tbd)
+  - UTU Coin (bridged from Ethereum Sepolia testnet): [0x05f47FDe56DfBA3E3692445c9b9C17B2128c1531](https://sepolia-blockscout.lisk.com/address/0x05f47FDe56DfBA3E3692445c9b9C17B2128c1531)
 
 
 ## Building, Testing
