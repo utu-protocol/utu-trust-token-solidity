@@ -20,7 +20,7 @@ observationSource   = """
 
   claimable_rewards_call    [type="ethcall"
       evmChainID="${UTT_NETWORK_ID}"
-      to="${UTT_MAIN_CONTRACT_ADDRESS}"
+      contract="${UTT_MAIN_CONTRACT_ADDRESS}"
       data="$(encode_claimable_rewards_call)"]
 
   claimable_rewards [type="ethabidecode" abi="uint256 amount" data="$(claimable_rewards_call)"]

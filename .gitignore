@@ -20,6 +20,7 @@ exports
 typechain-types
 tasks/chainlink-jobs/generated/*.toml
 env.toml
+.cursorignore
 
 
 
