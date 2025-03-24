@@ -12,13 +12,29 @@ mkdir -p /chainlink/jobs
 # Change ownership of the /chainlink directory to the chainlink user
 chown -R chainlink.chainlink /chainlink
 
-# Substitute environment variables in the config file template
+# Process the config file template
 envsubst < /etc/chainlink/config/chainlink-config.toml.template > /chainlink/config/runtime-config.toml
 
-# Process job definition templates and save them to /chainlink/jobs
+# Process non-network-specific job templates
 for job_template in /etc/chainlink/jobs/*.toml.template; do
   job_file="/chainlink/jobs/$(basename "${job_template%.template}")"
   envsubst < "$job_template" > "$job_file"
+done
+
+# Process each network environment file for the main UTT network we're deploying for
+for env_file in /etc/chainlink/jobs/network-specific/values-${UTT_NETWORK_ID}/*.sh; do
+  # Source the environment variables
+  source "$env_file"
+
+  # Get the basename of the .env file without the extension
+  env_basename=$(basename "${env_file%.sh}")
+
+  # Process network-specific job definition templates
+  for job_template in /etc/chainlink/jobs/network-specific/*.toml.template; do
+    # Create a job file name with the env basename as a prefix
+    job_file="/chainlink/jobs/${env_basename}_$(basename "${job_template%.template}")"
+    envsubst < "$job_template" > "$job_file"
+  done
 done
 
 export CL_DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}/${POSTGRES_DB}
@@ -73,6 +89,6 @@ for job_file in /chainlink/jobs/*.toml; do
   chainlink jobs create "$job_file"
 done
 
-# Keep the containter running 
+# Keep the container running 
 # (alling `wait` doesn't work for some reason)
 tail -f /dev/null

@@ -15,10 +15,15 @@ task(
     console.log(taskArguments);
     const UTT = await ethers.getContractAt("UTT", taskArguments.uttaddress);
 
-    const transactionResponse = await UTT.endorse(
-      taskArguments.targetaddress, taskArguments.amount, taskArguments.transactionId);
-
-    console.log(
-      `Endorsement completed. Transaction Hash: ${transactionResponse.hash}`
-    );
+    try {
+      const transactionResponse = await UTT.endorse(
+        taskArguments.targetaddress, taskArguments.amount, taskArguments.transactionId
+      );
+      console.log(`Endorsement completed. Transaction Hash: ${transactionResponse.hash}`);
+    } catch (error) {
+      console.error("Error during endorsement:", error);
+      if (error.data && error.data.message) {
+        console.error("Revert reason:", error.data.message);
+      }
+    }
   });

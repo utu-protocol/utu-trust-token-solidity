@@ -24,8 +24,13 @@ Additionally, we have `Lock` deployments from [Unlock Protocol](https://unlock-p
 - UTT proxy contract on Optimism:
   - Upgradable proxy: [0xb2e9dB661F992d2F3013e4AFcE01C72d52f58A37](https://optimistic.etherscan.io/address/0xb2e9dB661F992d2F3013e4AFcE01C72d52f58A37)
   - Current implementation: [0x53b6B5477193cCEdF9457F42a1591759cE75A095](https://optimistic.etherscan.io/address/0x53b6b5477193ccedf9457f42a1591759ce75a095)
-  - Oracle operator contract: [0x6934c1F62a6d28a573E2b4071a754DDd29B81E54](https://goerli-optimism.etherscan.io/address/0x6934c1f62a6d28a573e2b4071a754ddd29b81e54)
+  - Oracle operator contract: [0x68d806F671dcBdaF0bB7f4E836EE2dFe30Ba131C](https://optimistic.etherscan.io/address/0x68d806F671dcBdaF0bB7f4E836EE2dFe30Ba131C)
   - UTU Coin (bridged from Ethereum): [0xf7dC37493e2e375dFDEbec75E71D555af68648Bf](https://optimistic.etherscan.io/token/0xf7dC37493e2e375dFDEbec75E71D555af68648Bf)
+- UTT proxy contract on LISK:
+  - Upgradable proxy: [0x3B2A3a6E8C087fe399a24e08D3Cab12f17e033C3](https://blockscout.lisk.com/address/0x3B2A3a6E8C087fe399a24e08D3Cab12f17e033C3)
+  - Current implementation: [0x53b6B5477193cCEdF9457F42a1591759cE75A095](https://blockscout.lisk.com/address/0x53b6B5477193cCEdF9457F42a1591759cE75A095)
+  - Oracle operator contract: [0x68d806F671dcBdaF0bB7f4E836EE2dFe30Ba131C](https://blockscout.lisk.com/address/0x68d806F671dcBdaF0bB7f4E836EE2dFe30Ba131C)
+  - UTU Coin (bridged from Ethereum): [0x398697b203cA909e05690B6684D56938964b07A0](https://blockscout.lisk.com/address/0x398697b203cA909e05690B6684D56938964b07A0)
 
   
 ## Test Nets
@@ -47,11 +52,16 @@ Additionally, we have `Lock` deployments from [Unlock Protocol](https://unlock-p
   - Oracle operator contract: [0xbeF02f42F30b1233977DF88986DbB4D27D9c5b09](https://explorer.testnet.aurora.dev/address/0xbeF02f42F30b1233977DF88986DbB4D27D9c5b09)
   - UTU Coin (mock): [0xb0fc0bA00acDF415de3b66047E9CEE562C569bA1](https://explorer.testnet.aurora.dev/address/0xb0fc0bA00acDF415de3b66047E9CEE562C569bA1)
     (this version is mocked, not bridged)
-- UTT proxy contract on Optimism Goerli Testnet:
-  - Upgradable proxy: [0xfD458e4fb718eFAAEf0e28597b9cF6D5C240E8f7](https://goerli-optimism.etherscan.io/address/0xfd458e4fb718efaaef0e28597b9cf6d5c240e8f7)
-  - Current implementation: [0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF](https://goerli-optimism.etherscan.io/address/0xbdf3b87b410c50ba9620d8ac416a81e6bf7296ef)
-  - Oracle operator contract: [0xbeF02f42F30b1233977DF88986DbB4D27D9c5b09](https://explorer.testnet.aurora.dev/address/0xbeF02f42F30b1233977DF88986DbB4D27D9c5b09)
-  - UTU Coin (bridged from Ethereum Görli testnet): [0xd40530105E196B3ad21fA94b6D4ce5f9DcB50b1a](https://goerli-optimism.etherscan.io/token/0xd40530105E196B3ad21fA94b6D4ce5f9DcB50b1a#balances)
+- UTT proxy contract on Optimism Sepolia Testnet:
+  - Upgradable proxy: [0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF](https://sepolia-optimistic.etherscan.io/address/0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF)
+  - Current implementation: [0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d](https://sepolia-optimistic.etherscan.io/address/0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d)
+  - Oracle operator contract: [0x6934c1F62a6d28a573E2b4071a754DDd29B81E54](https://sepolia-optimistic.etherscan.io/address/0x6934c1F62a6d28a573E2b4071a754DDd29B81E54)
+  - UTU Coin (bridged from Ethereum Sepolia testnet): [tbd](tbd)
+- UTT proxy contract on LISK Sepolia Testnet:
+  - Upgradable proxy: [0x0125f1E709eC3dEA2aD8152826fD4b9496086B71](https://sepolia-blockscout.lisk.com/address/0x0125f1E709eC3dEA2aD8152826fD4b9496086B71)
+  - Current implementation: [0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF](https://sepolia-blockscout.lisk.com/address/0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF)
+  - Oracle operator contract: [0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d](https://sepolia-blockscout.lisk.com/address/0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d)
+  - UTU Coin (bridged from Ethereum Sepolia testnet): [0x4b82a31EBCD41fD4b98123cF141853aCD1166875](https://sepolia-blockscout.lisk.com/address/0x4b82a31EBCD41fD4b98123cF141853aCD1166875)
 
 
 ## Building, Testing
@@ -172,13 +182,16 @@ and then
 npm run verify -- --constructor-args ./scripts/deploy.args.<network>.js  --network <network> <upgradable-proxy-address>
 ```
 
-#### UTT v1 (non-upgradable:)
+#### UTTProxy (upgradable):
 
-Verify deployment at `<address>` on `<network>`
-(additionally requires an API key in the `ETHERSCAN_API_KEY` env variable):
 ```shell
-npm run verify -- --constructor-args ./scripts/deploy.args.<network>.js --network <network> <address>
+npm run verify -- --network <network> <implementation-address>
 ```
+and then
+```shell
+npm run verify -- --constructor-args ./scripts/deploy.proxy.args.<network>.js  --network <network> <upgradable-proxy-address>
+```
+
 
 #### Verifying the operator contract:
 ```shell

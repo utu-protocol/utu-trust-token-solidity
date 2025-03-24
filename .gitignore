@@ -3,6 +3,7 @@ node_modules
 coverage
 coverage.json
 typechain
+.history
 
 #Hardhat files
 cache
@@ -19,4 +20,7 @@ exports
 typechain-types
 tasks/chainlink-jobs/generated/*.toml
 env.toml
+.cursorignore
+
+
 

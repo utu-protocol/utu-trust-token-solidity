@@ -2,6 +2,7 @@ services:
   chainlink:
     build: .
     container_name: trust-api-chainlink-node
+    platform: "linux/amd64"
     env_file:
       - .env
     depends_on:

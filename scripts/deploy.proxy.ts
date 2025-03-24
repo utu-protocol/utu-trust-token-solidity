@@ -23,7 +23,10 @@ async function deployProxy() {
   await uttProxy.waitForDeployment();
   const uttProxyAddress = await uttProxy.getAddress();
 
+  const implementationAddress = await upgrades.erc1967.getImplementationAddress(uttProxyAddress);
+
   console.log("UTTProxy deployed to:", uttProxyAddress);
+  console.log("Implementation at:", implementationAddress);
 }
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.

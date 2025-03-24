@@ -1,8 +1,0 @@
-{
-  "proxyNetworkID": "1313161554",
-  "proxyOracleOperatorAddress": "0xC17985dfBF775aB5DAA9F9328423481d3Bb76f37",
-  "mainUTTContractNetworkID": "137",
-  "mainUTTContractAddress": "0xE62dc4c82a9749Bf2E40F73138B3CFee0a2EC89F",
-  "uttProxyEndorseExternalJobID": "ce9c161d576e41598b5599f7e111c808",
-  "uttProxyClaimRewardExternalJobID": "d38e785276534600ba42401e4bad0156"
-}

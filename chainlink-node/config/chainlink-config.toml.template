@@ -2,7 +2,7 @@ RootDir = "/chainlink"
 Log.Level = '${CHAINLINK_LOG_LEVEL}'
 
 [WebServer]
-AllowOrigins = '\*'
+AllowOrigins = "*"
 SecureCookies = false
 
 [WebServer.TLS]
@@ -12,31 +12,108 @@ HTTPSPort = 0
 ChainID = ${UTT_NETWORK_ID}
 MinContractPayment = '${MIN_CONTRACT_PAYMENT_ENDORSEMENT}'
 
-[EVM.GasEstimator]
-PriceMin = '1 wei'
+  [EVM.GasEstimator]
+  PriceMin = '1 wei'
 
-[[EVM.Nodes]]
-Name = '${UTT_NETWORK_NODE_NAME}'
-HTTPURL = "${UTT_NETWORK_HTTP_URL}"
-WSURL = "${UTT_NETWORK_WS_URL}"
+  [[EVM.Nodes]]
+  Name = '${UTT_NETWORK_NODE_NAME}'
+  HTTPURL = "${UTT_NETWORK_HTTP_URL}"
+  WSURL = "${UTT_NETWORK_WS_URL}"
 
 [[EVM]]
 ChainID = ${AURORA_ID}
 MinContractPayment = '${MIN_CONTRACT_PAYMENT_PROXY}'
 
-[EVM.GasEstimator]
-PriceMin = '1 wei'
+  [EVM.GasEstimator]
+  PriceMin = '1 wei'
 
-[[EVM.Nodes]]
-Name = '${AURORA_NODE_NAME}'
-HTTPURL = "${AURORA_HTTP_URL}"
-WSURL = "${AURORA_WS_URL}"
+  [[EVM.Nodes]]
+  Name = '${AURORA_NODE_NAME}'
+  HTTPURL = "${AURORA_HTTP_URL}"
+  WSURL = "${AURORA_WS_URL}"
 
 [[EVM]]
 ChainID = ${OPTIMISM_ID}
 MinContractPayment = '${MIN_CONTRACT_PAYMENT_PROXY}'
 
-[[EVM.Nodes]]
-Name = '${OPTIMISM_NODE_NAME}'
-HTTPURL = "${OPTIMISM_HTTP_URL}"
-WSURL = "${OPTIMISM_WS_URL}"
+  [[EVM.Nodes]]
+  Name = '${OPTIMISM_NODE_NAME}'
+  HTTPURL = "${OPTIMISM_HTTP_URL}"
+  WSURL = "${OPTIMISM_WS_URL}"
+
+[[EVM]]
+ChainID = ${LISK_ID}
+MinContractPayment = '${MIN_CONTRACT_PAYMENT_PROXY}'
+AutoCreateKey = true
+BlockBackfillDepth = 10
+BlockBackfillSkip = false
+ChainType = 'optimismBedrock'
+FinalityDepth = 200
+LogBackfillBatchSize = 1000
+LogPollInterval = '2s'
+LogKeepBlocksDepth = 100000
+LogPrunePageSize = 0
+MinIncomingConfirmations = 1
+NonceAutoSync = true
+NoNewHeadsThreshold = '40s'
+RPCDefaultBatchSize = 250
+RPCBlockQueryDelay = 1
+
+  [EVM.Transactions]
+  ForwardersEnabled = false
+  MaxInFlight = 16
+  MaxQueued = 250
+  ReaperInterval = '1h0m0s'
+  ReaperThreshold = '168h0m0s'
+  ResendAfterThreshold = '30s'
+
+  [EVM.BalanceMonitor]
+  Enabled = true
+
+  [EVM.GasEstimator]
+  Mode = 'BlockHistory'
+  PriceDefault = '20 gwei'
+  PriceMax = '1000 gwei'
+  PriceMin = '1 wei'
+  LimitDefault = 500000
+  LimitMax = 500000
+  LimitMultiplier = '1.0'
+  LimitTransfer = 21000
+  BumpMin = '100 wei'
+  BumpPercent = 20
+  BumpThreshold = 3
+  EIP1559DynamicFees = true
+  FeeCapDefault = '100 gwei'
+  TipCapDefault = '1 wei'
+  TipCapMin = '1 wei'
+
+    [EVM.GasEstimator.BlockHistory]
+    BatchSize = 25
+    BlockHistorySize = 60
+    TransactionPercentile = 60
+
+  [EVM.HeadTracker]
+  HistoryDepth = 300
+  MaxBufferSize = 3
+  SamplingInterval = '1s'
+
+  [EVM.NodePool]
+  PollFailureThreshold = 5
+  PollInterval = '10s'
+  SelectionMode = 'HighestHead'
+  SyncThreshold = 10
+
+  [EVM.OCR]
+  ContractConfirmations = 1
+  ContractTransmitterTransmitTimeout = '10s'
+  DatabaseTimeout = '10s'
+
+  [EVM.OCR2]
+    [EVM.OCR2.Automation]
+    GasLimit = 6500000
+
+  [[EVM.Nodes]]
+  Name = '${LISK_NODE_NAME}'
+  HTTPURL = "${LISK_HTTP_URL}"
+  WSURL = "${LISK_WS_URL}"
+
