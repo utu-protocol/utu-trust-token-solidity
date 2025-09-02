@@ -42,7 +42,7 @@ MinContractPayment = '${MIN_CONTRACT_PAYMENT_PROXY}'
   WSURL = "${OPTIMISM_WS_URL}"
 
 [[EVM]]
-ChainID = ${LISK_ID}
+ChainID = ${BASE_ID}
 MinContractPayment = '${MIN_CONTRACT_PAYMENT_PROXY}'
 AutoCreateKey = true
 BlockBackfillDepth = 10
@@ -113,7 +113,6 @@ RPCBlockQueryDelay = 1
     GasLimit = 6500000
 
   [[EVM.Nodes]]
-  Name = '${LISK_NODE_NAME}'
-  HTTPURL = "${LISK_HTTP_URL}"
-  WSURL = "${LISK_WS_URL}"
-
+  Name = '${BASE_NODE_NAME}'
+  HTTPURL = "${BASE_HTTP_URL}"
+  WSURL = "${BASE_WS_URL}"

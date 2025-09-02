@@ -154,6 +154,15 @@ const config = {
       accounts: [process.env.TEST_PRIVATE_KEY ?? ""],
       // gasPrice: 1000000000, // Is this necessary? (copied from https://akanimorex.hashnode.dev/mastering-lisk-a-step-by-step-guide-to-deploying-your-smart-contract-cm04gf1bt000009lf2loi3l56#heading-configuring-your-hardhat-with-lisk)
     },
+    base: { 
+      url: process.env.BASE_URL,
+      accounts: [process.env.MAIN_PRIVATE_KEY ?? ""],
+    },
+    testnet_base: { 
+      url: process.env.TESTNET_BASE_URL,
+      accounts: [process.env.TEST_PRIVATE_KEY ?? ""],
+      // gasPrice: 1000000000, // Is this necessary? (copied from https://akanimorex.hashnode.dev/mastering-lisk-a-step-by-step-guide-to-deploying-your-smart-contract-cm04gf1bt000009lf2loi3l56#heading-configuring-your-hardhat-with-lisk)
+    },
     ropsten: {
       url: process.env.ROPSTEN_URL || "",
       accounts:
@@ -187,7 +196,9 @@ const config = {
       optimism: process.env.OPTIMISM_ETHERSCAN_API_KEY,
       testnet_optimism: process.env.OPTIMISM_ETHERSCAN_API_KEY,
       lisk: null, // lisk's blockscout currently doesn't require one 
-      testnet_lisk: null // lisk's blockscout currently doesn't require one
+      testnet_lisk: null, // lisk's blockscout currently doesn't require one
+      base: null, 
+      testnet_base: null 
     },
     customChains: [
       {
@@ -237,7 +248,24 @@ const config = {
           apiURL: "https://sepolia-blockscout.lisk.com/api",
           browserURL: "https://sepolia-blockscout.lisk.com"
         }
-      }      
+      },
+      ,
+      {
+        network: "base",
+        chainId: 8453,
+        urls: {
+          apiURL: "https://base.blockscout.com//api",
+          browserURL: "https://base.blockscout.com/"
+        }
+      },      
+      {
+        network: "testnet_base",
+        chainId: 84532,
+        urls: {
+          apiURL: "https://base-sepolia.blockscout.com/api",
+          browserURL: "https://base-sepolia.blockscout.com"
+        }
+      }            
     ],
   },
 };
