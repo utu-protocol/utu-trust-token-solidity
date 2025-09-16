@@ -161,7 +161,6 @@ const config = {
     testnet_base: { 
       url: process.env.TESTNET_BASE_URL,
       accounts: [process.env.TEST_PRIVATE_KEY ?? ""],
-      // gasPrice: 1000000000, // Is this necessary? (copied from https://akanimorex.hashnode.dev/mastering-lisk-a-step-by-step-guide-to-deploying-your-smart-contract-cm04gf1bt000009lf2loi3l56#heading-configuring-your-hardhat-with-lisk)
     },
     ropsten: {
       url: process.env.ROPSTEN_URL || "",
