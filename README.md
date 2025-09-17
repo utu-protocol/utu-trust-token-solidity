@@ -1,6 +1,6 @@
 # UTU Trust Token Contract
 
-This project implements the UTU Trust Token (UTT) smart contract.
+This project contains the UTU Trust Token (UTT) smart contract, which implements UTU Protocol, a decentralized trust and reputation system that enables endorsements, rewards, and penalties between users. The mechanism and tokenomics are detailed in the [UTU Protocol Whitepaper](https://docs.google.com/document/d/1syxWDbJ5Ch0OiMiMfPQ3AWDiyY0Ol4pLJacTvczDo6I/edit?usp=sharing).
 
 ## Existing Deployments
 
@@ -101,6 +101,108 @@ It also prints out the code to add to the "Should allow contract upgrading with 
 
 ## Architecture
 
+### Main UTT Contract Architecture
+
+The main UTT contract on Polygon mainnet is built using a modular, upgradeable architecture that combines multiple inheritance layers; each inherited contract's purpose is to implement specific aspects of the total UTT functionality.
+
+#### Contract Hierarchy
+```
+UTT (Main Contract)
+├── MigratableReward
+│   ├── Reward (UTU Coin reward distribution)
+│   ├── MigratableEndorsement (Data migration for endorsements)
+│   │   ├── Migratable (Base migration functionality)
+│   │   └── Endorsement (Core endorsement logic)
+│   │       ├── ChainlinkClient (Oracle integration)
+│   │       ├── EndorsementInterface
+│   │       └── Roles (Access control)
+│   └── MigratableSocialConnector (Social media account linking)
+│       ├── Migratable
+│       └── SocialConnector
+├── ERC20BurnableUpgradeable (Token burning capability)
+└── ERC20PausableUpgradeable (Emergency pause functionality)
+```
+
+#### Core Functionality Modules
+
+1. **Token Properties**:
+   - ERC20 token with 0 decimals (whole numbers only)
+   - Non-transferable (transfers are blocked)
+   - Burnable 
+   - Pausable for emergency controls
+   - Upgradeable using OpenZeppelin proxy pattern
+
+2. **Endorsement System** (`Endorsement.sol`):
+   - `endorse()`: Direct endorsements on Polygon
+   - `proxyEndorse()`: Cross-chain endorsements from proxy contracts (requires `PROXY_ENDORSER_ROLE`), see below.
+   - Chainlink oracle integration for fetching previous endorsers
+   - Reward calculations based on previous endorsers, see white paper.
+
+3. **Reward Distribution** (`Reward.sol`):
+   - UTT token rewards for endorsements
+   - UTU Coin reward distribution (separate ERC20 token)
+     - Requires being connected to whitelisted social media platforms
+     - `claimUTURewards()`: Claim accumulated UTU Coin rewards
+     - `proxyClaimRewards()`: Cross-chain reward claiming
+
+4. **Social Connector** (`SocialConnector.sol`):
+   - Link Ethereum addresses to social media accounts
+   - `addConnection()`: Connect social media accounts (requires `SOCIAL_CONNECTOR_ROLE`)
+   - Rewards for verified social connections (once only per address and platforms)
+
+5. **Role-Based Access Control** (`Roles.sol`):
+   - `DEFAULT_ADMIN_ROLE`: Contract administration
+   - `PROXY_ENDORSER_ROLE`: Allows oracle to execute cross-chain endorsements
+   - `SOCIAL_CONNECTOR_ROLE`: Allows social media connector service to connect accounts
+
+6. **Migration System** (`Migratable*.sol`):
+   - Support for migrating data from previous contract versions
+   - Endorsement data migration
+   - Social connection migration
+   - Balance migration
+   - Migration state controls
+
+#### Key Technical Features
+
+- **Upgradeability**: Uses OpenZeppelin's upgradeable proxy pattern with proper storage gaps
+- **Oracle Integration**: Chainlink oracles fetch endorsement history for reward calculations
+- **Cross-Chain Support**: Special functions (`proxyEndorse`, `proxyClaimRewards`) for proxy contract calls
+- **Data Migration**: Comprehensive migration system for contract upgrades
+- **Access Control**: Granular role-based permissions for different operations
+
+### Cross-Chain Proxy Design
+
+The UTU Trust Token system uses a cross-chain proxy architecture to enable users on multiple EVM chains to interact with the main UTT contract deployed on Polygon mainnet. 
+
+This architecture's purpose is to allow the system to maintain a single source of truth on Polygon while providing native UX, and therefore easy intergratability into apps, on other chains.
+
+#### Proxy Mechanism Components
+
+1. **Main UTT Contract** (Polygon mainnet): The authoritative contract containing all state, logic, and token balances
+2. **UTTProxy Contracts** (Other chains): Stateless proxy contracts that forward calls to the main contract via Chainlink oracles
+3. **Chainlink Oracle Infrastructure**: Facilitates cross-chain communication between proxy contracts and the main contract
+
+#### Proxy Mechanism Properties
+
+- **Stateless Proxies**: UTTProxy contracts don't hold any business logic state - they're pure proxies that forward operations
+- **Oracle-Mediated Communication**: All cross-chain calls go through Chainlink oracles with specific job configurations
+- **Role-Based Access**: The oracle node wallet must have `PROXY_ENDORSER_ROLE` on the main UTT contract to execute proxy operations
+- **Two-Way Communication**:
+  - Endorsements: User → UTTProxy → Oracle → Main UTT Contract
+  - Reward Claims: User → UTTProxy → Oracle → Query Main UTT → Execute Claim → Return Result
+
+#### Oracle Jobs
+
+Two distinct Chainlink jobs handle cross-chain operations:
+
+1. **UTT Proxy Endorse Job**: Listens for endorsement requests on proxy chains and executes `proxyEndorse()` on the main contract
+2. **UTT Proxy Claim Rewards Job**: Handles reward claiming by querying claimable amounts and executing `proxyClaimRewards()` on the main contract
+
+#### Data Flow Example (Endorsement)
+```
+User (Chain B) → UTTProxy.endorse() → Oracle Request → Chainlink Node →
+Main UTT.proxyEndorse() (Polygon) → Oracle Response → UTTProxy fulfillment
+```
 
 
 ## Deploying
