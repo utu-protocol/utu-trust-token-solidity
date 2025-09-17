@@ -248,7 +248,184 @@ npm run deploy -- --network <network>
 
 ### Deploy Proxy Contract
 
-TODO: update this section
+Follow these steps to deploy UTTProxy on a new chain, let's call it "target chain", and connect it to the main UTT contract:
+
+#### 1. Prerequisites Setup
+
+**Environment Variables:**
+
+Add/update in .env (or console environment):
+- `<NETWORK>_URL` - RPC endpoint for the new chain
+- Appropriate API keys for contract verification (if supported)
+- `TEST_PRIVATE_KEY` or `MAIN_PRIVATE_KEY` - Deployer wallet private key, should be same as for other networks; 
+  - Our testnet deployer wallet is 0xc8c745De6a84DFF8E604c1fD4BE18baDd8433135
+  - Our mainnet deployer wallet is 0x0D1e9d15F6198C5458ca0Cd24b48f4D9B4AB942e
+
+**Network Configuration:**
+Add new network configuration in `hardhat.config.ts`:
+
+1. **Add to networks section:**
+```javascript
+new_chain: {
+  url: process.env.NEW_CHAIN_URL,
+  accounts: [process.env.MAIN_PRIVATE_KEY ?? ""],
+  chainId: <chain_id>
+}
+```
+
+2. **Add to etherscan.customChains for contract verification:**
+```javascript
+{
+  network: "new_chain",
+  chainId: <chain_id>,
+  urls: {
+    apiURL: "https://<explorer_domain>/api",
+    browserURL: "https://<explorer_domain>"
+  }
+}
+```
+
+**Note:** For Blockscout explorers, set the corresponding `etherscan.apiKey` entry to `null` (no API key required). For Etherscan-based explorers, you'll need to provide the appropriate API key.
+
+#### 2. Find or Deploy LINK Token 
+
+If the target chain is already supported by Chainlink and has a faucet, we can use this. LINK token addresses on all supported chains are [listed in the Chainlink docs](https://docs.chain.link/resources/link-token-contracts). 
+
+Otherwise, we can deploy our own LINK token like so:
+
+```bash
+npm run deploy:link-token -- --network <new_chain>
+```
+
+Note down the address for the next step.
+
+#### 3. Deploy Chainlink Operator Contract
+
+Create `scripts/deploy.operator.args.<new_chain>.js`:
+```javascript
+module.exports = [
+  "0x<LINK_TOKEN_ADDRESS>", // LINK token address on this chain
+];
+```
+
+```bash
+npm run deploy:operator -- --network <new_chain>
+```
+
+**Verify Operator Contract:**
+```bash
+npm run verify -- --constructor-args ./scripts/deploy.operator.args.<new_chain>.js --contract contracts/mocks/Operator.sol:UTUOperator --network <new_chain> <operator_address>
+```
+
+#### 4. Configure Oracle Node Jobs
+
+**Configure Job Parameters:**
+Create network-specific job configuration in `chainlink-node/jobs/network-specific/values-<main_utt_chain_id>/<new_chain>.sh`:
+```bash
+export __PROXY_JOB_VALUE_NETWORK="<new_chain>"
+export __PROXY_JOB_VALUE_PROXY_NETWORK_ID="<new_chain_id>"
+export __PROXY_JOB_VALUE_PROXY_ORACLE_OPERATOR_ADDRESS="<operator_address_from_step_3>"
+export __PROXY_JOB_VALUE_UTT_PROXY_ENDORSE_EXTERNAL_JOB_ID="<32_char_hex_job_id>"
+export __PROXY_JOB_VALUE_UTT_PROXY_CLAIM_REWARD_EXTERNAL_JOB_ID="<32_char_hex_job_id>"
+```
+
+
+**Job ID Guidelines:**
+- Randomly generated 32-character hex strings (no hyphens), e.g. `30d3f168244f40788be35c05f6c5924f`; e.g. use a uuid v4 generator and remove hyphens.
+- Mainnet and testnet variants of the same proxy chain my share job ids, but job ids of different proxy chains must be different. E.g. Aurora mainnet job id for the endorse job migt be equal to the Aurora testnet job, but must be different from the Optimism mainnet job. 
+
+**Redeploy Oracle Node:**
+After adding the new chain configuration, rebuild and redeploy the Chainlink oracle node container to pick up the new jobs:
+
+1. **Build the updated container:**
+   ```bash
+   cd chainlink-node
+   make docker-build
+   ```
+
+2. **Deploy the container** (choose one):
+   - **Local deployment:** `make docker-run` (uses docker-compose)
+   - Deployment in k8s cluster:
+      - **Standard way via pushing to registry:** 
+        - `make docker-push` 
+        - Update infrastructure project to use new version.
+        - Redeploy chainlink node.
+      - **Direct deployment:** `make k8s-deploy` (e.g. for quick debugging on staging); be sure to use the correct `K8S_NAMESPACE` env variable.
+   
+The container automatically processes job templates during startup:
+- `utt-proxy-endorse.toml.template` → Creates endorsement proxy jobs
+- `utt-proxy-claim-rewards.toml.template` → Creates reward claiming proxy jobs
+
+**Whitelist Oracle Node:**
+In the operator contract, call `setAuthorizedSenders` to whitelist the Chainlink node address.
+
+#### 5. Configure Oracle Node Access on Main UTT Contract
+
+On the main UTT contract (Polygon), grant the oracle node wallet address the `PROXY_ENDORSER_ROLE`:
+```solidity
+utt.grantRole(await utt.PROXY_ENDORSER_ROLE(), <chainlink_node_wallet_address>);
+```
+
+#### 6. Deploy UTU Coin Contract (Optional)
+If the chain needs a local UTU Coin token:
+```bash
+npm run deploy:utu-coin-mock -- --network <new_chain>
+```
+
+#### 7. Create UTTProxy Deployment Arguments
+
+Create `scripts/deploy.proxy.args.<new_chain>.js`:
+```javascript
+const { ethers } = require("hardhat");
+
+module.exports = [
+  "<OPERATOR_CONTRACT_ADDRESS>", // from step 3
+  "<32_char_hex_endorse_job_id>", // same as step 4, no hyphens
+  ethers.parseEther("0.0000001"), // LINK fee
+  "<LINK_TOKEN_ADDRESS>", // from step 2
+  "<32_char_hex_claim_job_id>", // same as step 4, no hyphens
+];
+```
+
+#### 8. Deploy UTTProxy Contract
+```bash
+npm run deploy:proxy -- --network <new_chain>
+```
+
+This deploys an upgradeable proxy with the UTTProxy implementation.
+
+**Verify UTTProxy Contract:**
+```bash
+# Verify implementation
+npm run verify -- --network <new_chain> <implementation_address>
+
+# Verify proxy
+npm run verify -- --constructor-args ./scripts/deploy.proxy.args.<new_chain>.js --network <new_chain> <proxy_address>
+```
+
+#### 9. Configure UTTProxy Contract
+
+**Set UTU Coin Address (if applicable):**
+```solidity
+uttProxy.setUTUCoin(<utu_coin_address>);
+```
+
+**Fund with LINK tokens:**
+Send LINK tokens to the UTTProxy contract address for oracle payments.
+
+#### 10. Test Cross-Chain Functionality
+
+**Test Endorsement Flow:**
+1. User calls `endorse()` on UTTProxy (new chain)
+2. UTTProxy sends oracle request to operator
+3. Chainlink node picks up job, calls `proxyEndorse()` on main UTT contract (Polygon)
+4. Oracle fulfills request back to UTTProxy
+
+**Test Reward Claiming:**
+1. User calls `claimUTURewards()` on UTTProxy
+2. Oracle queries main UTT contract for claimable rewards
+3. Oracle calls `proxyClaimRewards()` on main UTT contract
+4. Oracle returns reward amount to UTTProxy
 
 ### Upgrade UTT Contract
 
