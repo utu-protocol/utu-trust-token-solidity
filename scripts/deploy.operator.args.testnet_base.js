@@ -1,6 +1,6 @@
 const { ethers } = require("hardhat");
 
 module.exports = [
-  // BASE testnet self-deployed link token address
-  "0x6934c1F62a6d28a573E2b4071a754DDd29B81E54",
+  // BASE testnet link token address by Chainlink
+  "0xE4aB69C077896252FAFBD49EFD26B5D171A32410",
 ];
