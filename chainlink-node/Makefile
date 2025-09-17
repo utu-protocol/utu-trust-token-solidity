@@ -12,7 +12,7 @@ DOCKER_TAG = $(GIT_DESCR)
 OS = linux
 ARCH = amd64
 # K8S
-K8S_NAMESPACE = utu-trust-api
+K8S_NAMESPACE = utu-trust-api-stage
 K8S_DEPLOYMENT = trust-api-chainlink-node
 
 .PHONY: list
