@@ -1,6 +1,6 @@
 # UTU Trust Token Contract
 
-This project implements the UTU Trust Token (UTT) smart contract.
+This project contains the UTU Trust Token (UTT) smart contract, which implements UTU Protocol, a decentralized trust and reputation system that enables endorsements, rewards, and penalties between users. The mechanism and tokenomics are detailed in the [UTU Protocol Whitepaper](https://docs.google.com/document/d/1syxWDbJ5Ch0OiMiMfPQ3AWDiyY0Ol4pLJacTvczDo6I/edit?usp=sharing).
 
 ## Existing Deployments
 
@@ -37,7 +37,7 @@ Additionally, we have `Lock` deployments from [Unlock Protocol](https://unlock-p
 
 - UTT contract on Ethereum Testnet (Sepolia):
     - Upgradable proxy: [0x537BE61c5EFB865Df53CA55eeA07ceEe5d5fB162](https://sepolia.etherscan.io/address/0x537BE61c5EFB865Df53CA55eeA07ceEe5d5fB162)
-    - Current implementation: [0x89fA6ee038f3b4D8C050c6E1709Fa3d19d9be49E](https://sepolia.etherscan.io/address/0x8408F3D9E02E3965b4396d1abD395a0e7E5DE162)
+    - Current implementation: [0x89fA6ee038f3b4D8C050c6E1709Fa3d19d9be49E](https://sepolia.etherscan.io/address/0x89fa6ee038f3b4d8c050c6e1709fa3d19d9be49e)
     - Oracle operator contract: [0x9F0E25966DdCEa17524CED8bC8Fe2C78a29B5cAA](https://sepolia.etherscan.io/address/0x9F0E25966DdCEa17524CED8bC8Fe2C78a29B5cAA)
     - UTU Coin (mock): [0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d](https://sepolia.etherscan.io/address/0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d)
   - Unlock Protocol UTU Lock: [0x833601B71Ee6Bc5f62416DCc54a5e329BD04b9A5](https://app.unlock-protocol.com/locks/lock?address=0x833601B71Ee6Bc5f62416DCc54a5e329BD04b9A5&network=11155111)
@@ -62,6 +62,11 @@ Additionally, we have `Lock` deployments from [Unlock Protocol](https://unlock-p
   - Current implementation: [0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF](https://sepolia-blockscout.lisk.com/address/0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF)
   - Oracle operator contract: [0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d](https://sepolia-blockscout.lisk.com/address/0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d)
   - UTU Coin (bridged from Ethereum Sepolia testnet): [0x4b82a31EBCD41fD4b98123cF141853aCD1166875](https://sepolia-blockscout.lisk.com/address/0x4b82a31EBCD41fD4b98123cF141853aCD1166875)
+- UTT contract on Base Testnet (Sepolia):
+  - Upgradable proxy: [0x2b4F9c644b0C8010bB26Fc572001A156F9371C48](https://base-sepolia.blockscout.com/address/0x2b4F9c644b0C8010bB26Fc572001A156F9371C48)
+  - Current implementation: [0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF](https://base-sepolia.blockscout.com/address/0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF)
+  - Oracle operator contract: [0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d](https://base-sepolia.blockscout.com/address/0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d)
+  - UTU Coin (bridged from Ethereum Sepolia testnet): [0x6934c1F62a6d28a573E2b4071a754DDd29B81E54](https://base-sepolia.blockscout.com/address/0x6934c1F62a6d28a573E2b4071a754DDd29B81E54)  
 
 
 ## Building, Testing
@@ -96,6 +101,108 @@ It also prints out the code to add to the "Should allow contract upgrading with 
 
 ## Architecture
 
+### Main UTT Contract Architecture
+
+The main UTT contract on Polygon mainnet is built using a modular, upgradeable architecture that combines multiple inheritance layers; each inherited contract's purpose is to implement specific aspects of the total UTT functionality.
+
+#### Contract Hierarchy
+```
+UTT (Main Contract)
+├── MigratableReward
+│   ├── Reward (UTU Coin reward distribution)
+│   ├── MigratableEndorsement (Data migration for endorsements)
+│   │   ├── Migratable (Base migration functionality)
+│   │   └── Endorsement (Core endorsement logic)
+│   │       ├── ChainlinkClient (Oracle integration)
+│   │       ├── EndorsementInterface
+│   │       └── Roles (Access control)
+│   └── MigratableSocialConnector (Social media account linking)
+│       ├── Migratable
+│       └── SocialConnector
+├── ERC20BurnableUpgradeable (Token burning capability)
+└── ERC20PausableUpgradeable (Emergency pause functionality)
+```
+
+#### Core Functionality Modules
+
+1. **Token Properties**:
+   - ERC20 token with 0 decimals (whole numbers only)
+   - Non-transferable (transfers are blocked)
+   - Burnable 
+   - Pausable for emergency controls
+   - Upgradeable using OpenZeppelin proxy pattern
+
+2. **Endorsement System** (`Endorsement.sol`):
+   - `endorse()`: Direct endorsements on Polygon
+   - `proxyEndorse()`: Cross-chain endorsements from proxy contracts (requires `PROXY_ENDORSER_ROLE`), see below.
+   - Chainlink oracle integration for fetching previous endorsers
+   - Reward calculations based on previous endorsers, see white paper.
+
+3. **Reward Distribution** (`Reward.sol`):
+   - UTT token rewards for endorsements
+   - UTU Coin reward distribution (separate ERC20 token)
+     - Requires being connected to whitelisted social media platforms
+     - `claimUTURewards()`: Claim accumulated UTU Coin rewards
+     - `proxyClaimRewards()`: Cross-chain reward claiming
+
+4. **Social Connector** (`SocialConnector.sol`):
+   - Link Ethereum addresses to social media accounts
+   - `addConnection()`: Connect social media accounts (requires `SOCIAL_CONNECTOR_ROLE`)
+   - Rewards for verified social connections (once only per address and platforms)
+
+5. **Role-Based Access Control** (`Roles.sol`):
+   - `DEFAULT_ADMIN_ROLE`: Contract administration
+   - `PROXY_ENDORSER_ROLE`: Allows oracle to execute cross-chain endorsements
+   - `SOCIAL_CONNECTOR_ROLE`: Allows social media connector service to connect accounts
+
+6. **Migration System** (`Migratable*.sol`):
+   - Support for migrating data from previous contract versions
+   - Endorsement data migration
+   - Social connection migration
+   - Balance migration
+   - Migration state controls
+
+#### Key Technical Features
+
+- **Upgradeability**: Uses OpenZeppelin's upgradeable proxy pattern with proper storage gaps
+- **Oracle Integration**: Chainlink oracles fetch endorsement history for reward calculations
+- **Cross-Chain Support**: Special functions (`proxyEndorse`, `proxyClaimRewards`) for proxy contract calls
+- **Data Migration**: Comprehensive migration system for contract upgrades
+- **Access Control**: Granular role-based permissions for different operations
+
+### Cross-Chain Proxy Design
+
+The UTU Trust Token system uses a cross-chain proxy architecture to enable users on multiple EVM chains to interact with the main UTT contract deployed on Polygon mainnet. 
+
+This architecture's purpose is to allow the system to maintain a single source of truth on Polygon while providing native UX, and therefore easy intergratability into apps, on other chains.
+
+#### Proxy Mechanism Components
+
+1. **Main UTT Contract** (Polygon mainnet): The authoritative contract containing all state, logic, and token balances
+2. **UTTProxy Contracts** (Other chains): Stateless proxy contracts that forward calls to the main contract via Chainlink oracles
+3. **Chainlink Oracle Infrastructure**: Facilitates cross-chain communication between proxy contracts and the main contract
+
+#### Proxy Mechanism Properties
+
+- **Stateless Proxies**: UTTProxy contracts don't hold any business logic state - they're pure proxies that forward operations
+- **Oracle-Mediated Communication**: All cross-chain calls go through Chainlink oracles with specific job configurations
+- **Role-Based Access**: The oracle node wallet must have `PROXY_ENDORSER_ROLE` on the main UTT contract to execute proxy operations
+- **Two-Way Communication**:
+  - Endorsements: User → UTTProxy → Oracle → Main UTT Contract
+  - Reward Claims: User → UTTProxy → Oracle → Query Main UTT → Execute Claim → Return Result
+
+#### Oracle Jobs
+
+Two distinct Chainlink jobs handle cross-chain operations:
+
+1. **UTT Proxy Endorse Job**: Listens for endorsement requests on proxy chains and executes `proxyEndorse()` on the main contract
+2. **UTT Proxy Claim Rewards Job**: Handles reward claiming by querying claimable amounts and executing `proxyClaimRewards()` on the main contract
+
+#### Data Flow Example (Endorsement)
+```
+User (Chain B) → UTTProxy.endorse() → Oracle Request → Chainlink Node →
+Main UTT.proxyEndorse() (Polygon) → Oracle Response → UTTProxy fulfillment
+```
 
 
 ## Deploying
@@ -141,7 +248,184 @@ npm run deploy -- --network <network>
 
 ### Deploy Proxy Contract
 
-TODO: update this section
+Follow these steps to deploy UTTProxy on a new chain, let's call it "target chain", and connect it to the main UTT contract:
+
+#### 1. Prerequisites Setup
+
+**Environment Variables:**
+
+Add/update in .env (or console environment):
+- `<NETWORK>_URL` - RPC endpoint for the new chain
+- Appropriate API keys for contract verification (if supported)
+- `TEST_PRIVATE_KEY` or `MAIN_PRIVATE_KEY` - Deployer wallet private key, should be same as for other networks; 
+  - Our testnet deployer wallet is 0xc8c745De6a84DFF8E604c1fD4BE18baDd8433135
+  - Our mainnet deployer wallet is 0x0D1e9d15F6198C5458ca0Cd24b48f4D9B4AB942e
+
+**Network Configuration:**
+Add new network configuration in `hardhat.config.ts`:
+
+1. **Add to networks section:**
+```javascript
+new_chain: {
+  url: process.env.NEW_CHAIN_URL,
+  accounts: [process.env.MAIN_PRIVATE_KEY ?? ""],
+  chainId: <chain_id>
+}
+```
+
+2. **Add to etherscan.customChains for contract verification:**
+```javascript
+{
+  network: "new_chain",
+  chainId: <chain_id>,
+  urls: {
+    apiURL: "https://<explorer_domain>/api",
+    browserURL: "https://<explorer_domain>"
+  }
+}
+```
+
+**Note:** For Blockscout explorers, set the corresponding `etherscan.apiKey` entry to `null` (no API key required). For Etherscan-based explorers, you'll need to provide the appropriate API key.
+
+#### 2. Find or Deploy LINK Token 
+
+If the target chain is already supported by Chainlink and has a faucet, we can use this. LINK token addresses on all supported chains are [listed in the Chainlink docs](https://docs.chain.link/resources/link-token-contracts). 
+
+Otherwise, we can deploy our own LINK token like so:
+
+```bash
+npm run deploy:link-token -- --network <new_chain>
+```
+
+Note down the address for the next step.
+
+#### 3. Deploy Chainlink Operator Contract
+
+Create `scripts/deploy.operator.args.<new_chain>.js`:
+```javascript
+module.exports = [
+  "0x<LINK_TOKEN_ADDRESS>", // LINK token address on this chain
+];
+```
+
+```bash
+npm run deploy:operator -- --network <new_chain>
+```
+
+**Verify Operator Contract:**
+```bash
+npm run verify -- --constructor-args ./scripts/deploy.operator.args.<new_chain>.js --contract contracts/mocks/Operator.sol:UTUOperator --network <new_chain> <operator_address>
+```
+
+#### 4. Configure Oracle Node Jobs
+
+**Configure Job Parameters:**
+Create network-specific job configuration in `chainlink-node/jobs/network-specific/values-<main_utt_chain_id>/<new_chain>.sh`:
+```bash
+export __PROXY_JOB_VALUE_NETWORK="<new_chain>"
+export __PROXY_JOB_VALUE_PROXY_NETWORK_ID="<new_chain_id>"
+export __PROXY_JOB_VALUE_PROXY_ORACLE_OPERATOR_ADDRESS="<operator_address_from_step_3>"
+export __PROXY_JOB_VALUE_UTT_PROXY_ENDORSE_EXTERNAL_JOB_ID="<32_char_hex_job_id>"
+export __PROXY_JOB_VALUE_UTT_PROXY_CLAIM_REWARD_EXTERNAL_JOB_ID="<32_char_hex_job_id>"
+```
+
+
+**Job ID Guidelines:**
+- Randomly generated 32-character hex strings (no hyphens), e.g. `30d3f168244f40788be35c05f6c5924f`; e.g. use a uuid v4 generator and remove hyphens.
+- Mainnet and testnet variants of the same proxy chain my share job ids, but job ids of different proxy chains must be different. E.g. Aurora mainnet job id for the endorse job migt be equal to the Aurora testnet job, but must be different from the Optimism mainnet job. 
+
+**Redeploy Oracle Node:**
+After adding the new chain configuration, rebuild and redeploy the Chainlink oracle node container to pick up the new jobs:
+
+1. **Build the updated container:**
+   ```bash
+   cd chainlink-node
+   make docker-build
+   ```
+
+2. **Deploy the container** (choose one):
+   - **Local deployment:** `make docker-run` (uses docker-compose)
+   - Deployment in k8s cluster:
+      - **Standard way via pushing to registry:** 
+        - `make docker-push` 
+        - Update infrastructure project to use new version.
+        - Redeploy chainlink node.
+      - **Direct deployment:** `make k8s-deploy` (e.g. for quick debugging on staging); be sure to use the correct `K8S_NAMESPACE` env variable.
+   
+The container automatically processes job templates during startup:
+- `utt-proxy-endorse.toml.template` → Creates endorsement proxy jobs
+- `utt-proxy-claim-rewards.toml.template` → Creates reward claiming proxy jobs
+
+**Whitelist Oracle Node:**
+In the operator contract, call `setAuthorizedSenders` to whitelist the Chainlink node address.
+
+#### 5. Configure Oracle Node Access on Main UTT Contract
+
+On the main UTT contract (Polygon), grant the oracle node wallet address the `PROXY_ENDORSER_ROLE`:
+```solidity
+utt.grantRole(await utt.PROXY_ENDORSER_ROLE(), <chainlink_node_wallet_address>);
+```
+
+#### 6. Deploy UTU Coin Contract (Optional)
+If the chain needs a local UTU Coin token:
+```bash
+npm run deploy:utu-coin-mock -- --network <new_chain>
+```
+
+#### 7. Create UTTProxy Deployment Arguments
+
+Create `scripts/deploy.proxy.args.<new_chain>.js`:
+```javascript
+const { ethers } = require("hardhat");
+
+module.exports = [
+  "<OPERATOR_CONTRACT_ADDRESS>", // from step 3
+  "<32_char_hex_endorse_job_id>", // same as step 4, no hyphens
+  ethers.parseEther("0.0000001"), // LINK fee
+  "<LINK_TOKEN_ADDRESS>", // from step 2
+  "<32_char_hex_claim_job_id>", // same as step 4, no hyphens
+];
+```
+
+#### 8. Deploy UTTProxy Contract
+```bash
+npm run deploy:proxy -- --network <new_chain>
+```
+
+This deploys an upgradeable proxy with the UTTProxy implementation.
+
+**Verify UTTProxy Contract:**
+```bash
+# Verify implementation
+npm run verify -- --network <new_chain> <implementation_address>
+
+# Verify proxy
+npm run verify -- --constructor-args ./scripts/deploy.proxy.args.<new_chain>.js --network <new_chain> <proxy_address>
+```
+
+#### 9. Configure UTTProxy Contract
+
+**Set UTU Coin Address (if applicable):**
+```solidity
+uttProxy.setUTUCoin(<utu_coin_address>);
+```
+
+**Fund with LINK tokens:**
+Send LINK tokens to the UTTProxy contract address for oracle payments.
+
+#### 10. Test Cross-Chain Functionality
+
+**Test Endorsement Flow:**
+1. User calls `endorse()` on UTTProxy (new chain)
+2. UTTProxy sends oracle request to operator
+3. Chainlink node picks up job, calls `proxyEndorse()` on main UTT contract (Polygon)
+4. Oracle fulfills request back to UTTProxy
+
+**Test Reward Claiming:**
+1. User calls `claimUTURewards()` on UTTProxy
+2. Oracle queries main UTT contract for claimable rewards
+3. Oracle calls `proxyClaimRewards()` on main UTT contract
+4. Oracle returns reward amount to UTTProxy
 
 ### Upgrade UTT Contract
 

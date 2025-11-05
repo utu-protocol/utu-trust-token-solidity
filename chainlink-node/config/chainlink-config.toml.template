@@ -117,3 +117,11 @@ RPCBlockQueryDelay = 1
   HTTPURL = "${LISK_HTTP_URL}"
   WSURL = "${LISK_WS_URL}"
 
+[[EVM]]
+ChainID = ${BASE_ID}
+MinContractPayment = '${MIN_CONTRACT_PAYMENT_PROXY}'
+
+  [[EVM.Nodes]]
+  Name = '${BASE_NODE_NAME}'
+  HTTPURL = "${BASE_HTTP_URL}"
+  WSURL = "${BASE_WS_URL}"
