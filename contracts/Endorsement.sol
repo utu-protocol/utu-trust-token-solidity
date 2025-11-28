@@ -1,32 +1,74 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "./ChainlinkClient.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "./EndorsementInterface.sol";
 import "./Roles.sol";
 
-abstract contract Endorsement is ERC20, ChainlinkClient, Roles {
+/**
+ * @title Endorsement
+ * This contract implements the endorsement functionality of UTU Protocol.
+ */
+abstract contract Endorsement is
+    Initializable,
+    ERC20Upgradeable,
+    ChainlinkClient,
+    EndorsementInterface,
+    Roles
+{
     using Chainlink for Chainlink.Request;
     // Reward parameters:
 
     /** New stake offset (see whitepaper) */
-    uint256 public O_n = 1;
+    uint256 public O_n;
 
     /** Discounting component for the new stake (see whitepaper) */
-    uint256 public D_n = 30;
+    uint256 public D_n;
 
     /** Discounting component for the stake of first-level previous endorsers (see whitepaper) */
-    uint256 public D_lvl1 = 2;
+    uint256 public D_lvl1;
 
     /** Discounting component for the stake of second-level previous endorsers (see whitepaper) */
-    uint256 public D_lvl2 = 20; //
+    uint256 public D_lvl2; //
 
     /** Discounting component for other previous endorsers' total stake (see whitepaper) */
-    uint256 public D_o = 5000;
+    uint256 public D_o;
 
     bytes32 public constant PROXY_ENDORSER_ROLE =
         keccak256("PROXY_ENDORSER_ROLE");
+
+    function __Endorsement_init(
+        string memory name_,
+        string memory symbol_,
+        address _oracle,
+        string memory _jobId,
+        uint256 _fee,
+        address _link
+    ) internal virtual onlyInitializing {
+        __ERC20_init(name_, symbol_);
+        __ChainlinkClient_init();
+        __Endorsement_init_unchained(_oracle, _jobId, _fee, _link);
+    }
+
+    function __Endorsement_init_unchained(
+        address _oracle,
+        string memory _jobId,
+        uint256 _fee,
+        address _link
+    ) internal onlyInitializing {
+        setChainlinkToken(_link);
+        oracle = _oracle;
+        jobId = stringToBytes32(_jobId);
+        fee = _fee;
+        O_n = 1;
+        D_n = 30;
+        D_lvl1 = 2;
+        D_lvl2 = 20;
+        D_o = 5000;
+    }
 
     // Keeping track of stakes on endorsements:
 
@@ -60,22 +102,6 @@ abstract contract Endorsement is ERC20, ChainlinkClient, Roles {
 
     /** LINK fee to be paid to the oracle operator contract for each request */
     uint256 internal fee;
-
-    // Events for endorsements.
-
-    /** A new endorsement was made */
-    event Endorse(
-        address indexed _from,
-        address indexed _to,
-        uint _value,
-        string _transactionId
-    );
-
-    /** A first-level previous endorser was rewarded */
-    event RewardPreviousEndorserLevel1(address endorser, uint256 reward);
-
-    /** A second-level previous endorser was rewarded */
-    event RewardPreviousEndorserLevel2(address endorser, uint256 reward);
 
 
     // Governance functions for setting the reward and penalty parameters
@@ -164,15 +190,14 @@ abstract contract Endorsement is ERC20, ChainlinkClient, Roles {
                 amount
             );
 
-            // mint rewarded tokens to endorser
-            super._mint(address(endorsersLevel1[i]), endorserReward);
+            reward(endorsersLevel1[i], endorserReward, true);
             emit RewardPreviousEndorserLevel1(
                 endorsersLevel1[i],
                 endorserReward
             );
         }
 
-        //reward first-level previous endorsers
+        //reward second-level previous endorsers
         for (uint8 i = 0; i < endorsersLevel2.length; i++) {
             uint256 endorserReward = computeReward(
                 target,
@@ -181,8 +206,7 @@ abstract contract Endorsement is ERC20, ChainlinkClient, Roles {
                 amount
             );
 
-            // mint rewarded tokens to endorser
-            super._mint(endorsersLevel2[i], endorserReward);
+            reward(endorsersLevel2[i], endorserReward, true);
             emit RewardPreviousEndorserLevel2(
                 endorsersLevel2[i],
                 endorserReward
@@ -195,25 +219,40 @@ abstract contract Endorsement is ERC20, ChainlinkClient, Roles {
         emit Endorse(from, target, amount, transactionId);
     }
 
+    /**
+     * @inheritdoc EndorsementInterface
+     */
     function endorse(
         address target,
         uint256 amount,
         string memory transactionId
-    ) public virtual {
+    ) public override virtual {
         require(msg.sender == tx.origin, "should be a user");
 
         _triggerEndorse(msg.sender, target, amount, transactionId);
     }
 
-    function proxyEndorse(address source, address target, uint256 amount, string memory transactionId) public virtual onlyRole(PROXY_ENDORSER_ROLE) { 
-       _triggerEndorse(source, target, amount, transactionId);
+    /**
+     * @dev This is called via oracle to forward an endorse call from a proxy contract. The caller must have the
+     *      PROXY_ENDORSER_ROLE.
+     * @param source the endorser's address
+     * @param target the endorsed entity (address is just used as an id here)
+     * @param amount the stake for the new endorsement
+     * @param transactionId an id representing the "business transaction" for which the endorsement was made; this is
+     *        _not_ necessarily an Ethereum transaction id.
+     */
+    function proxyEndorse(
+        address source,
+        address target,
+        uint256 amount,
+        string memory transactionId
+    ) public virtual onlyRole(PROXY_ENDORSER_ROLE) {
+        _triggerEndorse(source, target, amount, transactionId);
     }
 
     /**
-     * @notice Creates a new staked endorsement, where the caller is the endorser. Previous endorsers, retrieved
-     *         from the UTU Trust API via an oracle, will be rewarded according to the reward formula from the
-     *         whitepaper.
-     * @dev This creates an oracle request. The actual endorsement, staking and rewarding is done on its fulfillment.
+     * @dev This creates an oracle request to retrieve previous endorsers to be rewarded. The actual endorsement,
+     *      staking and rewarding is done on its fulfillment.
      * @param source the endorser's address
      * @param target the endorsed entity (address is just used as an id here)
      * @param amount the stake for the new endorsement
@@ -234,9 +273,10 @@ abstract contract Endorsement is ERC20, ChainlinkClient, Roles {
             address(this),
             this.fulfillEndorse.selector
         );
-        request.add("targetAddress", addressToString(target));
-        request.add("sourceAddress", addressToString(source));
-        request.add("transactionId", transactionId);
+        request._add("targetAddress", addressToString(target));
+        request._add("sourceAddress", addressToString(source));
+        request._add("transactionId", transactionId);
+
         bytes32 requestId = sendOperatorRequestTo(oracle, request, fee);
         oracleRequests[requestId] = OracleRequest({
             from: source,
@@ -314,4 +354,16 @@ abstract contract Endorsement is ERC20, ChainlinkClient, Roles {
             result := mload(add(source, 32))
         }
     }
+
+    /**
+     * @dev Abstract function to reward a user with UTT and optionally UTU Coin.
+     */
+    function reward(address user, uint256 rewardUTT, bool rewardUTUCoin) internal virtual;
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[49] private __gap;
 }

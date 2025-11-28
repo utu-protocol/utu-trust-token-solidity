@@ -3,9 +3,9 @@
 //
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
+const { ethers, network, upgrades } = require("hardhat");
 
 async function deployProxy() {
-  const { ethers, network } = require("hardhat");
   // Hardhat always runs the compile task when running scripts with its command
   // line interface.
   //
@@ -16,13 +16,18 @@ async function deployProxy() {
   // We get the contract to deploy
   const UTTProxy = await ethers.getContractFactory("UTTProxy");
   const deployArgs = require(`./deploy.proxy.args.${network.name}`);
-  const utt = await UTTProxy.deploy.apply(UTTProxy, deployArgs);
+  const uttProxy = await upgrades.deployProxy(UTTProxy, deployArgs);
+  
+  console.log("waiting for uttProxy to deploy");
+  
+  await uttProxy.waitForDeployment();
+  const uttProxyAddress = await uttProxy.getAddress();
 
-  await utt.deployed();
+  const implementationAddress = await upgrades.erc1967.getImplementationAddress(uttProxyAddress);
 
-  console.log("UTT proxy deployed to:", utt.address);
+  console.log("UTTProxy deployed to:", uttProxyAddress);
+  console.log("Implementation at:", implementationAddress);
 }
-
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 deployProxy().catch((error) => {
