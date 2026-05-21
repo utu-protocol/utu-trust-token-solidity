@@ -10,6 +10,12 @@ The product feature is **Stake Withdrawal**. The Solidity function name should b
 withdrawStake(...)
 ```
 
+Whitepaper alignment:
+
+- The whitepaper describes stake editing as adding, reducing, or removing token stakes from endorsements.
+- Stake increase is already handled by repeated `endorse(...)` calls: each newly staked amount is added to the existing stake, and the contract queries the oracle/rewards previous endorsers.
+- This task implements the missing withdrawal side only: reducing or fully removing an existing stake without oracle/reward logic.
+
 The user story is:
 
 - A user has previously endorsed a target with UTT.
