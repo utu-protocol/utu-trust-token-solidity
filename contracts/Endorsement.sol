@@ -79,6 +79,13 @@ abstract contract Endorsement is
     /** A map targetAddress => stake with the total stake by target */
     mapping(address => uint) public totalStake;
 
+    event WithdrawStake(
+        address indexed _from,
+        address indexed _to,
+        uint256 _value,
+        string _transactionId
+    );
+
     // Oracle related:
 
     /**
@@ -230,6 +237,39 @@ abstract contract Endorsement is
         require(msg.sender == tx.origin, "should be a user");
 
         _triggerEndorse(msg.sender, target, amount, transactionId);
+    }
+
+    function withdrawStake(
+        address target,
+        uint256 amount,
+        string memory transactionId
+    ) public virtual {
+        require(msg.sender == tx.origin, "should be a user");
+
+        _withdrawStake(msg.sender, target, amount, transactionId);
+    }
+
+    function _withdrawStake(
+        address source,
+        address target,
+        uint256 amount,
+        string memory transactionId
+    ) internal {
+        require(amount > 0, "UTT: withdraw amount must be greater than zero");
+
+        uint256 currentStake = previousEndorserStakes[target][source];
+        require(currentStake >= amount, "UTT: withdraw amount exceeds stake");
+        require(
+            totalStake[target] >= amount,
+            "UTT: withdraw amount exceeds total stake"
+        );
+
+        previousEndorserStakes[target][source] = currentStake - amount;
+        totalStake[target] -= amount;
+
+        _mint(source, amount);
+
+        emit WithdrawStake(source, target, amount, transactionId);
     }
 
     /**
