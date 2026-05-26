@@ -182,30 +182,17 @@ const config = {
     currency: "USD",
   },
   sourcify: {
-    enabled: true
+    enabled: process.env.SOURCIFY_ENABLED === "true"
   },
   etherscan: {
-    apiKey: {
-      mainnet: process.env.ETHERSCAN_API_KEY,
-      testnet_ethereum: process.env.ETHERSCAN_API_KEY,
-      polygon: process.env.POLYGONSCAN_API_KEY,
-      testnet_polygon: process.env.POLYGONSCAN_API_KEY,
-      aurora: process.env.AURORA_ETHERSCAN_API_KEY,
-      testnet_aurora: process.env.AURORA_ETHERSCAN_API_KEY,
-      optimism: process.env.OPTIMISM_ETHERSCAN_API_KEY,
-      testnet_optimism: process.env.OPTIMISM_ETHERSCAN_API_KEY,
-      lisk: null, // lisk's blockscout currently doesn't require one 
-      testnet_lisk: null, // lisk's blockscout currently doesn't require one
-      base: null, 
-      testnet_base: null 
-    },
+    apiKey: process.env.ETHERSCAN_API_KEY || process.env.POLYGONSCAN_API_KEY || "",
     customChains: [
       {
         network: "testnet_polygon",
         chainId: 80002,
         urls: {
           apiURL: "https://api-amoy.polygonscan.com/api",
-          browserURL: "https://api-amoy.polygonscan.com",
+          browserURL: "https://amoy.polygonscan.com",
         },
       },
       {
@@ -248,7 +235,6 @@ const config = {
           browserURL: "https://sepolia-blockscout.lisk.com"
         }
       },
-      ,
       {
         network: "base",
         chainId: 8453,
