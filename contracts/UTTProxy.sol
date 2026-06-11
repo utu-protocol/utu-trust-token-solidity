@@ -126,6 +126,14 @@ contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient, Endorse
         });
     }
 
+    function withdrawStake(
+        address,
+        uint256,
+        string memory
+    ) external pure override {
+        revert("UTTProxy: withdrawStake not supported");
+    }
+
     function fulfill(
         bytes32 _requestId
     ) external recordChainlinkFulfillment(_requestId) {
