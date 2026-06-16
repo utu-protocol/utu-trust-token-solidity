@@ -232,6 +232,42 @@ abstract contract Endorsement is
         _triggerEndorse(msg.sender, target, amount, transactionId);
     }
 
+    function _withdrawStake(
+        address source,
+        address target,
+        uint256 amount,
+        string memory transactionId
+    ) internal {
+        require(amount > 0, "UTT: withdraw amount must be greater than zero");
+
+        uint256 currentStake = previousEndorserStakes[target][source];
+        require(currentStake >= amount, "UTT: withdraw amount exceeds stake");
+        require(
+            totalStake[target] >= amount,
+            "UTT: withdraw amount exceeds total stake"
+        );
+
+        previousEndorserStakes[target][source] = currentStake - amount;
+        totalStake[target] -= amount;
+
+        _mint(source, amount);
+
+        emit WithdrawStake(source, target, amount, transactionId);
+    }
+
+    /**
+     * @inheritdoc EndorsementInterface
+     */
+    function withdrawStake(
+        address target,
+        uint256 amount,
+        string memory transactionId
+    ) public override virtual {
+        require(msg.sender == tx.origin, "should be a user");
+
+        _withdrawStake(msg.sender, target, amount, transactionId);
+    }
+
     /**
      * @dev This is called via oracle to forward an endorse call from a proxy contract. The caller must have the
      *      PROXY_ENDORSER_ROLE.

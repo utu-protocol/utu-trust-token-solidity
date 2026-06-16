@@ -21,8 +21,11 @@ async function upgradeUTT() {
 
   await utt.waitForDeployment();
   const uttAddress = await utt.getAddress();
+  const implementationAddress =
+    await upgrades.erc1967.getImplementationAddress(uttAddress);
 
   console.log("UTT upgraded to:", uttAddress);
+  console.log("Implementation at:", implementationAddress);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

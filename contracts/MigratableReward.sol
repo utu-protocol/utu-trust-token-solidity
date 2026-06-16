@@ -117,6 +117,19 @@ contract MigratableReward is
         super.endorse(target, amount, transactionId);
     }
 
+    function withdrawStake(
+        address target,
+        uint256 amount,
+        string memory transactionId
+    )
+        public
+        virtual
+        override(Endorsement, MigratableEndorsement)
+        onlyNotMigrating
+    {
+        super.withdrawStake(target, amount, transactionId);
+    }
+
     function proxyEndorse(
         address source,
         address target,

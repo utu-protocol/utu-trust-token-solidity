@@ -236,6 +236,168 @@ describe("UTT", function () {
     });
   });
 
+  describe("Stake withdrawal", function () {
+    async function deployWithUserStake(stakeAmount = 1000) {
+      const fixture = await loadFixture(deployUTT);
+      const { utt, mockOperator, user1, service1, connector } = fixture;
+
+      await addConnection(utt, connector, user1.address);
+      await endorse(
+        utt,
+        mockOperator,
+        user1,
+        service1.address,
+        stakeAmount,
+        mockTransactionId,
+        [],
+        []
+      );
+
+      return fixture;
+    }
+
+    async function deployWithClaimableRewards() {
+      const fixture = await loadFixture(deployUTT);
+      const { utt, mockOperator, admin, user1, service1, connector } =
+        fixture;
+
+      await addConnection(utt, connector, user1.address);
+      await endorse(
+        utt,
+        mockOperator,
+        user1,
+        service1.address,
+        200,
+        mockTransactionId,
+        [],
+        []
+      );
+      await endorse(
+        utt,
+        mockOperator,
+        admin,
+        service1.address,
+        200,
+        mockTransactionId,
+        [user1.address],
+        []
+      );
+
+      return fixture;
+    }
+
+    it("should allow a user to withdraw part of their stake", async function () {
+      const { utt, user1, service1 } = await deployWithUserStake();
+      const balanceBefore = await utt.balanceOf(user1.address);
+      const stakeBefore = await utt.previousEndorserStakes(
+        service1.address,
+        user1.address
+      );
+      const totalStakeBefore = await utt.totalStake(service1.address);
+
+      const withdrawP = utt
+        .connect(user1)
+        .withdrawStake(service1.address, 400, mockTransactionId);
+
+      await expect(withdrawP)
+        .to.emit(utt, "WithdrawStake")
+        .withArgs(user1.address, service1.address, 400, mockTransactionId);
+      expect(await utt.balanceOf(user1.address)).to.eq(balanceBefore + 400n);
+      expect(
+        await utt.previousEndorserStakes(service1.address, user1.address)
+      ).to.eq(stakeBefore - 400n);
+      expect(await utt.totalStake(service1.address)).to.eq(
+        totalStakeBefore - 400n
+      );
+    });
+
+    it("should allow a user to withdraw all of their stake", async function () {
+      const { utt, user1, service1 } = await deployWithUserStake();
+
+      await utt
+        .connect(user1)
+        .withdrawStake(service1.address, 1000, mockTransactionId);
+
+      expect(
+        await utt.previousEndorserStakes(service1.address, user1.address)
+      ).to.eq(0);
+      expect(await utt.totalStake(service1.address)).to.eq(0);
+    });
+
+    it("should revert when withdrawing an invalid amount", async function () {
+      const { utt, user1, service1 } = await deployWithUserStake();
+
+      await expect(
+        utt.connect(user1).withdrawStake(service1.address, 0, mockTransactionId)
+      ).to.be.revertedWith("UTT: withdraw amount must be greater than zero");
+      await expect(
+        utt
+          .connect(user1)
+          .withdrawStake(service1.address, 1001, mockTransactionId)
+      ).to.be.revertedWith("UTT: withdraw amount exceeds stake");
+    });
+
+    it("should revert when withdrawing stake for a target the user never endorsed", async function () {
+      const { utt, user1, service1 } = await loadFixture(deployUTT);
+
+      await expect(
+        utt.connect(user1).withdrawStake(service1.address, 1, mockTransactionId)
+      ).to.be.revertedWith("UTT: withdraw amount exceeds stake");
+    });
+
+    it("should not emit reward events", async function () {
+      const { utt, user1, service1 } = await deployWithUserStake();
+
+      const withdrawP = utt
+        .connect(user1)
+        .withdrawStake(service1.address, 250, mockTransactionId);
+
+      await expect(withdrawP)
+        .to.not.emit(utt, "RewardPreviousEndorserLevel1")
+        .to.not.emit(utt, "RewardPreviousEndorserLevel2")
+        .to.not.emit(utt, "RewardUTUCoin");
+    });
+
+    it("should not change claimable UTU Coin", async function () {
+      const { utt, user1, service1 } = await deployWithClaimableRewards();
+      const claimableBefore = await utt.claimableUTUCoin(user1.address);
+      const totalClaimableBefore = await utt.totalClaimableUTUCoin();
+      expect(claimableBefore).to.be.gt(0);
+      expect(totalClaimableBefore).to.be.gt(0);
+
+      await utt
+        .connect(user1)
+        .withdrawStake(service1.address, 50, mockTransactionId);
+
+      expect(await utt.claimableUTUCoin(user1.address)).to.eq(claimableBefore);
+      expect(await utt.totalClaimableUTUCoin()).to.eq(totalClaimableBefore);
+    });
+
+    it("should block stake withdrawal while migration is active", async function () {
+      const { utt, admin, user1, service1 } = await deployWithUserStake();
+
+      await utt.connect(admin).startMigrationToNewContract();
+
+      await expect(
+        utt
+          .connect(user1)
+          .withdrawStake(service1.address, 250, mockTransactionId)
+      ).to.be.revertedWith("Contract is migrating");
+    });
+
+    it("should revert stake withdrawal while the contract is paused", async function () {
+      const { utt, admin, user1, service1 } = await deployWithUserStake();
+
+      await utt.connect(admin).pause();
+
+      await expect(
+        utt
+          .connect(user1)
+          .withdrawStake(service1.address, 250, mockTransactionId)
+      ).to.be.reverted;
+    });
+  });
+
   describe("User tries to addConnection", function () {
     it("should not allow a user to add a connection by themselves", async function () {
       const { utt, user1 } = await loadFixture(deployUTT);

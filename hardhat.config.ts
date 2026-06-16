@@ -194,10 +194,10 @@ const config = {
       testnet_aurora: process.env.AURORA_ETHERSCAN_API_KEY,
       optimism: process.env.OPTIMISM_ETHERSCAN_API_KEY,
       testnet_optimism: process.env.OPTIMISM_ETHERSCAN_API_KEY,
-      lisk: null, // lisk's blockscout currently doesn't require one 
+      lisk: null, // lisk's blockscout currently doesn't require one
       testnet_lisk: null, // lisk's blockscout currently doesn't require one
-      base: null, 
-      testnet_base: null 
+      base: null,
+      testnet_base: null
     },
     customChains: [
       {

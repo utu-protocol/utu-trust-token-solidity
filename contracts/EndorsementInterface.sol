@@ -24,6 +24,20 @@ interface EndorsementInterface {
         string memory transactionId
     ) external;
 
+    /**
+     * @notice Reduces or removes part of the caller's existing staked endorsement for a target.
+     *         A WithdrawStake event is emitted once the stake is withdrawn.
+     * @param target the endorsed entity (address is just used as an id here)
+     * @param amount the stake amount to withdraw
+     * @param transactionId an id representing the "business transaction" for which the stake withdrawal was made; this is
+     *        _not_ necessarily an Ethereum transaction id.
+     */
+    function withdrawStake(
+        address target,
+        uint256 amount,
+        string memory transactionId
+    ) external;
+
     // Events that might be emitted during the endorsement process.
 
     /** A new staked endorsement was created. */
@@ -31,6 +45,14 @@ interface EndorsementInterface {
         address indexed _from,
         address indexed _to,
         uint _value,
+        string _transactionId
+    );
+
+    /** Existing staked endorsement was reduced or removed. */
+    event WithdrawStake(
+        address indexed _from,
+        address indexed _to,
+        uint256 _value,
         string _transactionId
     );
 
