@@ -63,10 +63,35 @@ describe("UTTProxy", function () {
 
   describe("Endorse", function () {
     it("Should be able to make an endorsement", async function () {
-      const { contract, user1, user2 } = await loadFixture(deployContract);
+      const { contract, owner, user1, user2 } = await loadFixture(deployContract);
+      await contract.connect(owner).setActionJobId("dummy-action-job");
       await expect(
         contract.connect(user1).endorse(user2.address, 100, "000001")
       ).to.emit(contract, "ChainlinkRequested");
+    });
+
+    it("Should revert endorse when actionJobId is not configured", async function () {
+      const { contract, user1, user2 } = await loadFixture(deployContract);
+      await expect(
+        contract.connect(user1).endorse(user2.address, 100, "000001")
+      ).to.be.revertedWith("Action job ID not configured");
+    });
+  });
+
+  describe("Withdraw stake", function () {
+    it("Should forward a withdrawStake via the unified action job", async function () {
+      const { contract, owner, user1, user2 } = await loadFixture(deployContract);
+      await contract.connect(owner).setActionJobId("dummy-action-job");
+      await expect(
+        contract.connect(user1).withdrawStake(user2.address, 100, "000001")
+      ).to.emit(contract, "ChainlinkRequested");
+    });
+
+    it("Should revert withdrawStake when actionJobId is not configured", async function () {
+      const { contract, user1, user2 } = await loadFixture(deployContract);
+      await expect(
+        contract.connect(user1).withdrawStake(user2.address, 100, "000001")
+      ).to.be.revertedWith("Action job ID not configured");
     });
   });
 

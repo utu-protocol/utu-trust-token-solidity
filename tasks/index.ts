@@ -2,5 +2,8 @@ import "./export-logs.ts";
 import "./migrate"
 import "./set-data-migration-completed"
 import "./endorse"
+import "./disapprove"
+import "./withdraw-stake"
+import "./set-action-job-id"
 import "./show-pending-transactions"
 import "./get-implementation-address"

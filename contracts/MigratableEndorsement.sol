@@ -69,6 +69,24 @@ abstract contract MigratableEndorsement is Migratable, Endorsement {
         super.proxyEndorse(source, target, amount, transactionId);
     }
 
+    function disapprove(
+        address target,
+        uint256 amount,
+        string memory transactionId
+    ) public virtual override onlyNotMigrating {
+        super.disapprove(target, amount, transactionId);
+    }
+
+    function proxyAction(
+        address source,
+        address target,
+        uint256 amount,
+        string memory transactionId,
+        ActionType actionType
+    ) public virtual override onlyNotMigrating onlyRole(PROXY_ENDORSER_ROLE) {
+        super.proxyAction(source, target, amount, transactionId, actionType);
+    }
+
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
      * variables without shifting down storage in the inheritance chain.

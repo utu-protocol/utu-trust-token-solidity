@@ -3,8 +3,12 @@ FROM --platform=linux/amd64 smartcontract/chainlink:2.12.0
 
 USER root
 
-# Install gettext for envsubst command
-RUN apt-get update && apt-get install -y gettext
+# Install gettext for envsubst command (needed by entrypoint.sh)
+# The base image has a broken PostgreSQL apt repository, so we allow unauthenticated access
+# and suppress those errors while still succeeding in installing from available repositories
+RUN apt-get update -o APT::Get::AllowUnauthenticated=true 2>&1 | grep -v postgresql || true && \
+    apt-get install -y gettext && \
+    rm -rf /var/lib/apt/lists/*
 
 # Create a directory for configuration files
 RUN mkdir -p /etc/chainlink/config
