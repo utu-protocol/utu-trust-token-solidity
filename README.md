@@ -16,21 +16,11 @@ Additionally, we have `Lock` deployments from [Unlock Protocol](https://unlock-p
   - Upgradable proxy: [0xE62dc4c82a9749Bf2E40F73138B3CFee0a2EC89F](https://polygonscan.com/address/0xe62dc4c82a9749bf2e40f73138b3cfee0a2ec89f)
   - Current implementation: [0x9147E7DD575926239E4b5Ac96B4663847A07c0b1](https://polygonscan.com/address/0x9147e7dd575926239e4b5ac96b4663847a07c0b1#code)
   - Oracle operator contract: [0x73ac0B4ba4Fc1c42B8DFFA39f3E4E0e95eb9b8Fd](https://polygonscan.com/address/0x73ac0B4ba4Fc1c42B8DFFA39f3E4E0e95eb9b8Fd)
-- UTT proxy contract on Aurora:
-  - Upgradable proxy: [0xaE53DcC63d7895600e2510A986Dc2b65c953E26c](https://explorer.mainnet.aurora.dev/address/0xaE53DcC63d7895600e2510A986Dc2b65c953E26c)
-  - Current implementation: [0x90C6B69383695b4Dc4125ca010C61f78dff93fb0](https://explorer.mainnet.aurora.dev/address/0x90C6B69383695b4Dc4125ca010C61f78dff93fb0)
-  - Oracle operator contract: [0xC17985dfBF775aB5DAA9F9328423481d3Bb76f37](https://explorer.mainnet.aurora.dev/address/0xC17985dfBF775aB5DAA9F9328423481d3Bb76f37)
-  - UTU Coin: [0x7aa1a72f744Cdcd4c89918AEBFbe4F1d1D1156E6](https://explorer.mainnet.aurora.dev/address/0x7aa1a72f744Cdcd4c89918AEBFbe4F1d1D1156E6)
 - UTT proxy contract on Optimism:
   - Upgradable proxy: [0xb2e9dB661F992d2F3013e4AFcE01C72d52f58A37](https://optimistic.etherscan.io/address/0xb2e9dB661F992d2F3013e4AFcE01C72d52f58A37)
   - Current implementation: [0x53b6B5477193cCEdF9457F42a1591759cE75A095](https://optimistic.etherscan.io/address/0x53b6b5477193ccedf9457f42a1591759ce75a095)
   - Oracle operator contract: [0x68d806F671dcBdaF0bB7f4E836EE2dFe30Ba131C](https://optimistic.etherscan.io/address/0x68d806F671dcBdaF0bB7f4E836EE2dFe30Ba131C)
   - UTU Coin (bridged from Ethereum): [0xf7dC37493e2e375dFDEbec75E71D555af68648Bf](https://optimistic.etherscan.io/token/0xf7dC37493e2e375dFDEbec75E71D555af68648Bf)
-- UTT proxy contract on LISK:
-  - Upgradable proxy: [0x3B2A3a6E8C087fe399a24e08D3Cab12f17e033C3](https://blockscout.lisk.com/address/0x3B2A3a6E8C087fe399a24e08D3Cab12f17e033C3)
-  - Current implementation: [0x53b6B5477193cCEdF9457F42a1591759cE75A095](https://blockscout.lisk.com/address/0x53b6B5477193cCEdF9457F42a1591759cE75A095)
-  - Oracle operator contract: [0x68d806F671dcBdaF0bB7f4E836EE2dFe30Ba131C](https://blockscout.lisk.com/address/0x68d806F671dcBdaF0bB7f4E836EE2dFe30Ba131C)
-  - UTU Coin (bridged from Ethereum): [0x398697b203cA909e05690B6684D56938964b07A0](https://blockscout.lisk.com/address/0x398697b203cA909e05690B6684D56938964b07A0)
 
   
 ## Test Nets
@@ -46,22 +36,11 @@ Additionally, we have `Lock` deployments from [Unlock Protocol](https://unlock-p
   - Current implementation: [0xC72b7A6146d3D53B614A4769A1A1459882ED4B1A](https://amoy.polygonscan.com/address/0xC72b7A6146d3D53B614A4769A1A1459882ED4B1A#code)
   - Oracle operator contract: [0x0880633c47A2cba76Ef082e2bCD2103Af14c68EE](https://amoy.polygonscan.com/address/0x0880633c47A2cba76Ef082e2bCD2103Af14c68EE)
   - UTU Coin (mock): [0xfD458e4fb718eFAAEf0e28597b9cF6D5C240E8f7](https://amoy.polygonscan.com/address/0xfD458e4fb718eFAAEf0e28597b9cF6D5C240E8f7)
-- UTT proxy contract on Aurora Testnet:
-  - Upgradable proxy: [0x2ac7F081f8eB51ce393bA298e4C020b0DeF420E1](https://explorer.testnet.aurora.dev/address/0x2ac7F081f8eB51ce393bA298e4C020b0DeF420E1/transactions#address-tabs)
-  - Current implementation: [0xd6A3423cCAB82efDC507EBefFEcEd576577d17E2](https://explorer.testnet.aurora.dev/address/0xd6A3423cCAB82efDC507EBefFEcEd576577d17E2)
-  - Oracle operator contract: [0xbeF02f42F30b1233977DF88986DbB4D27D9c5b09](https://explorer.testnet.aurora.dev/address/0xbeF02f42F30b1233977DF88986DbB4D27D9c5b09)
-  - UTU Coin (mock): [0xb0fc0bA00acDF415de3b66047E9CEE562C569bA1](https://explorer.testnet.aurora.dev/address/0xb0fc0bA00acDF415de3b66047E9CEE562C569bA1)
-    (this version is mocked, not bridged)
 - UTT proxy contract on Optimism Sepolia Testnet:
   - Upgradable proxy: [0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF](https://sepolia-optimistic.etherscan.io/address/0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF)
   - Current implementation: [0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d](https://sepolia-optimistic.etherscan.io/address/0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d)
   - Oracle operator contract: [0x6934c1F62a6d28a573E2b4071a754DDd29B81E54](https://sepolia-optimistic.etherscan.io/address/0x6934c1F62a6d28a573E2b4071a754DDd29B81E54)
   - UTU Coin (bridged from Ethereum Sepolia testnet): [tbd](tbd)
-- UTT proxy contract on LISK Sepolia Testnet:
-  - Upgradable proxy: [0x0125f1E709eC3dEA2aD8152826fD4b9496086B71](https://sepolia-blockscout.lisk.com/address/0x0125f1E709eC3dEA2aD8152826fD4b9496086B71)
-  - Current implementation: [0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF](https://sepolia-blockscout.lisk.com/address/0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF)
-  - Oracle operator contract: [0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d](https://sepolia-blockscout.lisk.com/address/0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d)
-  - UTU Coin (bridged from Ethereum Sepolia testnet): [0x4b82a31EBCD41fD4b98123cF141853aCD1166875](https://sepolia-blockscout.lisk.com/address/0x4b82a31EBCD41fD4b98123cF141853aCD1166875)
 - UTT contract on Base Testnet (Sepolia):
   - Upgradable proxy: [0x2b4F9c644b0C8010bB26Fc572001A156F9371C48](https://base-sepolia.blockscout.com/address/0x2b4F9c644b0C8010bB26Fc572001A156F9371C48)
   - Current implementation: [0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF](https://base-sepolia.blockscout.com/address/0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF)
@@ -332,7 +311,7 @@ export __PROXY_JOB_VALUE_UTT_PROXY_CLAIM_REWARD_EXTERNAL_JOB_ID="<32_char_hex_jo
 
 **Job ID Guidelines:**
 - Randomly generated 32-character hex strings (no hyphens), e.g. `30d3f168244f40788be35c05f6c5924f`; e.g. use a uuid v4 generator and remove hyphens.
-- Mainnet and testnet variants of the same proxy chain my share job ids, but job ids of different proxy chains must be different. E.g. Aurora mainnet job id for the endorse job migt be equal to the Aurora testnet job, but must be different from the Optimism mainnet job. 
+- Mainnet and testnet variants of the same proxy chain may share job ids, but job ids of different proxy chains must be different. E.g. Optimism mainnet job id for the endorse job might be equal to the Optimism testnet job, but must be different from the Base mainnet job.
 
 **Redeploy Oracle Node:**
 After adding the new chain configuration, rebuild and redeploy the Chainlink oracle node container to pick up the new jobs:
