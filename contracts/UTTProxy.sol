@@ -16,6 +16,12 @@ contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient, Endorse
     using Strings for uint256;
     using SafeERC20 for ERC20;
 
+    /**
+     * Action types forwarded to the main UTT contract via proxyAction().
+     * MUST match the ordinals of Endorsement.ActionType on the main contract.
+     */
+    enum ActionType { ENDORSE, DISAPPROVE, WITHDRAW_STAKE }
+
     /** UTU Coin contract address */
     address public UTUCoin;
 
@@ -44,7 +50,10 @@ contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient, Endorse
     /** Address of the Chainlink oracle operator contract */
     address public oracle;
 
-    /** Id for oracle jobs from this contract */
+    /**
+     * Legacy job id from the per-method era. Unused by this implementation; retained as a storage slot so the
+     * upgrade preserves layout for any deployment that previously had it set.
+     */
     bytes32 public jobId;
 
     /** LINK fee to be paid to the oracle operator contract for each request */
@@ -56,7 +65,17 @@ contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient, Endorse
     /** Id for oracle claim rewards jobs from this contract */
     bytes32 public claimRewardJobId;
 
+    /**
+     * Id for the unified proxy action oracle job. Handles endorse, disapprove, and withdrawStake by reading
+     * an "actionType" field from the request payload and dispatching to proxyAction() on the main UTT.
+     *
+     * Storage layout note: this slot was previously named `disapproveJobId` (introduced on this branch but
+     * never deployed). Renaming preserves the slot.
+     */
+    bytes32 public actionJobId;
+
     event ProxiedEndorseFulfilled(bytes32 indexed _requestId);
+    event ProxiedActionFulfilled(bytes32 indexed _requestId);
 
         /** Rewarded UTU Coin were claimed */
     event FulfillingClaimUTURewards(address indexed _by, uint _value);
@@ -102,42 +121,76 @@ contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient, Endorse
         claimRewardJobId = stringToBytes32(_claimRewardJobId);
     }
 
+    function setActionJobId(string memory _actionJobId) external onlyOwner {
+        actionJobId = stringToBytes32(_actionJobId);
+    }
+
     function endorse(
         address target,
         uint256 amount,
         string memory transactionId
     ) external override notMigrating {
+        _emitAction(msg.sender, target, amount, transactionId, ActionType.ENDORSE);
+    }
+
+    function disapprove(
+        address target,
+        uint256 amount,
+        string memory transactionId
+    ) external override notMigrating {
+        _emitAction(msg.sender, target, amount, transactionId, ActionType.DISAPPROVE);
+    }
+
+    function withdrawStake(
+        address target,
+        uint256 amount,
+        string memory transactionId
+    ) external override notMigrating {
+        _emitAction(msg.sender, target, amount, transactionId, ActionType.WITHDRAW_STAKE);
+    }
+
+    function _emitAction(
+        address source,
+        address target,
+        uint256 amount,
+        string memory transactionId,
+        ActionType actionType
+    ) private {
+        require(actionJobId != bytes32(0), "Action job ID not configured");
         Chainlink.Request memory request = buildChainlinkRequest(
-            jobId,
+            actionJobId,
             address(this),
-            this.fulfill.selector
+            this.fulfillAction.selector
         );
         request._add("targetAddress", addressToString(target));
-        request._add("sourceAddress", addressToString(msg.sender));
+        request._add("sourceAddress", addressToString(source));
         request._add("transactionId", transactionId);
         request._add("amount", amount.toString());
+        request._addUint("actionType", uint256(actionType));
 
         bytes32 requestId = sendOperatorRequestTo(oracle, request, fee);
         oracleRequests[requestId] = OracleRequest({
-            from: msg.sender,
+            from: source,
             target: target,
             amount: amount,
             transactionId: transactionId
         });
     }
 
-    function withdrawStake(
-        address,
-        uint256,
-        string memory
-    ) external pure override {
-        revert("UTTProxy: withdrawStake not supported");
-    }
-
+    /**
+     * Legacy fulfillment callback selector. Retained so any in-flight Chainlink request submitted with
+     * `this.fulfill.selector` before an upgrade can still be fulfilled without reverting.
+     */
     function fulfill(
         bytes32 _requestId
     ) external recordChainlinkFulfillment(_requestId) {
         emit ProxiedEndorseFulfilled(_requestId);
+    }
+
+    function fulfillAction(
+        bytes32 _requestId
+    ) external recordChainlinkFulfillment(_requestId) {
+        emit ProxiedActionFulfilled(_requestId);
     }
 
     /**
@@ -239,5 +292,5 @@ contract UTTProxy is Initializable, OwnableUpgradeable, ChainlinkClient, Endorse
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
-    uint256[48] __gap;
+    uint256[47] __gap;
 }

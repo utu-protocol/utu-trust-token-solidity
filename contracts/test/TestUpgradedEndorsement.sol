@@ -37,6 +37,12 @@ abstract contract TestUpgradedEndorsement is
     /** Discounting component for other previous endorsers' total stake (see whitepaper) */
     uint256 public D_o;
 
+    /** Penalty divisor for disapprovals (see whitepaper) */
+    uint256 public D_d;
+
+    /** Minimum disapproval fee in UTT (see whitepaper) */
+    uint256 public D_min;
+
     bytes32 public constant PROXY_ENDORSER_ROLE =
         keccak256("PROXY_ENDORSER_ROLE");
 
@@ -81,6 +87,9 @@ abstract contract TestUpgradedEndorsement is
 
     // Oracle related:
 
+    /** Action types for the oracle */
+    enum ActionType { ENDORSE, DISAPPROVE, WITHDRAW_STAKE }
+
     /**
      * Chainlinkg orcale request data structure
      */
@@ -89,6 +98,7 @@ abstract contract TestUpgradedEndorsement is
         address target;
         uint256 amount;
         string transactionId;
+        ActionType actionType;
     }
 
     /** Sent oracle requests by id  */
@@ -282,7 +292,8 @@ abstract contract TestUpgradedEndorsement is
             from: source,
             target: target,
             amount: amount,
-            transactionId: transactionId
+            transactionId: transactionId,
+            actionType: ActionType.ENDORSE
         });
     }
 
@@ -366,7 +377,7 @@ abstract contract TestUpgradedEndorsement is
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
     uint256 newTestUpgradedEndorsementVar;
-    uint256[48] private __gap;
+    uint256[46] private __gap;
 
     function incrementnewTestUpgradedEndorsementVar() public {
         newTestUpgradedEndorsementVar += 1;

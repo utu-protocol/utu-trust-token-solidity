@@ -25,12 +25,29 @@ interface EndorsementInterface {
     ) external;
 
     /**
-     * @notice Reduces or removes part of the caller's existing staked endorsement for a target.
-     *         A WithdrawStake event is emitted once the stake is withdrawn.
-     * @param target the endorsed entity (address is just used as an id here)
-     * @param amount the stake amount to withdraw
-     * @param transactionId an id representing the "business transaction" for which the stake withdrawal was made; this is
+     * @notice Creates a disapproval, where the caller disapproves of the target after having interacted with it.
+     *         Previous endorsers, retrieved from the UTU Trust API via an oracle, will be penalised according to the
+     *         penalty formula from the whitepaper.
+     *         Note that the disapproval might not be applied immediately, but only on the callback from an oracle call,
+     *         or after being forwarded to the main UTT contract if called on a proxy.
+     * @param target the disapproved entity (address is just used as an id here)
+     * @param amount the disapproval fee in UTT (burned); must be >= D_min
+     * @param transactionId an id representing the "business transaction" for which the disapproval was made; this is
      *        _not_ necessarily an Ethereum transaction id.
+     */
+    function disapprove(
+        address target,
+        uint256 amount,
+        string memory transactionId
+    ) external;
+
+    /**
+     * @notice Reduces the caller's existing stake on a previously endorsed target. UTT is re-minted back to the
+     *         caller. Per whitepaper, this is purely a balance adjustment: no oracle is consulted and previous
+     *         endorsers are not penalised.
+     * @param target the previously endorsed entity
+     * @param amount the amount of stake to withdraw; must be <= the caller's current stake on `target`
+     * @param transactionId business transaction id
      */
     function withdrawStake(
         address target,
@@ -48,11 +65,19 @@ interface EndorsementInterface {
         string _transactionId
     );
 
-    /** Existing staked endorsement was reduced or removed. */
+    /** A disapproval was created. */
+    event Disapprove(
+        address indexed _from,
+        address indexed _to,
+        uint _value,
+        string _transactionId
+    );
+
+    /** An endorser withdrew part or all of their stake on a target. */
     event WithdrawStake(
         address indexed _from,
         address indexed _to,
-        uint256 _value,
+        uint _value,
         string _transactionId
     );
 
@@ -61,4 +86,10 @@ interface EndorsementInterface {
 
     /** A second-level previous endorser was rewarded */
     event RewardPreviousEndorserLevel2(address endorser, uint256 reward);
+
+    /** A first-level previous endorser was penalised */
+    event PenalisePreviousEndorserLevel1(address endorser, uint256 penalty);
+
+    /** A second-level previous endorser was penalised */
+    event PenalisePreviousEndorserLevel2(address endorser, uint256 penalty);
 }

@@ -37,6 +37,12 @@ abstract contract Endorsement is
     /** Discounting component for other previous endorsers' total stake (see whitepaper) */
     uint256 public D_o;
 
+    /** Penalty divisor for disapprovals (see whitepaper) */
+    uint256 public D_d;
+
+    /** Minimum disapproval fee in UTT (see whitepaper) */
+    uint256 public D_min;
+
     bytes32 public constant PROXY_ENDORSER_ROLE =
         keccak256("PROXY_ENDORSER_ROLE");
 
@@ -68,6 +74,8 @@ abstract contract Endorsement is
         D_lvl1 = 2;
         D_lvl2 = 20;
         D_o = 5000;
+        D_d = 5;
+        D_min = 50;
     }
 
     // Keeping track of stakes on endorsements:
@@ -81,14 +89,18 @@ abstract contract Endorsement is
 
     // Oracle related:
 
+    /** Action types that may be requested via the oracle or directly. */
+    enum ActionType { ENDORSE, DISAPPROVE, WITHDRAW_STAKE }
+
     /**
-     * Chainlinkg orcale request data structure
+     * Chainlink oracle request data structure
      */
     struct OracleRequest {
         address from;
         address target;
         uint256 amount;
         string transactionId;
+        ActionType actionType;
     }
 
     /** Sent oracle requests by id  */
@@ -134,6 +146,17 @@ abstract contract Endorsement is
     /** Sets the LINK fee to be paid for each request */
     function setFee(uint256 _fee) public onlyOwner {
         fee = _fee;
+    }
+
+    /** Sets the D_d penalty divisor parameter */
+    function setD_d(uint256 val) public onlyOwner {
+        require(val > 0, "D_d must be > 0");
+        D_d = val;
+    }
+
+    /** Sets the D_min minimum disapproval fee parameter */
+    function setD_min(uint256 val) public onlyOwner {
+        D_min = val;
     }
 
     /**
@@ -229,9 +252,14 @@ abstract contract Endorsement is
     ) public override virtual {
         require(msg.sender == tx.origin, "should be a user");
 
-        _triggerEndorse(msg.sender, target, amount, transactionId);
+        _triggerOracleRequest(msg.sender, target, amount, transactionId, ActionType.ENDORSE);
     }
 
+    /**
+     * @dev Atomic stake withdrawal. Re-mints the freed UTT back to the endorser (since endorse() burned it).
+     *      No oracle round-trip and no penalty to previous endorsers — per whitepaper, withdrawing one's own
+     *      stake is purely a balance adjustment as long as the resulting stake remains >= 0.
+     */
     function _withdrawStake(
         address source,
         address target,
@@ -269,13 +297,45 @@ abstract contract Endorsement is
     }
 
     /**
-     * @dev This is called via oracle to forward an endorse call from a proxy contract. The caller must have the
-     *      PROXY_ENDORSER_ROLE.
-     * @param source the endorser's address
-     * @param target the endorsed entity (address is just used as an id here)
-     * @param amount the stake for the new endorsement
-     * @param transactionId an id representing the "business transaction" for which the endorsement was made; this is
-     *        _not_ necessarily an Ethereum transaction id.
+     * @inheritdoc EndorsementInterface
+     */
+    function disapprove(
+        address target,
+        uint256 amount,
+        string memory transactionId
+    ) public override virtual {
+        require(msg.sender == tx.origin, "should be a user");
+        require(amount >= D_min, "UTT: disapproval amount below minimum");
+
+        _triggerOracleRequest(msg.sender, target, amount, transactionId, ActionType.DISAPPROVE);
+    }
+
+    /**
+     * @dev Unified proxy entry point for all action types forwarded from a UTTProxy on another chain.
+     *      ENDORSE and DISAPPROVE trigger an oracle round-trip to fetch previous endorsers;
+     *      WITHDRAW_STAKE is atomic and does not touch the oracle.
+     */
+    function proxyAction(
+        address source,
+        address target,
+        uint256 amount,
+        string memory transactionId,
+        ActionType actionType
+    ) public virtual onlyRole(PROXY_ENDORSER_ROLE) {
+        if (actionType == ActionType.WITHDRAW_STAKE) {
+            _withdrawStake(source, target, amount, transactionId);
+        } else {
+            if (actionType == ActionType.DISAPPROVE) {
+                require(amount >= D_min, "UTT: disapproval amount below minimum");
+            }
+            _triggerOracleRequest(source, target, amount, transactionId, actionType);
+        }
+    }
+
+    /**
+     * @dev Backwards-compatible shim for legacy UTTProxy deployments that emit OracleRequest events keyed by an
+     *      endorse-only job id. New proxies should call proxyAction(..., ActionType.ENDORSE) instead. This shim can
+     *      be removed once all proxy deployments have been upgraded.
      */
     function proxyEndorse(
         address source,
@@ -283,23 +343,18 @@ abstract contract Endorsement is
         uint256 amount,
         string memory transactionId
     ) public virtual onlyRole(PROXY_ENDORSER_ROLE) {
-        _triggerEndorse(source, target, amount, transactionId);
+        _triggerOracleRequest(source, target, amount, transactionId, ActionType.ENDORSE);
     }
 
     /**
-     * @dev This creates an oracle request to retrieve previous endorsers to be rewarded. The actual endorsement,
-     *      staking and rewarding is done on its fulfillment.
-     * @param source the endorser's address
-     * @param target the endorsed entity (address is just used as an id here)
-     * @param amount the stake for the new endorsement
-     * @param transactionId an id representing the "business transaction" for which the endorsement was made; this is
-     *        _not_ necessarily an Ethereum transaction id.
+     * @dev Creates an oracle request to retrieve previous endorsers. Used by endorse and disapprove flows.
      */
-    function _triggerEndorse(
+    function _triggerOracleRequest(
         address source,
         address target,
         uint256 amount,
-        string memory transactionId
+        string memory transactionId,
+        ActionType actionType
     ) private {
         uint256 fromBalance = balanceOf(source);
         require(fromBalance >= amount, "UTT: endorse amount exceeds balance");
@@ -307,7 +362,7 @@ abstract contract Endorsement is
         Chainlink.Request memory request = buildChainlinkRequest(
             jobId,
             address(this),
-            this.fulfillEndorse.selector
+            this.fulfillPreviousEndorsers.selector
         );
         request._add("targetAddress", addressToString(target));
         request._add("sourceAddress", addressToString(source));
@@ -318,16 +373,50 @@ abstract contract Endorsement is
             from: source,
             target: target,
             amount: amount,
-            transactionId: transactionId
+            transactionId: transactionId,
+            actionType: actionType
         });
     }
 
     /**
      * @dev Called back from the oracle operator contract when the oracle request was fulfilled, with the retrieved
-     *      values.
+     *      previous endorser addresses. Routes to _endorse() or _disapprove() based on the request type.
      * @param _requestId oracle request id as it was stored in oracleRequests
      * @param endorsersLevel1 list of first-level previous endorser addresses
      * @param endorsersLevel2 list of second-level previous endorser addresses
+     */
+    function fulfillPreviousEndorsers(
+        bytes32 _requestId,
+        address[] calldata endorsersLevel1,
+        address[] calldata endorsersLevel2
+    ) external recordChainlinkFulfillment(_requestId) {
+        OracleRequest memory r = oracleRequests[_requestId];
+        require(r.target != address(0), "unknown request");
+        _burn(r.from, r.amount);
+
+        if (r.actionType == ActionType.ENDORSE) {
+            _endorse(
+                r.from,
+                r.target,
+                r.amount,
+                r.transactionId,
+                endorsersLevel1,
+                endorsersLevel2
+            );
+        } else {
+            _disapprove(
+                r.from,
+                r.target,
+                r.amount,
+                r.transactionId,
+                endorsersLevel1,
+                endorsersLevel2
+            );
+        }
+    }
+
+    /**
+     * @dev Kept for backwards compatibility with existing oracle jobs that call fulfillEndorse.
      */
     function fulfillEndorse(
         bytes32 _requestId,
@@ -345,6 +434,70 @@ abstract contract Endorsement is
             endorsersLevel1,
             endorsersLevel2
         );
+    }
+
+    /**
+     * @dev Applies penalties to previous endorsers after a disapproval. The penalty for each previous endorser is
+     *      computed as computeReward() / D_d, and is deducted from their recorded stake. This reduces their future
+     *      endorsement rewards.
+     * @param from the disapprover's address
+     * @param target the disapproved entity
+     * @param amount the disapproval fee (already burned)
+     * @param transactionId business transaction id
+     * @param endorsersLevel1 list of first-level previous endorser addresses
+     * @param endorsersLevel2 list of second-level previous endorser addresses
+     */
+    function _disapprove(
+        address from,
+        address target,
+        uint256 amount,
+        string memory transactionId,
+        address[] memory endorsersLevel1,
+        address[] memory endorsersLevel2
+    ) internal {
+        // Penalise first-level previous endorsers
+        for (uint8 i = 0; i < endorsersLevel1.length; i++) {
+            uint256 equivalentReward = computeReward(
+                target,
+                endorsersLevel1[i],
+                D_lvl1,
+                amount
+            );
+            uint256 penalty = equivalentReward / D_d;
+            uint256 currentStake = previousEndorserStakes[target][endorsersLevel1[i]];
+            uint256 actualPenalty = penalty > currentStake ? currentStake : penalty;
+
+            previousEndorserStakes[target][endorsersLevel1[i]] -= actualPenalty;
+            totalStake[target] -= actualPenalty;
+
+            emit PenalisePreviousEndorserLevel1(
+                endorsersLevel1[i],
+                actualPenalty
+            );
+        }
+
+        // Penalise second-level previous endorsers
+        for (uint8 i = 0; i < endorsersLevel2.length; i++) {
+            uint256 equivalentReward = computeReward(
+                target,
+                endorsersLevel2[i],
+                D_lvl2,
+                amount
+            );
+            uint256 penalty = equivalentReward / D_d;
+            uint256 currentStake = previousEndorserStakes[target][endorsersLevel2[i]];
+            uint256 actualPenalty = penalty > currentStake ? currentStake : penalty;
+
+            previousEndorserStakes[target][endorsersLevel2[i]] -= actualPenalty;
+            totalStake[target] -= actualPenalty;
+
+            emit PenalisePreviousEndorserLevel2(
+                endorsersLevel2[i],
+                actualPenalty
+            );
+        }
+
+        emit Disapprove(from, target, amount, transactionId);
     }
 
     /**
@@ -401,5 +554,5 @@ abstract contract Endorsement is
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
-    uint256[49] private __gap;
+    uint256[47] private __gap;
 }

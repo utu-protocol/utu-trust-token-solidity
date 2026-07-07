@@ -1,0 +1,37 @@
+type                = "directrequest"
+schemaVersion       = 1
+
+# Unified proxy action job: forwards endorse, disapprove, and withdrawStake calls
+# from UTTProxy on this chain to proxyAction() on the main UTT contract. The
+# specific action is read from the request payload's `actionType` field
+# (0=ENDORSE, 1=DISAPPROVE, 2=WITHDRAW_STAKE).
+name                = "UTT Proxy Action ${__PROXY_JOB_VALUE_NETWORK}"
+
+evmChainID          = "${__PROXY_JOB_VALUE_PROXY_NETWORK_ID}"
+contractAddress     = "${__PROXY_JOB_VALUE_PROXY_ORACLE_OPERATOR_ADDRESS}"
+
+externalJobID       = "${__PROXY_JOB_VALUE_UTT_PROXY_ACTION_EXTERNAL_JOB_ID}"
+
+observationSource   = """
+  decode_log   [type="ethabidecodelog"
+                abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+                data="$(jobRun.logData)"
+                topics="$(jobRun.logTopics)"]
+
+  decode_cbor  [type="cborparse" data="$(decode_log.data)"]
+
+  # Surface the action type in the run graph for at-a-glance visibility in the
+  # Chainlink dashboard. Per-run inspection shows this memo alongside the
+  # other decoded fields.
+  action_label [type="memo" value="actionType=$(decode_cbor.actionType)"]
+
+  action_tx  [type="ethabiencode" abi="proxyAction(address source, address target, uint256 amount, string transactionId, uint8 actionType)" data="{\\"source\\": $(decode_cbor.sourceAddress), \\"target\\": $(decode_cbor.targetAddress), \\"amount\\": $(decode_cbor.amount), \\"transactionId\\": $(decode_cbor.transactionId), \\"actionType\\": $(decode_cbor.actionType) }"]
+
+  submit_action_tx [type="ethtx"
+      evmChainID="${UTT_NETWORK_ID}"
+      to="${UTT_MAIN_CONTRACT_ADDRESS}"
+      data="$(action_tx)" minConfirmations="1" failOnRevert="true"]
+
+  decode_log -> decode_cbor -> action_label
+  decode_cbor -> action_tx -> submit_action_tx
+"""

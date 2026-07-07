@@ -24,3 +24,10 @@ env.toml
 
 
 
+
+# Dolt database files (added by bd init)
+.dolt/
+*.db
+
+# beads issue tracker — kept local; synced to a separate private Dolt remote, not this shared repo
+.beads/

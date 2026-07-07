@@ -117,7 +117,7 @@ export async function deployUTTUnmigrated() {
   return deployUTT(false);
 }
 
-async function fulfillEndorse(
+async function fulfillPreviousEndorsers(
   tx: ContractTransaction,
   mockOperator: Contract,
   endorsersLevel1: string[],
@@ -135,6 +135,9 @@ async function fulfillEndorse(
   const fulfillParams = convertFufillParams(request, data);
   return mockOperator.fulfillOracleRequest2(...fulfillParams);
 }
+
+// Keep backwards-compatible alias
+const fulfillEndorse = fulfillPreviousEndorsers;
 export async function endorse(
   utt: Contract,
   mockOperator: Contract,
@@ -164,6 +167,59 @@ export async function proxyEndorse(
     .connect(proxySender)
     .proxyEndorse(sender, target, amount, transactionId);
   return fulfillEndorse(tx, mockOperator, endorsersLevel1, endorsersLevel2);
+}
+
+export async function disapprove(
+  utt: Contract,
+  mockOperator: Contract,
+  sender: Signer,
+  target: string,
+  amount: number,
+  transactionId: string,
+  endorsersLevel1: string[],
+  endorsersLevel2: string[]
+) {
+  const tx = await utt.connect(sender).disapprove(target, amount, transactionId);
+  return fulfillPreviousEndorsers(tx, mockOperator, endorsersLevel1, endorsersLevel2);
+}
+
+// Must match Endorsement.ActionType ordinals.
+export const ActionType = {
+  ENDORSE: 0,
+  DISAPPROVE: 1,
+  WITHDRAW_STAKE: 2,
+} as const;
+
+export async function proxyAction(
+  utt: Contract,
+  proxySender: Signer,
+  mockOperator: Contract,
+  sender: string,
+  target: string,
+  amount: number,
+  transactionId: string,
+  actionType: number,
+  endorsersLevel1: string[],
+  endorsersLevel2: string[]
+) {
+  const tx = await utt
+    .connect(proxySender)
+    .proxyAction(sender, target, amount, transactionId, actionType);
+  if (actionType === ActionType.WITHDRAW_STAKE) {
+    // WITHDRAW_STAKE is atomic on main and does not trigger an oracle round-trip.
+    return tx;
+  }
+  return fulfillPreviousEndorsers(tx, mockOperator, endorsersLevel1, endorsersLevel2);
+}
+
+export async function withdrawStake(
+  utt: Contract,
+  sender: Signer,
+  target: string,
+  amount: number,
+  transactionId: string
+) {
+  return utt.connect(sender).withdrawStake(target, amount, transactionId);
 }
 
 export async function addConnection(

@@ -1,5 +1,13 @@
 # Implement Stake Withdrawal
 
+> **Note (superseded):** This document is the original task brief for the same-chain
+> stake-withdrawal implementation, which deliberately scoped cross-chain proxy support
+> *out*. That follow-up has since been completed on the `33-implement-disapprove-method`
+> branch: `withdrawStake(...)` is part of `EndorsementInterface`, `UTTProxy.withdrawStake(...)`
+> forwards through the unified `proxyAction` entry point (`ActionType.WITHDRAW_STAKE`), and
+> there is no separate `proxyWithdrawStake`. The "out of scope" / "do not modify `UTTProxy`" /
+> "do not edit `EndorsementInterface`" instructions below therefore no longer apply.
+
 ## Overview
 
 Implement stake withdrawal for the canonical UTT implementation.
