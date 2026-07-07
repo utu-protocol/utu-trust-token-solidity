@@ -127,16 +127,6 @@ const config = {
           : [],
       chainId: 80002,
     },
-    aurora: {
-      url: process.env.AURORA_URL || "https://mainnet.aurora.dev",
-      accounts: [process.env.MAIN_PRIVATE_KEY ?? ""],
-      chainId: 1313161554,
-    },
-    testnet_aurora: {
-      url: process.env.TESTNET_AURORA_URL || "https://testnet.aurora.dev",
-      accounts: [process.env.TEST_PRIVATE_KEY ?? ""],
-      chainId: 1313161555,
-    },
     optimism: {
       url: process.env.OPTIMISM_URL,
       accounts: [process.env.MAIN_PRIVATE_KEY ?? ""],
@@ -144,15 +134,6 @@ const config = {
     testnet_optimism: {
       url: process.env.TESTNET_OPTIMISM_URL,
       accounts: [process.env.TEST_PRIVATE_KEY ?? ""],
-    },
-    lisk: { 
-      url: process.env.LISK_URL,
-      accounts: [process.env.MAIN_PRIVATE_KEY ?? ""],
-    },
-    testnet_lisk: { 
-      url: process.env.TESTNET_LISK_URL,
-      accounts: [process.env.TEST_PRIVATE_KEY ?? ""],
-      // gasPrice: 1000000000, // Is this necessary? (copied from https://akanimorex.hashnode.dev/mastering-lisk-a-step-by-step-guide-to-deploying-your-smart-contract-cm04gf1bt000009lf2loi3l56#heading-configuring-your-hardhat-with-lisk)
     },
     base: { 
       url: process.env.BASE_URL,
@@ -190,12 +171,8 @@ const config = {
       testnet_ethereum: process.env.ETHERSCAN_API_KEY,
       polygon: process.env.POLYGONSCAN_API_KEY,
       testnet_polygon: process.env.POLYGONSCAN_API_KEY,
-      aurora: process.env.AURORA_ETHERSCAN_API_KEY,
-      testnet_aurora: process.env.AURORA_ETHERSCAN_API_KEY,
       optimism: process.env.OPTIMISM_ETHERSCAN_API_KEY,
       testnet_optimism: process.env.OPTIMISM_ETHERSCAN_API_KEY,
-      lisk: null, // lisk's blockscout currently doesn't require one
-      testnet_lisk: null, // lisk's blockscout currently doesn't require one
       base: null,
       testnet_base: null
     },
@@ -209,22 +186,6 @@ const config = {
         },
       },
       {
-        network: "aurora",
-        chainId: 1313161554,
-        urls: {
-          apiURL: "https://explorer.mainnet.aurora.dev/api",
-          browserURL: "https://explorer.mainnet.aurora.dev",
-        },
-      },
-      {
-        network: "testnet_aurora",
-        chainId: 1313161555,
-        urls: {
-          apiURL: "https://explorer.testnet.aurora.dev/api",
-          browserURL: "https://explorer.testnet.aurora.dev",
-        },
-      },
-      {
         network: "testnet_optimism",
         chainId: 11155420,
         urls: {
@@ -232,23 +193,6 @@ const config = {
           browserURL: "https://api-sepolia-optimistic.etherscan.io",
         },
       },
-      {
-        network: "lisk",
-        chainId: 1135,
-        urls: {
-          apiURL: "https://blockscout.lisk.com/api",
-          browserURL: "https://blockscout.lisk.com"
-        }
-      },      
-      {
-        network: "testnet_lisk",
-        chainId: 4202,
-        urls: {
-          apiURL: "https://sepolia-blockscout.lisk.com/api",
-          browserURL: "https://sepolia-blockscout.lisk.com"
-        }
-      },
-      ,
       {
         network: "base",
         chainId: 8453,
