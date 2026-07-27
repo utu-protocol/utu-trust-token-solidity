@@ -207,8 +207,9 @@ on the main side.
   have been three per network.
 - **Per-network value files** gained a
   `__PROXY_JOB_VALUE_UTT_PROXY_ACTION_EXTERNAL_JOB_ID` export. Real job UUIDs
-  are minted for Base and Optimism (both Sepolia-testnet and mainnet-Polygon
-  variants); Aurora and Lisk are left empty pending job creation there.
+  are minted for Base and Optimism (both testnet and mainnet variants).
+  Aurora and Lisk are intentionally excluded because support for those
+  networks has been removed.
 - **Dockerfile**: works around a broken PostgreSQL apt repository in the
   `smartcontract/chainlink:2.12.0` base image so `gettext` (for `envsubst`)
   still installs; also cleans apt lists. `docker-compose.yml` moves postgres
@@ -309,9 +310,8 @@ drive the fulfillment callbacks:
   level), but the loop counters are `uint8`, capping each endorser list at 255
   entries — same pattern as the existing `_endorse`, so consistent, but a
   shared constraint to keep in mind for the API side.
-- Two networks (Aurora, Lisk) still have empty
-  `UTT_PROXY_ACTION_EXTERNAL_JOB_ID` values; those jobs need minting before
-  the unified flow can be enabled there.
+- Aurora and Lisk are intentionally excluded from the unified proxy rollout
+  because support for those networks has been removed.
 - `UTTProxy.withdrawStake` costs the user LINK-funded oracle latency even
   though the main-chain operation is atomic; that is inherent to the
   cross-chain design (state lives on the main chain) rather than a defect.

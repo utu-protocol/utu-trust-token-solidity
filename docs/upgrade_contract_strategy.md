@@ -277,8 +277,8 @@ deployment to this branch's code requires these follow-up transactions:
       `chainlink-node/jobs/network-specific/utt-proxy-action.toml.template`,
       with the network's values file providing
       `__PROXY_JOB_VALUE_UTT_PROXY_ACTION_EXTERNAL_JOB_ID`. Job ids are
-      already minted for Base and Optimism; Aurora and Lisk still have empty
-      values and need ids minted before enabling the flow there.
+      already minted for Base and Optimism. Aurora and Lisk are intentionally
+      excluded because support for those networks has been removed.
 - [ ] Keep the old `utt-proxy-endorse` job running during the transition so
       legacy proxies and in-flight requests complete; retire it once all
       proxies are upgraded and configured.
