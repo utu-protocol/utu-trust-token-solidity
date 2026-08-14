@@ -111,6 +111,8 @@ const config = {
         process.env.TEST_PRIVATE_KEY !== undefined
           ? [process.env.TEST_PRIVATE_KEY]
           : [],
+      chainId: 11155111,
+      gas: 3000000,
     },
     polygon: {
       url: process.env.POLYGON_URL || "",
