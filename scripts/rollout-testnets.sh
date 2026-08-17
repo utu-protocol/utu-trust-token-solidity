@@ -131,6 +131,8 @@ if [[ "${execute}" == "true" && "${git_dirty}" == "true" && "${allow_dirty}" != 
 fi
 
 if [[ "${execute}" == "true" && "${phase}" != "preflight" ]]; then
+  printf '%s\n' 'Operational prerequisite: stop new canonical and proxy action submissions, then allow known Chainlink requests to finish before continuing.'
+  printf '%s\n' 'Pausing canonical UTT protects token state changes but does not prevent new oracle requests.'
   confirmation="${ROLLOUT_CONFIRMATION:-}"
   if [[ -t 0 ]]; then
     printf 'Type UPGRADE UTU TESTNETS to authorize testnet transactions: '

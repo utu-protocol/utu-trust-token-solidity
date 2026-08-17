@@ -31,7 +31,7 @@ Before execution:
 2. Review and commit the exact source revision to deploy.
 3. Confirm with DevOps that the unified action jobs for Base Sepolia and Optimism Sepolia are running.
 4. Obtain every Ethereum Sepolia destination wallet used by those jobs and set `TESTNET_CHAINLINK_NODE_ADDRESSES`.
-5. Coordinate a short testnet maintenance window and allow known in-flight requests to finish.
+5. Stop new canonical and proxy action submissions, then allow known Chainlink requests to finish before starting the rollout. Keep submissions stopped until all upgrades and configuration checks pass. Pausing canonical UTT protects token state changes, but does not prevent users from creating new oracle requests.
 6. Fund owner and ProxyAdmin wallets with the relevant testnet native tokens.
 7. Before E2E testing or proxy use, fund both UTTProxy contracts with enough test LINK for at least three requests.
 8. Before E2E testing, fund canonical Ethereum Sepolia UTT with LINK and give the E2E account sufficient UTT.
@@ -106,6 +106,8 @@ If a proxy upgrade fails after enabling migration mode, it deliberately leaves t
 export ROLLOUT_RESUME_MIGRATING=true
 npm run rollout:testnets -- --phase proxies --execute
 ```
+
+An implementation deployment can update a tracked `.openzeppelin/*.json` manifest before a later rollout step fails. Before resuming, inspect `git diff -- .openzeppelin`, review the recorded implementation address, and commit legitimate manifest changes so the clean-worktree guard can pass. Use `--allow-dirty` only after deliberately reviewing the exact diff.
 
 Do not unpause or disable migration merely to make the script continue. Resolve the reported failed invariant first.
 

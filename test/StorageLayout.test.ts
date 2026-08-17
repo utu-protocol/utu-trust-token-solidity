@@ -1,8 +1,10 @@
 import fs from "node:fs";
 
 import { expect } from "chai";
-import { assertStorageUpgradeSafe } from "@openzeppelin/upgrades-core/dist/storage";
-import type { StorageLayout } from "@openzeppelin/upgrades-core/dist/storage/layout";
+import {
+  assertStorageUpgradeSafe,
+  type StorageLayout,
+} from "@openzeppelin/upgrades-core";
 import { artifacts } from "hardhat";
 
 describe("Deployed UTT storage compatibility", function () {
