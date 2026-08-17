@@ -113,6 +113,7 @@ const config = {
     testnet_ethereum: {
       url: process.env.TESTNET_ETHEREUM_URL || "",
       accounts: configuredAccounts("TEST_PRIVATE_KEY"),
+      chainId: 11155111,
     },
     polygon: {
       url: process.env.POLYGON_URL || "",
