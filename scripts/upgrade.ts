@@ -13,19 +13,41 @@ async function upgradeUTT() {
   // manually to make sure everything is compiled
   // await hre.run('compile');
 
-  // We get the contract to deploy
+  const upgradeArgs = require(`./upgrade.args.${network.name}`);
+  const contractAddress = upgradeArgs[0];
+  if (
+    typeof contractAddress !== "string" ||
+    !ethers.isAddress(contractAddress) ||
+    contractAddress === ethers.ZeroAddress
+  ) {
+    throw new Error(
+      `Missing or invalid UTT proxy address in scripts/upgrade.args.${network.name}.js`
+    );
+  }
+
+  const previousImplementationAddress =
+    await upgrades.erc1967.getImplementationAddress(contractAddress);
   const UTT = await ethers.getContractFactory("UTT");
-  const updagradeArgs = require(`./upgrade.args.${network.name}`);
-  const contractAddress = updagradeArgs[0];
+  await upgrades.validateUpgrade(contractAddress, UTT);
   const utt = await upgrades.upgradeProxy(contractAddress, UTT);
 
-  await utt.waitForDeployment();
+  const upgradeTransaction = utt.deploymentTransaction();
+  if (upgradeTransaction === null) {
+    throw new Error("OpenZeppelin did not return the UTT upgrade transaction");
+  }
+  const receipt = await upgradeTransaction.wait();
+  if (receipt === null || receipt.status !== 1) {
+    throw new Error(`UTT upgrade transaction failed: ${upgradeTransaction.hash}`);
+  }
+
   const uttAddress = await utt.getAddress();
   const implementationAddress =
     await upgrades.erc1967.getImplementationAddress(uttAddress);
 
   console.log("UTT upgraded to:", uttAddress);
+  console.log("Previous implementation:", previousImplementationAddress);
   console.log("Implementation at:", implementationAddress);
+  console.log("Upgrade transaction:", upgradeTransaction.hash);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
