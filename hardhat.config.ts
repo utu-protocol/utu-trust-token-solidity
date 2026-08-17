@@ -24,6 +24,11 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   }
 });
 
+function configuredAccounts(environmentVariable: string): string[] {
+  const privateKey = process.env[environmentVariable]?.trim();
+  return privateKey ? [privateKey] : [];
+}
+
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 
@@ -107,55 +112,40 @@ const config = {
   networks: {
     testnet_ethereum: {
       url: process.env.TESTNET_ETHEREUM_URL || "",
-      accounts:
-        process.env.TEST_PRIVATE_KEY !== undefined
-          ? [process.env.TEST_PRIVATE_KEY]
-          : [],
+      accounts: configuredAccounts("TEST_PRIVATE_KEY"),
     },
     polygon: {
       url: process.env.POLYGON_URL || "",
-      accounts:
-        process.env.MAIN_PRIVATE_KEY !== undefined
-          ? [process.env.MAIN_PRIVATE_KEY]
-          : [],
+      accounts: configuredAccounts("MAIN_PRIVATE_KEY"),
     },
     testnet_polygon: {
       url: process.env.TESTNET_POLYGON_URL || "",
-      accounts:
-        process.env.TEST_PRIVATE_KEY !== undefined
-          ? [process.env.TEST_PRIVATE_KEY]
-          : [],
+      accounts: configuredAccounts("TEST_PRIVATE_KEY"),
       chainId: 80002,
     },
     optimism: {
       url: process.env.OPTIMISM_URL,
-      accounts: [process.env.MAIN_PRIVATE_KEY ?? ""],
+      accounts: configuredAccounts("MAIN_PRIVATE_KEY"),
     },
     testnet_optimism: {
       url: process.env.TESTNET_OPTIMISM_URL,
-      accounts: [process.env.TEST_PRIVATE_KEY ?? ""],
+      accounts: configuredAccounts("TEST_PRIVATE_KEY"),
     },
     base: { 
       url: process.env.BASE_URL,
-      accounts: [process.env.MAIN_PRIVATE_KEY ?? ""],
+      accounts: configuredAccounts("MAIN_PRIVATE_KEY"),
     },
     testnet_base: { 
       url: process.env.TESTNET_BASE_URL,
-      accounts: [process.env.TEST_PRIVATE_KEY ?? ""],
+      accounts: configuredAccounts("TEST_PRIVATE_KEY"),
     },
     ropsten: {
       url: process.env.ROPSTEN_URL || "",
-      accounts:
-        process.env.TEST_PRIVATE_KEY !== undefined
-          ? [process.env.TEST_PRIVATE_KEY]
-          : [],
+      accounts: configuredAccounts("TEST_PRIVATE_KEY"),
     },
     ganache: {
       url: process.env.GANACHE_URL || "http://127.0.0.1:7545",
-      accounts:
-        process.env.TEST_PRIVATE_KEY !== undefined
-          ? [process.env.TEST_PRIVATE_KEY]
-          : [],
+      accounts: configuredAccounts("TEST_PRIVATE_KEY"),
     },
   },
   gasReporter: {

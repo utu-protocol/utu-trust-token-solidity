@@ -1,4 +1,4 @@
 
 module.exports = [
-  "0xb0897686c545045afc77cf20ec7a532e3120e0f1", // UTT token address
+  "0xE62dc4c82a9749Bf2E40F73138B3CFee0a2EC89F", // canonical Polygon UTT proxy
 ];
