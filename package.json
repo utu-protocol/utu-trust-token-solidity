@@ -16,6 +16,7 @@
     "upgrade": "npx hardhat run scripts/upgrade.ts",
     "verify": "npx hardhat verify",
     "test": "npx hardhat test",
+    "rollout:testnets": "bash scripts/rollout-testnets.sh",
     "generate-upgraded-test-contracts": "ts-node scripts/generate-upgraded-test-contracts.ts"
   },
   "devDependencies": {
