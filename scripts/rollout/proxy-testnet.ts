@@ -4,6 +4,7 @@ import {
   assertAddressEquals,
   assertHasCode,
   getProxyAdminOwner,
+  getUpgradeTransaction,
   isExecutionEnabled,
   optionalWalletFromEnv,
   phaseIncludesE2e,
@@ -277,12 +278,7 @@ async function main(): Promise<void> {
         config.proxyAddress,
         upgradeFactory
       );
-      const upgradeTransaction = upgraded.deploymentTransaction();
-      if (upgradeTransaction === null) {
-        throw new Error(
-          `OpenZeppelin did not return the ${network.name} upgrade transaction`
-        );
-      }
+      const upgradeTransaction = getUpgradeTransaction(upgraded, network.name);
       transactions.upgrade = await waitForSuccessfulTransaction(
         upgradeTransaction,
         `Upgrade ${network.name} UTTProxy`

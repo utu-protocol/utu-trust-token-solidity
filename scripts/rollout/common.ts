@@ -24,6 +24,11 @@ export interface TransactionRecord {
   gasUsed: string;
 }
 
+interface UpgradeTransactionCarrier {
+  deploymentTransaction?: () => TransactionResponse | null;
+  deployTransaction?: TransactionResponse;
+}
+
 type JsonObject = Record<string, unknown>;
 
 const TRUE_VALUES = new Set(["1", "true", "yes"]);
@@ -186,6 +191,19 @@ export function getConfirmations(): number {
     throw new Error("ROLLOUT_CONFIRMATIONS must be a positive integer");
   }
   return confirmations;
+}
+
+export function getUpgradeTransaction(
+  upgradedContract: UpgradeTransactionCarrier,
+  label: string
+): TransactionResponse {
+  const transaction =
+    upgradedContract.deploymentTransaction?.() ??
+    upgradedContract.deployTransaction;
+  if (transaction === undefined || transaction === null) {
+    throw new Error(`OpenZeppelin did not return the ${label} upgrade transaction`);
+  }
+  return transaction;
 }
 
 export function parsePositiveIntegerEnv(name: string, defaultValue?: bigint): bigint {

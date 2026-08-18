@@ -3,6 +3,8 @@
 //
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
+import { getUpgradeTransaction } from "./rollout/common";
+
 const { ethers, network, upgrades } = require("hardhat");
 
 async function upgradeUTTProxy() {
@@ -32,10 +34,7 @@ async function upgradeUTTProxy() {
   await upgrades.validateUpgrade(contractAddress, UTTProxy);
   const uttProxy = await upgrades.upgradeProxy(contractAddress, UTTProxy);
 
-  const upgradeTransaction = uttProxy.deploymentTransaction();
-  if (upgradeTransaction === null) {
-    throw new Error("OpenZeppelin did not return the UTTProxy upgrade transaction");
-  }
+  const upgradeTransaction = getUpgradeTransaction(uttProxy, "UTTProxy");
   const receipt = await upgradeTransaction.wait();
   if (receipt === null || receipt.status !== 1) {
     throw new Error(

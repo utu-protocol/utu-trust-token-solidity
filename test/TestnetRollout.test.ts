@@ -3,10 +3,12 @@ import os from "node:os";
 import path from "node:path";
 
 import { expect } from "chai";
-import { getAddress } from "ethers";
+import { getAddress, type TransactionResponse } from "ethers";
+import { ethers, upgrades } from "hardhat";
 
 import {
   deepMerge,
+  getUpgradeTransaction,
   phaseIncludesE2e,
   readBooleanEnv,
   updateRolloutReport,
@@ -17,6 +19,7 @@ import {
   CANONICAL_TESTNET,
   PROXY_TESTNETS,
 } from "../scripts/rollout/testnet-config";
+import { deployUTT } from "./UTT.fixture";
 
 describe("testnet rollout configuration", function () {
   it("should pin the intended canonical and proxy networks", function () {
@@ -140,5 +143,46 @@ describe("testnet rollout configuration", function () {
     expect(phaseIncludesE2e("proxies")).to.equal(false);
     expect(phaseIncludesE2e("e2e")).to.equal(true);
     expect(phaseIncludesE2e("all")).to.equal(true);
+  });
+
+  it("should read upgrade transactions from supported OpenZeppelin shapes", function () {
+    const modernTransaction = { hash: "0x01" } as TransactionResponse;
+    const legacyTransaction = { hash: "0x02" } as TransactionResponse;
+
+    expect(
+      getUpgradeTransaction(
+        { deploymentTransaction: () => modernTransaction },
+        "modern"
+      )
+    ).to.equal(modernTransaction);
+    expect(
+      getUpgradeTransaction(
+        {
+          deploymentTransaction: () => null,
+          deployTransaction: legacyTransaction,
+        },
+        "legacy"
+      )
+    ).to.equal(legacyTransaction);
+    expect(() =>
+      getUpgradeTransaction({ deploymentTransaction: () => null }, "missing")
+    ).to.throw("OpenZeppelin did not return the missing upgrade transaction");
+  });
+
+  it("should read the transaction returned by the installed upgrades plugin", async function () {
+    const deployment = await deployUTT();
+    if (deployment === undefined) {
+      throw new Error("UTT test deployment failed");
+    }
+    const upgradedFactory = await ethers.getContractFactory("TestUpgradedUTT");
+    const upgraded = await upgrades.upgradeProxy(
+      deployment.uttAddress,
+      upgradedFactory
+    );
+
+    const transaction = getUpgradeTransaction(upgraded, "test UTT");
+    expect(transaction.hash).to.match(/^0x[0-9a-f]{64}$/);
+    const receipt = await transaction.wait();
+    expect(receipt?.status).to.equal(1);
   });
 });
