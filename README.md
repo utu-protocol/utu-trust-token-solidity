@@ -42,10 +42,10 @@ Additionally, we have `Lock` deployments from [Unlock Protocol](https://unlock-p
   - Oracle operator contract: [0x6934c1F62a6d28a573E2b4071a754DDd29B81E54](https://sepolia-optimistic.etherscan.io/address/0x6934c1F62a6d28a573E2b4071a754DDd29B81E54)
   - UTU Coin (bridged from Ethereum Sepolia testnet): [tbd](tbd)
 - UTT contract on Base Testnet (Sepolia):
-  - Upgradable proxy: [0x2b4F9c644b0C8010bB26Fc572001A156F9371C48](https://base-sepolia.blockscout.com/address/0x2b4F9c644b0C8010bB26Fc572001A156F9371C48)
+  - Upgradable proxy: [0xC72b7A6146d3D53B614A4769A1A1459882ED4B1A](https://base-sepolia.blockscout.com/address/0xC72b7A6146d3D53B614A4769A1A1459882ED4B1A)
   - Current implementation: [0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF](https://base-sepolia.blockscout.com/address/0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF)
-  - Oracle operator contract: [0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d](https://base-sepolia.blockscout.com/address/0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d)
-  - UTU Coin (bridged from Ethereum Sepolia testnet): [0x6934c1F62a6d28a573E2b4071a754DDd29B81E54](https://base-sepolia.blockscout.com/address/0x6934c1F62a6d28a573E2b4071a754DDd29B81E54)  
+  - Oracle operator contract: [0x1380FD912C44F3860D17EB6221F861F9c4611D97](https://base-sepolia.blockscout.com/address/0x1380FD912C44F3860D17EB6221F861F9c4611D97)
+  - UTU Coin: not configured
 
 
 ## Building, Testing
@@ -185,6 +185,8 @@ Main UTT.proxyEndorse() (Polygon) → Oracle Response → UTTProxy fulfillment
 
 
 ## Deploying
+
+For the guarded Ethereum Sepolia, Base Sepolia, and Optimism Sepolia rollout, see [docs/testnet-rollout.md](docs/testnet-rollout.md).
 
 ### Deploy Oracle Contract
 
@@ -415,7 +417,7 @@ Create an upgrade args config file in `scripts/` named `upgrade.args.${network}.
 ```js
 
 module.exports = [
-   "0xb0897686c545045afc77cf20ec7a532e3120e0f1", // UTT contract address to upgrade
+   "<UTT_PROXY_ADDRESS>", // UTT proxy address to upgrade
 ];
 ```
 
@@ -423,7 +425,7 @@ The address provided must be the deployed UTT contract that needs to be updated.
 
 E.g. for Ethereum testnet:
 
-`TESTNET_ETHEREUM_URL=0xb0897686c545045afc77cf20ec7a532e3120e0f1/v2/<key>`
+`TESTNET_ETHEREUM_URL=<Ethereum Sepolia RPC URL>`
 
 Deploy on `<network>` (e.g. testnet_ethereum):
 

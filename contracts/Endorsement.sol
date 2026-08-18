@@ -37,12 +37,6 @@ abstract contract Endorsement is
     /** Discounting component for other previous endorsers' total stake (see whitepaper) */
     uint256 public D_o;
 
-    /** Penalty divisor for disapprovals (see whitepaper) */
-    uint256 public D_d;
-
-    /** Minimum disapproval fee in UTT (see whitepaper) */
-    uint256 public D_min;
-
     bytes32 public constant PROXY_ENDORSER_ROLE =
         keccak256("PROXY_ENDORSER_ROLE");
 
@@ -114,6 +108,13 @@ abstract contract Endorsement is
 
     /** LINK fee to be paid to the oracle operator contract for each request */
     uint256 internal fee;
+
+    // Upgrade state must stay after the fields present in deployed UTT implementations.
+    /** Penalty divisor for disapprovals (see whitepaper) */
+    uint256 public D_d;
+
+    /** Minimum disapproval fee in UTT (see whitepaper) */
+    uint256 public D_min;
 
 
     // Governance functions for setting the reward and penalty parameters
