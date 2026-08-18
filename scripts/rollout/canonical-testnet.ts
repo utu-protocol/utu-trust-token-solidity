@@ -4,6 +4,7 @@ import {
   assertAddressEquals,
   assertHasCode,
   getProxyAdminOwner,
+  getUpgradeTransaction,
   isExecutionEnabled,
   optionalWalletFromEnv,
   optionalAddressList,
@@ -304,10 +305,7 @@ async function main(): Promise<void> {
         config.proxyAddress,
         upgradeFactory
       );
-      const upgradeTransaction = upgraded.deploymentTransaction();
-      if (upgradeTransaction === null) {
-        throw new Error("OpenZeppelin did not return the canonical upgrade transaction");
-      }
+      const upgradeTransaction = getUpgradeTransaction(upgraded, "canonical");
       transactions.upgrade = await waitForSuccessfulTransaction(
         upgradeTransaction,
         "Upgrade canonical UTT"
