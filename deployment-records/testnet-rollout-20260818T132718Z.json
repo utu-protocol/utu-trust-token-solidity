@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "rollout": "UTU cross-chain testnet rollout",
+  "mode": "execute",
+  "phase": "canonical",
+  "startedAt": "2026-08-18T13:27:18Z",
+  "git": {
+    "commit": "fc8fb670b52c9d4d0296702b805ffca17a7d5d74",
+    "branch": "main",
+    "dirty": true
+  },
+  "status": "completed",
+  "error": null,
+  "failedAt": null,
+  "completedAt": "2026-08-18T13:29:52.372Z",
+  "networks": {
+    "testnet_ethereum": {
+      "kind": "canonical-utt",
+      "chainId": "11155111",
+      "status": "completed",
+      "error": null,
+      "failedAt": null,
+      "proxyAddress": "0x537BE61c5EFB865Df53CA55eeA07ceEe5d5fB162",
+      "proxyAdminAddress": "0x36db1ab0527efb234C263c70A7a125d02E43C9a8",
+      "proxyAdminOwner": "0xc8c745De6a84DFF8E604c1fD4BE18baDd8433135",
+      "contractOwner": "0xc8c745De6a84DFF8E604c1fD4BE18baDd8433135",
+      "previousImplementation": "0xDCfA4139C5EA11330e9Fe9Cb4821dfe1e0a842dB",
+      "implementationIsCurrent": true,
+      "pausedInitially": true,
+      "migration": {
+        "migratingData": false,
+        "migratingToNewContract": false
+      },
+      "disapprovalParameters": {
+        "currentDd": "5",
+        "currentDMin": "50",
+        "desiredDd": "5",
+        "desiredDMin": "50"
+      },
+      "chainlink": {
+        "nodeAddresses": [
+          "0x70d19481eAbA11891EAF7EE005fE9e2923b1bBC6"
+        ],
+        "missingProxyRoles": [],
+        "linkTokenAddress": "0x779877A7B0D9E8603169DdbD7836e478b4624789",
+        "linkBalance": "996982300000000000"
+      },
+      "signers": {
+        "owner": "0xc8c745De6a84DFF8E604c1fD4BE18baDd8433135",
+        "proxyAdmin": "0xc8c745De6a84DFF8E604c1fD4BE18baDd8433135",
+        "roleAdmin": "0xc8c745De6a84DFF8E604c1fD4BE18baDd8433135"
+      },
+      "signerNativeBalances": {
+        "owner": "110352234416902958",
+        "proxyAdmin": "110352234416902958",
+        "roleAdmin": "110352234416902958"
+      },
+      "pauseRecoveryRequired": false,
+      "newImplementation": "0xDCfA4139C5EA11330e9Fe9Cb4821dfe1e0a842dB",
+      "pausedFinally": false,
+      "transactions": {
+        "setDd": {
+          "hash": "0xc3efcd58e084115cc73b5450d38f0436e74213581f419c2744116db20963f440",
+          "blockNumber": 11515375,
+          "gasUsed": "50817"
+        },
+        "setDMin": {
+          "hash": "0xa39b66c6c4303fa0d5e9c296044e563546c72c052ece6cbb1b365804189e9f9d",
+          "blockNumber": 11515377,
+          "gasUsed": "50771"
+        },
+        "unpause": {
+          "hash": "0x719fb9d53cc6ca84e70fe5099b4f542566c8fba4aed3cc285540fbad58848805",
+          "blockNumber": 11515379,
+          "gasUsed": "29916"
+        }
+      },
+      "completedAt": "2026-08-18T13:29:50.572Z"
+    }
+  }
+}

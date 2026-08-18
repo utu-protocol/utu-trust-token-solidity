@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "rollout": "UTU cross-chain testnet rollout",
+  "mode": "execute",
+  "phase": "deploy",
+  "startedAt": "2026-08-18T12:54:26Z",
+  "git": {
+    "commit": "fc8fb670b52c9d4d0296702b805ffca17a7d5d74",
+    "branch": "main",
+    "dirty": false
+  },
+  "status": "failed",
+  "error": {
+    "exitCode": 1,
+    "shellLine": 166
+  },
+  "failedAt": "2026-08-18T12:54:55.623Z",
+  "completedAt": null
+}

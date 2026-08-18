@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "rollout": "UTU cross-chain testnet rollout",
+  "mode": "execute",
+  "phase": "deploy",
+  "startedAt": "2026-08-18T13:00:36Z",
+  "git": {
+    "commit": "fc8fb670b52c9d4d0296702b805ffca17a7d5d74",
+    "branch": "main",
+    "dirty": false
+  },
+  "status": "failed",
+  "error": {
+    "exitCode": 1,
+    "shellLine": 171
+  },
+  "failedAt": "2026-08-18T13:03:58.173Z",
+  "completedAt": null,
+  "networks": {
+    "testnet_ethereum": {
+      "kind": "canonical-utt",
+      "chainId": "11155111",
+      "status": "failed",
+      "error": "OpenZeppelin did not return the canonical upgrade transaction",
+      "failedAt": "2026-08-18T13:03:57.401Z",
+      "proxyAddress": "0x537BE61c5EFB865Df53CA55eeA07ceEe5d5fB162",
+      "proxyAdminAddress": "0x36db1ab0527efb234C263c70A7a125d02E43C9a8",
+      "proxyAdminOwner": "0xc8c745De6a84DFF8E604c1fD4BE18baDd8433135",
+      "contractOwner": "0xc8c745De6a84DFF8E604c1fD4BE18baDd8433135",
+      "previousImplementation": "0x89fA6ee038f3b4D8C050c6E1709Fa3d19d9be49E",
+      "implementationIsCurrent": false,
+      "pausedInitially": false,
+      "migration": {
+        "migratingData": false,
+        "migratingToNewContract": false
+      },
+      "disapprovalParameters": {
+        "currentDd": null,
+        "currentDMin": null,
+        "desiredDd": "5",
+        "desiredDMin": "50"
+      },
+      "chainlink": {
+        "nodeAddresses": [
+          "0x70d19481eAbA11891EAF7EE005fE9e2923b1bBC6"
+        ],
+        "missingProxyRoles": [],
+        "linkTokenAddress": "0x779877A7B0D9E8603169DdbD7836e478b4624789",
+        "linkBalance": "996982300000000000"
+      },
+      "signers": {
+        "owner": "0xc8c745De6a84DFF8E604c1fD4BE18baDd8433135",
+        "proxyAdmin": "0xc8c745De6a84DFF8E604c1fD4BE18baDd8433135",
+        "roleAdmin": "0xc8c745De6a84DFF8E604c1fD4BE18baDd8433135"
+      },
+      "signerNativeBalances": {
+        "owner": "120520934619486083",
+        "proxyAdmin": "120520934619486083",
+        "roleAdmin": "120520934619486083"
+      },
+      "transactions": {
+        "pause": {
+          "hash": "0xe39e4ac6f7f10e0e3aeaa51430eec6b10d24538a89486d0add4ebf62444c66f1",
+          "blockNumber": 11515250,
+          "gasUsed": "51794"
+        }
+      },
+      "pausedByThisRun": true,
+      "pauseRecoveryRequired": true
+    },
+    "testnet_base": {
+      "kind": "cross-chain-utt-proxy",
+      "chainId": "84532",
+      "status": "preflight-passed",
+      "error": null,
+      "failedAt": null,
+      "proxyAddress": "0xC72b7A6146d3D53B614A4769A1A1459882ED4B1A",
+      "proxyAdminAddress": "0xB4AB186e8aB147b91aae80FB7E14F0693370b73c",
+      "proxyAdminOwner": "0xc8c745De6a84DFF8E604c1fD4BE18baDd8433135",
+      "contractOwner": "0xc8c745De6a84DFF8E604c1fD4BE18baDd8433135",
+      "operatorAddress": "0x1380FD912C44F3860D17EB6221F861F9c4611D97",
+      "previousImplementation": "0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF",
+      "implementationIsCurrent": false,
+      "migratingInitially": false,
+      "actionJob": {
+        "externalId": "a9ffd71b7f674f14bc71f78063204450",
+        "expectedBytes32": "0x6139666664373162376636373466313462633731663738303633323034343530",
+        "currentBytes32": null,
+        "matches": false
+      },
+      "chainlink": {
+        "linkTokenAddress": "0xE4aB69C077896252FAFBD49EFD26B5D171A32410",
+        "linkBalance": "999999100000000000",
+        "fee": "100000000000",
+        "recommendedLinkBalance": "300000000000",
+        "sufficientForE2e": true
+      },
+      "signers": {
+        "owner": null,
+        "proxyAdmin": null
+      },
+      "signerNativeBalances": {
+        "owner": null,
+        "proxyAdmin": null
+      }
+    },
+    "testnet_optimism": {
+      "kind": "cross-chain-utt-proxy",
+      "chainId": "11155420",
+      "status": "preflight-passed",
+      "error": null,
+      "failedAt": null,
+      "proxyAddress": "0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF",
+      "proxyAdminAddress": "0x5f9F39eE4fcF8516f452d888F15F37a0fdC5E040",
+      "proxyAdminOwner": "0xc8c745De6a84DFF8E604c1fD4BE18baDd8433135",
+      "contractOwner": "0xc8c745De6a84DFF8E604c1fD4BE18baDd8433135",
+      "operatorAddress": "0x6934c1F62a6d28a573E2b4071a754DDd29B81E54",
+      "previousImplementation": "0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d",
+      "implementationIsCurrent": false,
+      "migratingInitially": false,
+      "actionJob": {
+        "externalId": "318c8baf067044658e989266895105be",
+        "expectedBytes32": "0x3331386338626166303637303434363538653938393236363839353130356265",
+        "currentBytes32": null,
+        "matches": false
+      },
+      "chainlink": {
+        "linkTokenAddress": "0xE4aB69C077896252FAFBD49EFD26B5D171A32410",
+        "linkBalance": "0",
+        "fee": "100000000000",
+        "recommendedLinkBalance": "300000000000",
+        "sufficientForE2e": false
+      },
+      "signers": {
+        "owner": null,
+        "proxyAdmin": null
+      },
+      "signerNativeBalances": {
+        "owner": null,
+        "proxyAdmin": null
+      }
+    }
+  }
+}

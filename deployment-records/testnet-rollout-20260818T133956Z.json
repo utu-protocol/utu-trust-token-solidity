@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "rollout": "UTU cross-chain testnet rollout",
+  "mode": "execute",
+  "phase": "proxies",
+  "startedAt": "2026-08-18T13:39:56Z",
+  "git": {
+    "commit": "1db59758cdced864a1cd44d448001473ebc9d7fe",
+    "branch": "main",
+    "dirty": false
+  },
+  "status": "completed",
+  "error": null,
+  "failedAt": null,
+  "completedAt": "2026-08-18T13:42:06.896Z",
+  "networks": {
+    "testnet_base": {
+      "kind": "cross-chain-utt-proxy",
+      "chainId": "84532",
+      "status": "completed",
+      "error": null,
+      "failedAt": null,
+      "proxyAddress": "0xC72b7A6146d3D53B614A4769A1A1459882ED4B1A",
+      "proxyAdminAddress": "0xB4AB186e8aB147b91aae80FB7E14F0693370b73c",
+      "proxyAdminOwner": "0xc8c745De6a84DFF8E604c1fD4BE18baDd8433135",
+      "contractOwner": "0xc8c745De6a84DFF8E604c1fD4BE18baDd8433135",
+      "operatorAddress": "0x1380FD912C44F3860D17EB6221F861F9c4611D97",
+      "previousImplementation": "0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF",
+      "implementationIsCurrent": false,
+      "migratingInitially": false,
+      "actionJob": {
+        "externalId": "a9ffd71b7f674f14bc71f78063204450",
+        "expectedBytes32": "0x6139666664373162376636373466313462633731663738303633323034343530",
+        "currentBytes32": "0x6139666664373162376636373466313462633731663738303633323034343530",
+        "matches": true
+      },
+      "chainlink": {
+        "linkTokenAddress": "0xE4aB69C077896252FAFBD49EFD26B5D171A32410",
+        "linkBalance": "999999100000000000",
+        "fee": "100000000000",
+        "recommendedLinkBalance": "300000000000",
+        "sufficientForE2e": true
+      },
+      "signers": {
+        "owner": "0xc8c745De6a84DFF8E604c1fD4BE18baDd8433135",
+        "proxyAdmin": "0xc8c745De6a84DFF8E604c1fD4BE18baDd8433135"
+      },
+      "signerNativeBalances": {
+        "owner": "11333238800040090",
+        "proxyAdmin": "11333238800040090"
+      },
+      "transactions": {
+        "enableMigration": {
+          "hash": "0x09c3e420cfac0e5e6fdb81ac2c739bdc29cb9b930ff274c9b3b6ceb7ea461bfb",
+          "blockNumber": 45646080,
+          "gasUsed": "50542"
+        },
+        "upgrade": {
+          "hash": "0x41568a3b73de5caca3489bdca5c43f5466fb28f30aa540c9d4d2a83b91090f7f",
+          "blockNumber": 45646087,
+          "gasUsed": "37863"
+        },
+        "setActionJobId": {
+          "hash": "0x7cc1aee541f8d1639d4814d5f5bb8d21290796b3615f9d05e1306d8135a6742e",
+          "blockNumber": 45646090,
+          "gasUsed": "51881"
+        },
+        "disableMigration": {
+          "hash": "0xa114be1490fbfc34c5742d85e52c211d568ebcfce1f6edddb39a4a3142ee88d3",
+          "blockNumber": 45646094,
+          "gasUsed": "28642"
+        }
+      },
+      "newImplementation": "0x91Ad2C9cdf44700bbEAaad4B4DcdC5563f291892",
+      "migrationRecoveryRequired": false,
+      "migratingFinally": false,
+      "completedAt": "2026-08-18T13:41:19.341Z"
+    },
+    "testnet_optimism": {
+      "kind": "cross-chain-utt-proxy",
+      "chainId": "11155420",
+      "status": "completed",
+      "error": null,
+      "failedAt": null,
+      "proxyAddress": "0xbdF3b87B410C50Ba9620d8Ac416A81e6bF7296eF",
+      "proxyAdminAddress": "0x5f9F39eE4fcF8516f452d888F15F37a0fdC5E040",
+      "proxyAdminOwner": "0xc8c745De6a84DFF8E604c1fD4BE18baDd8433135",
+      "contractOwner": "0xc8c745De6a84DFF8E604c1fD4BE18baDd8433135",
+      "operatorAddress": "0x6934c1F62a6d28a573E2b4071a754DDd29B81E54",
+      "previousImplementation": "0xC3586558ddb1Cc6C7c5338691842b8d5F47D253d",
+      "implementationIsCurrent": false,
+      "migratingInitially": false,
+      "actionJob": {
+        "externalId": "318c8baf067044658e989266895105be",
+        "expectedBytes32": "0x3331386338626166303637303434363538653938393236363839353130356265",
+        "currentBytes32": "0x3331386338626166303637303434363538653938393236363839353130356265",
+        "matches": true
+      },
+      "chainlink": {
+        "linkTokenAddress": "0xE4aB69C077896252FAFBD49EFD26B5D171A32410",
+        "linkBalance": "0",
+        "fee": "100000000000",
+        "recommendedLinkBalance": "300000000000",
+        "sufficientForE2e": false
+      },
+      "signers": {
+        "owner": "0xc8c745De6a84DFF8E604c1fD4BE18baDd8433135",
+        "proxyAdmin": "0xc8c745De6a84DFF8E604c1fD4BE18baDd8433135"
+      },
+      "signerNativeBalances": {
+        "owner": "499989081568292478",
+        "proxyAdmin": "499989081568292478"
+      },
+      "transactions": {
+        "enableMigration": {
+          "hash": "0x69e44143efd82332fa63489e28ee540015dac1183fb2a99d74191a592fb27e3e",
+          "blockNumber": 47628978,
+          "gasUsed": "50542"
+        },
+        "upgrade": {
+          "hash": "0xdb16fdcfe595391f7de495c594977fd39dea7d96c41d19c5274e01300fa4a047",
+          "blockNumber": 47628985,
+          "gasUsed": "37863"
+        },
+        "setActionJobId": {
+          "hash": "0x1a7c6d109e74b242b80ecb44ab9123658f16c3030ecfd70b31e16082de1a3236",
+          "blockNumber": 47628988,
+          "gasUsed": "51881"
+        },
+        "disableMigration": {
+          "hash": "0x6ea5161598cdf1c7f26537d10577291a690fc10f8b6e6ab454d4cb0ac947bda3",
+          "blockNumber": 47628991,
+          "gasUsed": "28642"
+        }
+      },
+      "newImplementation": "0x1380FD912C44F3860D17EB6221F861F9c4611D97",
+      "migrationRecoveryRequired": false,
+      "migratingFinally": false,
+      "completedAt": "2026-08-18T13:42:05.311Z"
+    }
+  }
+}
