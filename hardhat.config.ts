@@ -125,19 +125,19 @@ const config = {
       chainId: 80002,
     },
     optimism: {
-      url: process.env.OPTIMISM_URL,
+      url: process.env.OPTIMISM_URL || "",
       accounts: configuredAccounts("MAIN_PRIVATE_KEY"),
     },
     testnet_optimism: {
-      url: process.env.TESTNET_OPTIMISM_URL,
+      url: process.env.TESTNET_OPTIMISM_URL || "",
       accounts: configuredAccounts("TEST_PRIVATE_KEY"),
     },
     base: { 
-      url: process.env.BASE_URL,
+      url: process.env.BASE_URL || "",
       accounts: configuredAccounts("MAIN_PRIVATE_KEY"),
     },
     testnet_base: { 
-      url: process.env.TESTNET_BASE_URL,
+      url: process.env.TESTNET_BASE_URL || "",
       accounts: configuredAccounts("TEST_PRIVATE_KEY"),
     },
     ropsten: {
